@@ -24,4 +24,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
+/**
+ * A small helper to compute button class names; exported so other modules can reuse the same logic.
+ */
+const buttonVariants = (
+  variant: ButtonProps['variant'] = 'default',
+  size: ButtonProps['size'] = 'default',
+  className = ''
+): string => {
+  return ['btn', `btn-${variant}`, `btn-size-${size}`, className].filter(Boolean).join(' ');
+};
+
 export { Button, buttonVariants };
