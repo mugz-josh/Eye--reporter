@@ -1025,10 +1025,38 @@
   text-align: center;
 }
 
+/* NotFound page */
 .notfound-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f3f4f6;
+  background-color: hsl(var(--background));
+}
+
+.notfound-content {
+  text-align: center;
+}
+
+.notfound-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
+}
+
+.notfound-message {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.notfound-link {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.notfound-link:hover {
+  color: color-mix(in srgb, hsl(var(--primary)) 80%, transparent);
 }
