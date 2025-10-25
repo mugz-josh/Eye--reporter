@@ -113,43 +113,58 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="page-admin">
-      <aside className="page-aside">
-        <div className="sidebar-brand">
-          <div className="brand-icon">
+    <div className="flex min-h-screen">
+      <aside className="w-64 bg-sidebar border-r border-sidebar-border p-6">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
             <Flag className="text-primary-foreground" size={20} />
           </div>
-          <h1 className="sidebar-title">iReporter Admin</h1>
+          <h1 className="text-xl font-semibold">iReporter Admin</h1>
         </div>
 
-        <nav className="sidebar-nav">
-          <Link to="/admin" className="nav-link nav-link-active">
+        <nav className="space-y-1">
+          <Link
+            to="/admin"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-sidebar-accent text-primary"
+          >
             <Grid3x3 size={20} />
             <span>Dashboard</span>
           </Link>
 
-          <Link to="/admin/users" className={`nav-link ${isUsersPage ? 'nav-link-active' : ''}`}>
+          <Link
+            to="/admin/users"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
+              isUsersPage ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent text-foreground"
+            }`}
+          >
             <Users size={20} />
             <span>Users</span>
           </Link>
 
-          <button onClick={handleLogout} className="nav-link" style={{ width: '100%', textAlign: 'left' }}>
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sidebar-accent text-foreground w-full"
+          >
             <LogOut size={20} />
             <span>Logout</span>
           </button>
         </nav>
       </aside>
 
-      <main className="main-content">
-        <div className="page-header">
+      <main className="flex-1 p-8">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-semibold mb-2">{isUsersPage ? "User Management" : "Admin Dashboard"}</h2>
-            <p className="muted-foreground">{isUsersPage ? "Manage all users" : "Manage all reports and users"}</p>
+            <h2 className="text-3xl font-semibold mb-2">
+              {isUsersPage ? "User Management" : "Admin Dashboard"}
+            </h2>
+            <p className="text-muted-foreground">
+              {isUsersPage ? "Manage all users" : "Manage all reports and users"}
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
             <span>Admin User</span>
-            <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
               <span>AU</span>
             </div>
           </div>
@@ -157,11 +172,13 @@ export default function AdminDashboard() {
 
         {!isUsersPage && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="grid grid-cols-4 gap-6 mb-8">
               {stats.map((stat) => (
                 <Card key={stat.title}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
                     <div className={`w-10 h-10 rounded-full ${stat.color} flex items-center justify-center`}>
                       <stat.icon className="text-white" size={20} />
                     </div>
@@ -173,47 +190,82 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            <div className="record-card" style={{ padding: '1.5rem' }}>
+            <div className="bg-card rounded-xl border border-border p-6">
               <h3 className="text-xl font-semibold mb-6">All Reports</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              
+              <div className="space-y-4">
                 {allRecords.map((record) => (
-                  <div key={record.id} className="record-card" style={{ display: 'flex', gap: '1.5rem', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
-                    <img src={record.image} alt={record.title} className="record-image" style={{ width: '8rem', height: '8rem' }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <div key={record.id} className="border border-border rounded-lg p-6 flex gap-6">
+                    <img
+                      src={record.image}
+                      alt={record.title}
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                    
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-3">
                         <div>
-                          <span className={`record-badge ${record.type === "Red Flag" ? 'badge-destructive' : 'badge-secondary'}`}>{record.type}</span>
+                          <span
+                            className={`inline-block px-3 py-1 rounded text-sm mb-2 ${
+                              record.type === "Red Flag"
+                                ? "bg-destructive/20 text-destructive"
+                                : "bg-secondary text-secondary-foreground"
+                            }`}
+                          >
+                            {record.type}
+                          </span>
                           <h4 className="text-lg font-semibold">{record.title}</h4>
                         </div>
-
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <select value={record.status} onChange={(e) => handleStatusChange(record.id, e.target.value)} className="input-with-margin" style={{ padding: '0.25rem 0.75rem', borderRadius: '0.375rem' }}>
+                        
+                        <div className="flex gap-2">
+                          <select
+                            value={record.status}
+                            onChange={(e) => handleStatusChange(record.id, e.target.value)}
+                            className="px-3 py-1 rounded border border-border bg-background text-sm"
+                          >
                             <option value="PENDING">Pending</option>
                             <option value="UNDER INVESTIGATION">Under Investigation</option>
                             <option value="RESOLVED">Resolved</option>
                             <option value="REJECTED">Rejected</option>
                           </select>
-                          <Button variant="destructive" size="sm" onClick={() => handleDelete(record.id)}>Delete</Button>
+                          
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(record.id)}
+                          >
+                            Delete
+                          </Button>
                         </div>
                       </div>
-
-                      <p className="muted-foreground mb-3">{record.description}</p>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1rem', fontSize: '0.875rem' }}>
+                      
+                      <p className="text-muted-foreground mb-3">{record.description}</p>
+                      
+                      <div className="grid grid-cols-4 gap-4 text-sm">
                         <div>
-                          <span className="muted-foreground">Status: </span>
-                          <span className={record.status === "RESOLVED" ? 'status-resolved' : (record.status === 'PENDING' ? 'status-other' : 'status-other')}>{record.status}</span>
+                          <span className="text-muted-foreground">Status: </span>
+                          <span
+                            className={
+                              record.status === "RESOLVED"
+                                ? "text-green-500"
+                                : record.status === "PENDING"
+                                ? "text-yellow-500"
+                                : "text-blue-400"
+                            }
+                          >
+                            {record.status}
+                          </span>
                         </div>
                         <div>
-                          <span className="muted-foreground">User: </span>
+                          <span className="text-muted-foreground">User: </span>
                           <span>{record.user}</span>
                         </div>
                         <div>
-                          <span className="muted-foreground">Created: </span>
+                          <span className="text-muted-foreground">Created: </span>
                           <span>{record.createdAt}</span>
                         </div>
                         <div>
-                          <span className="muted-foreground">Location: </span>
+                          <span className="text-muted-foreground">Location: </span>
                           <span>{record.lat}, {record.lon}</span>
                         </div>
                       </div>
@@ -226,48 +278,71 @@ export default function AdminDashboard() {
         )}
 
         {isUsersPage && (
-          <div className="record-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <div className="bg-card rounded-xl border border-border p-6">
+            <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold">All Users</h3>
-              <div className="muted-foreground">Total Users: {mockUsers.length}</div>
+              <div className="text-sm text-muted-foreground">
+                Total Users: {mockUsers.length}
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="space-y-4">
               {mockUsers.map((user) => (
-                <div key={user.id} className="record-card" style={{ padding: '1rem', border: '1px solid hsl(var(--border))' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                      <div className="brand-icon" style={{ width: '4rem', height: '4rem', fontSize: '1rem' }}>{user.name.split(' ').map(n => n[0]).join('')}</div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div key={user.id} className="border border-border rounded-lg p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex gap-4">
+                      <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-semibold">
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
                           <h4 className="text-lg font-semibold">{user.name}</h4>
-                          <span className={`record-badge ${user.status === 'Active' ? '' : 'badge-destructive'}`}>{user.status}</span>
+                          <span className={`px-3 py-1 rounded text-xs ${
+                            user.status === "Active" 
+                              ? "bg-green-500/20 text-green-500" 
+                              : "bg-destructive/20 text-destructive"
+                          }`}>
+                            {user.status}
+                          </span>
                         </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '1rem', fontSize: '0.875rem' }}>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <Mail size={16} className="muted-foreground" />
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Mail size={16} className="text-muted-foreground" />
                             <span>{user.email}</span>
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <Shield size={16} className="muted-foreground" />
+                          <div className="flex items-center gap-2">
+                            <Shield size={16} className="text-muted-foreground" />
                             <span>{user.role}</span>
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <FileText size={16} className="muted-foreground" />
+                          <div className="flex items-center gap-2">
+                            <FileText size={16} className="text-muted-foreground" />
                             <span>{user.reportsCount} Reports</span>
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <Calendar size={16} className="muted-foreground" />
+                          <div className="flex items-center gap-2">
+                            <Calendar size={16} className="text-muted-foreground" />
                             <span>Joined {user.joinedDate}</span>
                           </div>
                         </div>
                       </div>
                     </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Button variant="outline" size="sm" onClick={() => handleUserAction(user.id, "View Details")}>View Details</Button>
-                      <Button variant={user.status === "Active" ? "destructive" : "default"} size="sm" onClick={() => handleUserAction(user.id, user.status === "Active" ? "Suspend" : "Activate")}>{user.status === "Active" ? "Suspend" : "Activate"}</Button>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUserAction(user.id, "View Details")}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        variant={user.status === "Active" ? "destructive" : "default"}
+                        size="sm"
+                        onClick={() => handleUserAction(user.id, user.status === "Active" ? "Suspend" : "Activate")}
+                      >
+                        {user.status === "Active" ? "Suspend" : "Activate"}
+                      </Button>
                     </div>
                   </div>
                 </div>

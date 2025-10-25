@@ -33,46 +33,58 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="page-dashboard">
-      <aside className="page-aside">
-        <div className="sidebar-brand">
-          <div className="brand-icon">
+    <div className="flex min-h-screen">
+      <aside className="w-64 bg-sidebar border-r border-sidebar-border p-6">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
             <Flag className="text-primary-foreground" size={20} />
           </div>
-          <h1 className="sidebar-title">iReporter</h1>
+          <h1 className="text-xl font-semibold">iReporter</h1>
         </div>
 
         <Link to="/create">
-          <Button className="btn-full" style={{ marginBottom: '2rem' }}>CREATE RECORD</Button>
+          <Button className="w-full mb-8 h-12">CREATE RECORD</Button>
         </Link>
 
-        <nav className="sidebar-nav">
-          <Link to="/dashboard" className="nav-link">
+        <nav className="space-y-1">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sidebar-accent text-foreground"
+          >
             <Grid3x3 size={20} />
             <span>Dashboard</span>
           </Link>
 
-          <Link to="/red-flags" className="nav-link nav-link-active">
+          <Link
+            to="/red-flags"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-sidebar-accent text-primary"
+          >
             <Flag size={20} />
             <span>Red Flags</span>
           </Link>
 
-          <Link to="/interventions" className="nav-link">
+          <Link
+            to="/interventions"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sidebar-accent text-foreground"
+          >
             <Plus size={20} />
             <span>Interventions</span>
           </Link>
 
-          <button onClick={handleLogout} className="nav-link" style={{ width: '100%', textAlign: 'left' }}>
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sidebar-accent text-foreground w-full"
+          >
             <LogOut size={20} />
             <span>Logout</span>
           </button>
         </nav>
       </aside>
 
-      <main className="main-content">
-        <div className="page-header">
+      <main className="flex-1 p-8">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <div className="page-subtitle">
+            <div className="flex items-center gap-2 mb-2 text-muted-foreground">
               <Flag size={20} />
               <span>Recent Records</span>
             </div>
@@ -81,22 +93,22 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-3">
             <span>John Doe</span>
-            <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
               <span>JD</span>
             </div>
           </div>
         </div>
 
-        <div className="cards-grid">
-          <div className="stats-card" style={{ backgroundColor: 'hsl(var(--primary))' }}>
-            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.5rem', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="bg-primary rounded-2xl p-8 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
               <Flag size={24} />
             </div>
             <span className="text-xl font-medium">Red Flag</span>
           </div>
 
-          <div className="stats-card" style={{ backgroundColor: 'hsl(var(--secondary))' }}>
-            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.5rem', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="bg-secondary rounded-2xl p-8 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
               <Plus size={24} />
             </div>
             <span className="text-xl font-medium">Intervention</span>
@@ -105,28 +117,48 @@ export default function Dashboard() {
 
         <h3 className="text-xl font-semibold mb-6">Recent Records</h3>
 
-        <div className="cards-grid">
+        <div className="grid grid-cols-2 gap-6">
           {records.map((record) => (
-            <div key={record.id} className="record-card">
-              <div className="record-body">
-                <span className={`record-badge ${record.type === "Red Flag" ? 'badge-destructive' : 'badge-secondary'}`}>
+            <div key={record.id} className="bg-card rounded-xl border border-border overflow-hidden">
+              <div className="p-6">
+                <span
+                  className={`inline-block px-3 py-1 rounded text-sm mb-4 ${
+                    record.type === "Red Flag"
+                      ? "bg-destructive/20 text-destructive"
+                      : "bg-secondary text-secondary-foreground"
+                  }`}
+                >
                   {record.type}
                 </span>
 
                 <h4 className="text-lg font-semibold mb-2">{record.title}</h4>
 
-                <div className="space-y-2 text-sm muted-foreground mb-4">
+                <div className="space-y-2 text-sm text-muted-foreground mb-4">
                   <p>Description</p>
                   <p>{record.description}</p>
                   <p>Status</p>
-                  <p className={record.status === "RESOLVED" ? 'status-resolved' : 'status-other'}>
+                  <p
+                    className={
+                      record.status === "RESOLVED"
+                        ? "text-green-500"
+                        : "text-blue-400"
+                    }
+                  >
                     {record.status}
                   </p>
-                  <p>Lat {record.lat}</p>
-                  <p>Lon {record.lon}</p>
+                  <p>
+                    Lat {record.lat}
+                  </p>
+                  <p>
+                    Lon {record.lon}
+                  </p>
                 </div>
 
-                <img src={record.image} alt={record.title} className="record-image" />
+                <img
+                  src={record.image}
+                  alt={record.title}
+                  className="w-full h-48 object-cover rounded-lg"
+                />
               </div>
             </div>
           ))}
