@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import CreateReport from "./pages/CreateReport";
+import RedFlags from "./pages/RedFlags";
+import Interventions from "./pages/Interventions";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -20,8 +22,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/red-flags" element={<Dashboard />} />
-          <Route path="/interventions" element={<Dashboard />} />
+          <Route path="/red-flags" element={<RedFlags />} />
+          <Route path="/interventions" element={<Interventions />} />
           <Route path="/create" element={<CreateReport />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminDashboard />} />

@@ -4,18 +4,57 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { storage } from "@/utils/storage";
+import { User } from "@/types/report";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    
+    if (isLogin) {
+      // Mock login - check if user exists
+      const users = storage.getUsers();
+      const user = users.find(u => u.email === email);
+      
+      if (user) {
+        storage.setCurrentUser(user);
+        navigate("/dashboard");
+      } else {
+        alert("User not found. Please sign up first.");
+      }
+    } else {
+      // Sign up - create new user
+      const newUser: User = {
+        id: Date.now().toString(),
+        name: `${firstName} ${lastName}`,
+        email,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      };
+      
+      storage.saveUser(newUser);
+      storage.setCurrentUser(newUser);
+      navigate("/dashboard");
+    }
   };
 
   const handleAdminLogin = () => {
-    // Mock admin login - just navigate to admin dashboard
+    // Mock admin login
+    const adminUser: User = {
+      id: 'admin',
+      name: 'Admin User',
+      email: 'admin@ireporter.com',
+      role: 'admin',
+      createdAt: new Date().toISOString()
+    };
+    storage.setCurrentUser(adminUser);
     navigate("/admin");
   };
 
@@ -39,7 +78,14 @@ export default function Auth() {
                   <Label htmlFor="firstname" className="muted-foreground">
                     First Name
                   </Label>
-                  <Input id="firstname" placeholder="John" className="input-with-margin" />
+                  <Input 
+                    id="firstname" 
+                    placeholder="John" 
+                    className="input-with-margin"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                  />
                 </div>
 
                 <div>
@@ -50,6 +96,9 @@ export default function Auth() {
                     id="lastname"
                     placeholder="Doe"
                     className="mt-2 bg-background border-border"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
                   />
                 </div>
               </>
@@ -64,6 +113,9 @@ export default function Auth() {
                 type="email"
                 placeholder="johndoo@gmail.com"
                 className="input-with-margin"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -76,6 +128,9 @@ export default function Auth() {
                 type="password"
                 placeholder="****"
                 className="mt-2 bg-background border-border"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
 

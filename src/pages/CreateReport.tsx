@@ -1,28 +1,107 @@
-import { Flag, LogOut, Grid3x3, Plus, MapPin, Camera } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import MapPicker from "@/components/MapPicker";
+import { storage } from "@/utils/storage";
+import { Report } from "@/types/report";
 
 export default function CreateReport() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [reportType, setReportType] = useState<"red-flag" | "intervention">("red-flag");
+  const [searchParams] = useSearchParams();
+  const reportId = searchParams.get('id');
+  const typeParam = searchParams.get('type') as 'red-flag' | 'intervention' | null;
+  
+  const currentUser = storage.getCurrentUser();
+  const [reportType, setReportType] = useState<"red-flag" | "intervention">(typeParam || "red-flag");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [latitude, setLatitude] = useState(6.5244);
+  const [longitude, setLongitude] = useState(3.3792);
+  const [imagePreview, setImagePreview] = useState<string>("");
+
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/");
+      return;
+    }
+
+    if (reportId) {
+      const report = storage.getReportById(reportId);
+      if (report && report.userId === currentUser.id) {
+        setReportType(report.type);
+        setTitle(report.title);
+        setDescription(report.description);
+        setLatitude(report.latitude);
+        setLongitude(report.longitude);
+        setImagePreview(report.image || "");
+      }
+    }
+  }, [reportId]);
 
   const handleLogout = () => {
+    storage.clearCurrentUser();
     navigate("/");
+  };
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!title || !description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const report: Report = {
+      id: reportId || Date.now().toString(),
+      type: reportType,
+      title,
+      description,
+      latitude,
+      longitude,
+      status: 'DRAFT',
+      image: imagePreview,
+      userId: currentUser!.id,
+      userName: currentUser!.name,
+      createdAt: reportId ? storage.getReportById(reportId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    storage.saveReport(report);
+
     toast({
-      title: "Report submitted",
-      description: "Your report has been submitted successfully.",
+      title: reportId ? "Report updated" : "Report created",
+      description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
     });
-    setTimeout(() => navigate("/dashboard"), 1500);
+
+    setTimeout(() => {
+      navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
+    }, 1500);
   };
 
   return (
@@ -35,11 +114,7 @@ export default function CreateReport() {
           <h1 className="sidebar-title">iReporter</h1>
         </div>
 
-        <Link to="/create">
-          <Button className="btn-full" style={{ marginBottom: '2rem' }}>CREATE RECORD</Button>
-        </Link>
-
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
           <Link to="/dashboard" className="nav-link">
             <Grid3x3 size={20} />
             <span>Dashboard</span>
@@ -64,19 +139,17 @@ export default function CreateReport() {
 
       <main className="main-content">
         <div className="page-header">
-          <h2 className="text-3xl font-semibold">Edit Red Flag</h2>
+          <h2 className="text-3xl font-semibold">{reportId ? 'Edit' : 'Create'} Report</h2>
 
           <div className="flex items-center gap-3">
-            <span>John Doe</span>
+            <span>{currentUser?.name}</span>
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
-              <span>JD</span>
+              <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-card record-card" style={{ borderRadius: '1rem', padding: '2rem', maxWidth: '42rem' }}>
-          <h2 className="text-3xl font-semibold mb-8">Create Record</h2>
-
+        <div className="bg-card record-card" style={{ borderRadius: '1rem', padding: '2rem', maxWidth: '50rem' }}>
           <form className="auth-form" onSubmit={handleSubmit}>
             <div>
               <Label className="muted-foreground mb-3 block">Type</Label>
@@ -95,7 +168,15 @@ export default function CreateReport() {
                   type="button"
                   onClick={() => setReportType("intervention")}
                   className={`record-type ${reportType === "intervention" ? 'badge-secondary' : 'badge-secondary'}`}
-                  style={{ borderRadius: '1rem', padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', border: '2px solid transparent' }}
+                  style={{ 
+                    borderRadius: '1rem', 
+                    padding: '1.25rem', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    gap: '0.75rem', 
+                    border: reportType === "intervention" ? '2px solid hsl(var(--primary))' : '2px solid transparent'
+                  }}
                 >
                   <Plus size={24} />
                   <span className="font-medium">Intervention</span>
@@ -104,37 +185,87 @@ export default function CreateReport() {
             </div>
 
             <div>
-              <Label htmlFor="title" className="muted-foreground">Title</Label>
-              <Input id="title" placeholder="Enter title" className="input-with-margin" />
+              <Label htmlFor="title" className="muted-foreground">Title *</Label>
+              <Input 
+                id="title" 
+                placeholder="Enter title" 
+                className="input-with-margin"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
             </div>
 
             <div>
-              <Label htmlFor="description" className="muted-foreground">Description</Label>
-              <Textarea id="description" placeholder="Enter description" className="input-with-margin" />
+              <Label htmlFor="description" className="muted-foreground">Description *</Label>
+              <Textarea 
+                id="description" 
+                placeholder="Enter description" 
+                className="input-with-margin"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div>
-                <Label htmlFor="latitude" className="muted-foreground">Latitude</Label>
-                <Input id="latitude" type="number" step="any" placeholder="0.00" className="input-with-margin" />
-              </div>
+            <div>
+              <Label className="muted-foreground mb-3 block">
+                <MapPin size={16} className="inline mr-2" />
+                Location (Click on map to set location)
+              </Label>
+              <MapPicker 
+                latitude={latitude}
+                longitude={longitude}
+                onLocationChange={handleLocationChange}
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                <div>
+                  <Label htmlFor="latitude" className="text-xs muted-foreground">Latitude</Label>
+                  <Input 
+                    id="latitude" 
+                    type="number" 
+                    step="any" 
+                    value={latitude}
+                    onChange={(e) => setLatitude(parseFloat(e.target.value))}
+                    className="input-with-margin"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="longitude" className="muted-foreground">Longitude</Label>
-                <Input id="longitude" type="number" step="any" placeholder="0.00" className="input-with-margin" />
+                <div>
+                  <Label htmlFor="longitude" className="text-xs muted-foreground">Longitude</Label>
+                  <Input 
+                    id="longitude" 
+                    type="number" 
+                    step="any" 
+                    value={longitude}
+                    onChange={(e) => setLongitude(parseFloat(e.target.value))}
+                    className="input-with-margin"
+                  />
+                </div>
               </div>
             </div>
 
             <div>
-              <Label className="muted-foreground">Upload Image</Label>
-              <div className="upload-dropzone">
-                <Camera size={32} className="text-muted-foreground mb-2" />
-                <p className="muted-foreground">Click to upload or drag and drop<br/>Image files only</p>
-                <Input type="file" accept="image/*" className="hidden" />
-              </div>
+              <Label className="muted-foreground">Upload Image (Optional)</Label>
+              <Input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageChange}
+                className="input-with-margin"
+              />
+              {imagePreview && (
+                <img src={imagePreview} alt="Preview" style={{ marginTop: '1rem', maxWidth: '100%', borderRadius: '0.5rem' }} />
+              )}
             </div>
 
-            <Button type="submit" className="btn-full">CREATE RECORD</Button>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <Button type="submit" className="flex-1">
+                {reportId ? 'UPDATE REPORT' : 'CREATE REPORT'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+                Cancel
+              </Button>
+            </div>
           </form>
         </div>
       </main>

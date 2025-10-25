@@ -1,34 +1,33 @@
 import { Flag, LogOut, Grid3x3, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-
-const records = [
-  {
-    id: 1,
-    type: "Red Flag",
-    title: "Bad infrastructure",
-    description: "See here.",
-    status: "RESOLVED",
-    lat: "6.8880319",
-    lon: "9.53999",
-    image: "https://images.unsplash.com/photo-1518876024007-c0c7c2826904?w=400",
-  },
-  {
-    id: 2,
-    type: "Intervention",
-    title: "Bad Infrastructure",
-    description: "long here.",
-    status: "UNDER INVESTIGATION",
-    lat: "15.42525",
-    lon: "76.34874",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
-  },
-];
+import { storage } from "@/utils/storage";
+import { useState, useEffect } from "react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const currentUser = storage.getCurrentUser();
+  const [stats, setStats] = useState({ redFlags: 0, interventions: 0, total: 0 });
+
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/");
+      return;
+    }
+
+    const reports = storage.getReports();
+    const userReports = reports.filter(r => r.userId === currentUser.id);
+    const redFlags = userReports.filter(r => r.type === 'red-flag').length;
+    const interventions = userReports.filter(r => r.type === 'intervention').length;
+    
+    setStats({
+      redFlags,
+      interventions,
+      total: redFlags + interventions
+    });
+  }, []);
 
   const handleLogout = () => {
+    storage.clearCurrentUser();
     navigate("/");
   };
 
@@ -42,17 +41,13 @@ export default function Dashboard() {
           <h1 className="sidebar-title">iReporter</h1>
         </div>
 
-        <Link to="/create">
-          <Button className="btn-full" style={{ marginBottom: '2rem' }}>CREATE RECORD</Button>
-        </Link>
-
-        <nav className="sidebar-nav">
-          <Link to="/dashboard" className="nav-link">
+        <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
+          <Link to="/dashboard" className="nav-link nav-link-active">
             <Grid3x3 size={20} />
             <span>Dashboard</span>
           </Link>
 
-          <Link to="/red-flags" className="nav-link nav-link-active">
+          <Link to="/red-flags" className="nav-link">
             <Flag size={20} />
             <span>Red Flags</span>
           </Link>
@@ -73,63 +68,88 @@ export default function Dashboard() {
         <div className="page-header">
           <div>
             <div className="page-subtitle">
-              <Flag size={20} />
-              <span>Recent Records</span>
+              <Grid3x3 size={20} />
+              <span>Overview</span>
             </div>
-            <h2 className="text-2xl font-semibold">Recent Records</h2>
+            <h2 className="text-2xl font-semibold">Dashboard</h2>
           </div>
 
           <div className="flex items-center gap-3">
-            <span>John Doe</span>
+            <span>{currentUser?.name}</span>
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
-              <span>JD</span>
+              <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
             </div>
           </div>
         </div>
 
-        <div className="cards-grid">
-          <div className="stats-card" style={{ backgroundColor: 'hsl(var(--primary))' }}>
-            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.5rem', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Flag size={24} />
+        <div className="cards-grid" style={{ marginBottom: '2rem' }}>
+          <div className="stats-card" style={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
+            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.5rem', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid3x3 size={24} className="text-primary-foreground" />
             </div>
-            <span className="text-xl font-medium">Red Flag</span>
+            <div>
+              <div className="text-3xl font-bold">{stats.total}</div>
+              <div className="text-sm muted-foreground">Total Reports</div>
+            </div>
           </div>
 
-          <div className="stats-card" style={{ backgroundColor: 'hsl(var(--secondary))' }}>
-            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.5rem', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Plus size={24} />
+          <div className="stats-card" style={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
+            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.5rem', background: 'hsl(var(--destructive))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Flag size={24} className="text-destructive-foreground" />
             </div>
-            <span className="text-xl font-medium">Intervention</span>
+            <div>
+              <div className="text-3xl font-bold">{stats.redFlags}</div>
+              <div className="text-sm muted-foreground">Red Flags</div>
+            </div>
+          </div>
+
+          <div className="stats-card" style={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
+            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.5rem', background: 'hsl(var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Plus size={24} className="text-secondary-foreground" />
+            </div>
+            <div>
+              <div className="text-3xl font-bold">{stats.interventions}</div>
+              <div className="text-sm muted-foreground">Interventions</div>
+            </div>
           </div>
         </div>
 
-        <h3 className="text-xl font-semibold mb-6">Recent Records</h3>
-
-        <div className="cards-grid">
-          {records.map((record) => (
-            <div key={record.id} className="record-card">
-              <div className="record-body">
-                <span className={`record-badge ${record.type === "Red Flag" ? 'badge-destructive' : 'badge-secondary'}`}>
-                  {record.type}
-                </span>
-
-                <h4 className="text-lg font-semibold mb-2">{record.title}</h4>
-
-                <div className="space-y-2 text-sm muted-foreground mb-4">
-                  <p>Description</p>
-                  <p>{record.description}</p>
-                  <p>Status</p>
-                  <p className={record.status === "RESOLVED" ? 'status-resolved' : 'status-other'}>
-                    {record.status}
-                  </p>
-                  <p>Lat {record.lat}</p>
-                  <p>Lon {record.lon}</p>
+        <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div>
+            <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+            <div className="flex flex-col gap-3">
+              <Link to="/red-flags" className="p-4 rounded-lg border border-border hover:bg-accent transition-colors">
+                <div className="flex items-center gap-3">
+                  <Flag size={20} />
+                  <div>
+                    <div className="font-medium">View Red Flags</div>
+                    <div className="text-sm muted-foreground">Manage your red flag reports</div>
+                  </div>
                 </div>
-
-                <img src={record.image} alt={record.title} className="record-image" />
-              </div>
+              </Link>
+              <Link to="/interventions" className="p-4 rounded-lg border border-border hover:bg-accent transition-colors">
+                <div className="flex items-center gap-3">
+                  <Plus size={20} />
+                  <div>
+                    <div className="font-medium">View Interventions</div>
+                    <div className="text-sm muted-foreground">Manage your intervention requests</div>
+                  </div>
+                </div>
+              </Link>
             </div>
-          ))}
+          </div>
+
+          <div>
+            <h3 className="text-xl font-semibold mb-4">About iReporter</h3>
+            <div className="p-4 rounded-lg bg-card border border-border">
+              <p className="text-sm muted-foreground mb-3">
+                iReporter enables citizens to bring any form of corruption to the notice of appropriate authorities and the general public.
+              </p>
+              <p className="text-sm muted-foreground">
+                You can report incidents requiring government intervention (interventions) or instances of corruption (red-flags).
+              </p>
+            </div>
+          </div>
         </div>
       </main>
     </div>
