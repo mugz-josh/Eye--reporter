@@ -20,32 +20,26 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center gap-3 mb-12 justify-center">
-          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+    <div className="page-auth">
+      <div className="auth-container">
+        <div className="auth-brand">
+          <div className="brand-icon">
             <Flag className="text-primary-foreground" size={24} />
           </div>
-          <h1 className="text-2xl font-semibold">iReporter</h1>
+          <h1 className="brand-title">iReporter</h1>
         </div>
 
-        <div className="bg-card rounded-2xl p-8 border border-border">
-          <h2 className="text-3xl font-semibold mb-8">
-            {isLogin ? "Login" : "Sign Up"}
-          </h2>
+        <div className="auth-card">
+          <h2 className="auth-title">{isLogin ? "Login" : "Sign Up"}</h2>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSubmit}>
             {!isLogin && (
               <>
                 <div>
-                  <Label htmlFor="firstname" className="text-muted-foreground">
+                  <Label htmlFor="firstname" className="muted-foreground">
                     First Name
                   </Label>
-                  <Input
-                    id="firstname"
-                    placeholder="John"
-                    className="mt-2 bg-background border-border"
-                  />
+                  <Input id="firstname" placeholder="John" className="input-with-margin" />
                 </div>
 
                 <div>
@@ -62,14 +56,14 @@ export default function Auth() {
             )}
 
             <div>
-              <Label htmlFor="email" className="text-muted-foreground">
+              <Label htmlFor="email" className="muted-foreground">
                 Email
               </Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="johndoo@gmail.com"
-                className="mt-2 bg-background border-border"
+                className="input-with-margin"
               />
             </div>
 
@@ -85,19 +79,16 @@ export default function Auth() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 text-base font-medium"
-            >
+            <Button type="submit" className="btn-full">
               {isLogin ? "LOGIN" : "SIGN UP"}
             </Button>
 
-            <p className="text-center text-muted-foreground">
+            <p className="text-center muted-foreground">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline"
+                className="link-primary"
               >
                 {isLogin ? "Sign Up" : "Login"}
               </button>
