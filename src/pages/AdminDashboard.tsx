@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Users, Eye, X } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { storage } from "@/utils/storage";
@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const currentUser = storage.getCurrentUser();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'admin') {
@@ -41,7 +42,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-admin">
-      <aside className="page-aside">
+      <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+      
+      <div className={`mobile-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
+      
+      <aside className={`page-aside ${sidebarOpen ? '' : 'mobile-hidden'}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
             <Flag className="text-primary-foreground" size={20} />

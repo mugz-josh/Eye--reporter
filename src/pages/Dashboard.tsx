@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
@@ -7,6 +7,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const currentUser = storage.getCurrentUser();
   const [stats, setStats] = useState({ redFlags: 0, interventions: 0, total: 0 });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
@@ -33,7 +34,13 @@ export default function Dashboard() {
 
   return (
     <div className="page-dashboard">
-      <aside className="page-aside">
+      <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+      
+      <div className={`mobile-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
+      
+      <aside className={`page-aside ${sidebarOpen ? '' : 'mobile-hidden'}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
             <Flag className="text-primary-foreground" size={20} />

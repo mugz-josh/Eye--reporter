@@ -920,6 +920,48 @@
 .page-admin {
   display: flex;
   min-height: 100vh;
+  background: hsl(var(--background));
+  position: relative;
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 30;
+}
+
+.mobile-overlay.show {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .mobile-overlay {
+    display: none !important;
+  }
+}
+
+.mobile-menu-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-btn {
+    display: none;
+  }
 }
 
 .page-aside {
@@ -927,6 +969,24 @@
   background-color: hsl(var(--sidebar-background));
   border-right: 1px solid hsl(var(--sidebar-border));
   padding: 1.5rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 40;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.page-aside.mobile-hidden {
+  transform: translateX(-100%);
+}
+
+@media (min-width: 768px) {
+  .page-aside {
+    position: static;
+    transform: none !important;
+  }
 }
 
 .sidebar-brand {
@@ -978,6 +1038,15 @@
   padding: 2rem;
   background-color: hsl(var(--background));
   overflow-y: auto;
+  width: 100%;
+  padding-top: 4rem;
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    padding-top: 2rem;
+    margin-left: 0;
+  }
 }
 
 .page-header {
