@@ -74,33 +74,33 @@ export default function Auth() {
           <form className="auth-form" onSubmit={handleSubmit}>
             {!isLogin && (
               <>
-                <div>
-                  <Label htmlFor="firstname" className="muted-foreground">
-                    First Name
-                  </Label>
-                  <Input 
-                    id="firstname" 
-                    placeholder="John" 
-                    className="input-with-margin"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                  />
-                </div>
+            <div>
+              <Label htmlFor="firstname" className="muted-foreground">
+                First Name
+              </Label>
+              <Input 
+                id="firstname" 
+                placeholder="John" 
+                className="input-with-margin"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+            </div>
 
-                <div>
-                  <Label htmlFor="lastname" className="text-muted-foreground">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastname"
-                    placeholder="Doe"
-                    className="mt-2 bg-background border-border"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                  />
-                </div>
+            <div>
+              <Label htmlFor="lastname" className="muted-foreground">
+                Last Name
+              </Label>
+              <Input
+                id="lastname"
+                placeholder="Doe"
+                className="input-with-margin"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
               </>
             )}
 
@@ -120,14 +120,14 @@ export default function Auth() {
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-muted-foreground">
+              <Label htmlFor="password" className="muted-foreground">
                 Password
               </Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="****"
-                className="mt-2 bg-background border-border"
+                className="input-with-margin"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

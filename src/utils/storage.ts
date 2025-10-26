@@ -1,5 +1,16 @@
 import { Report, User } from '@/types/report';
 
+// MOCK STORAGE - This uses localStorage for development
+// TODO: Replace with Supabase database calls when backend is ready
+// Migration notes:
+// - getReports() -> SELECT * FROM reports WHERE user_id = auth.uid() (for users) or SELECT * FROM reports (for admins)
+// - saveReport() -> INSERT/UPDATE reports table with RLS policies
+// - deleteReport() -> DELETE FROM reports WHERE id = ? AND user_id = auth.uid()
+// - getUsers() -> SELECT * FROM profiles (admin only)
+// - saveUser() -> INSERT/UPDATE profiles table
+// - getCurrentUser() -> Use Supabase auth.getUser()
+// - Authentication: Replace mock login with Supabase auth.signIn() and auth.signUp()
+
 const REPORTS_KEY = 'ireporter_reports';
 const USERS_KEY = 'ireporter_users';
 const CURRENT_USER_KEY = 'ireporter_current_user';
