@@ -10,6 +10,7 @@ export default function Interventions() {
   const [reports, setReports] = useState<Report[]>([]);
   const currentUser = storage.getCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 });
 
   useEffect(() => {
     if (!currentUser) {
@@ -23,6 +24,12 @@ export default function Interventions() {
     const allReports = storage.getReports();
     const interventions = allReports.filter(r => r.type === 'intervention' && r.userId === currentUser?.id);
     setReports(interventions);
+    
+    // Calculate stats
+    const resolved = interventions.filter(r => r.status === 'RESOLVED').length;
+    const unresolved = interventions.filter(r => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
+    const rejected = interventions.filter(r => r.status === 'REJECTED').length;
+    setStats({ resolved, unresolved, rejected });
   };
 
   const handleLogout = () => {
@@ -103,6 +110,22 @@ export default function Interventions() {
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
               <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
             </div>
+          </div>
+        </div>
+
+        <div className="cards-grid mb-6">
+          <div className="stat-card">
+            <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{stats.resolved}</div>
+            <div className="stat-label">Resolved Interventions</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value" style={{ color: 'hsl(221, 83%, 53%)' }}>{stats.unresolved}</div>
+            <div className="stat-label">Unresolved Interventions</div>
+            <div className="text-xs muted-foreground mt-1">(Draft or Under Investigation)</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value" style={{ color: 'hsl(0, 84%, 60%)' }}>{stats.rejected}</div>
+            <div className="stat-label">Rejected Interventions</div>
           </div>
         </div>
 
