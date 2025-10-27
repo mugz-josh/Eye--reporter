@@ -10,6 +10,7 @@
   font-weight: 500;
   transition-property: color, background-color, border-color;
   transition-duration: 150ms;
+  cursor: pointer;
 }
 
 .btn:focus-visible {
@@ -20,7 +21,11 @@
 
 .btn:disabled {
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
 .btn svg {
@@ -32,12 +37,13 @@
 
 /* Button variants */
 .btn-default {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--primary));
 }
 
 .btn-default:hover {
-  background-color: color-mix(in srgb, var(--primary) 90%, transparent);
+  background-color: color-mix(in srgb, hsl(var(--primary)) 90%, black);
 }
 
 .btn-destructive {
@@ -50,13 +56,14 @@
 }
 
 .btn-outline {
-  border: 1px solid var(--input);
-  background-color: var(--background);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
 }
 
 .btn-outline:hover {
-  background-color: var(--accent);
-  color: var(--accent-foreground);
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
 }
 
 .btn-secondary {
@@ -152,11 +159,12 @@
   height: 2.5rem;
   width: 100%;
   border-radius: 0.375rem;
-  border: 1px solid var(--input);
-  background-color: var(--background);
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--card));
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   ring-offset: var(--background);
+  color: hsl(var(--foreground));
 }
 
 .input::file-selector-button {
@@ -164,11 +172,12 @@
   background-color: transparent;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
 }
 
 .input::placeholder {
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
+  opacity: 0.7;
 }
 
 .input:focus-visible {
@@ -194,6 +203,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1;
+  color: hsl(var(--foreground));
 }
 
 .label:where(:has(:disabled)) {
@@ -207,15 +217,17 @@
   min-height: 80px;
   width: 100%;
   border-radius: 0.375rem;
-  border: 1px solid var(--input);
-  background-color: var(--background);
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--card));
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   ring-offset: var(--background);
+  color: hsl(var(--foreground));
 }
 
 .textarea::placeholder {
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
+  opacity: 0.7;
 }
 
 .textarea:focus-visible {
@@ -897,7 +909,8 @@
 }
 
 .muted-foreground {
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--muted-foreground)) !important;
+  opacity: 0.9;
 }
 
 .link-primary {

@@ -70,14 +70,29 @@ export default function MapPicker({ latitude, longitude, onLocationChange }: Map
   }, [latitude, longitude]);
 
   return (
-    <div 
-      ref={containerRef} 
-      style={{ 
-        height: '400px', 
-        width: '100%', 
-        borderRadius: '0.5rem',
-        overflow: 'hidden'
-      }} 
-    />
+    <div>
+      <div 
+        style={{ 
+          marginBottom: '0.75rem',
+          padding: '0.75rem',
+          backgroundColor: 'hsl(var(--muted))',
+          borderRadius: '0.375rem',
+          fontSize: '0.875rem',
+          color: 'hsl(var(--muted-foreground))'
+        }}
+      >
+        <strong>📍 Pick Location:</strong> Click anywhere on the map or drag the marker to set your location
+      </div>
+      <div 
+        ref={containerRef} 
+        style={{ 
+          height: '400px', 
+          width: '100%', 
+          borderRadius: '0.5rem',
+          overflow: 'hidden',
+          border: '2px solid hsl(var(--border))'
+        }} 
+      />
+    </div>
   );
 }

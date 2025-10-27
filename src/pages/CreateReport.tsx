@@ -21,8 +21,8 @@ export default function CreateReport() {
   const [reportType, setReportType] = useState<"red-flag" | "intervention">(typeParam || "red-flag");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [latitude, setLatitude] = useState(6.5244);
-  const [longitude, setLongitude] = useState(3.3792);
+  const [latitude, setLatitude] = useState(0.3476);
+  const [longitude, setLongitude] = useState(32.5825);
   const [imagePreview, setImagePreview] = useState<string>("");
 
   useEffect(() => {
@@ -209,10 +209,6 @@ export default function CreateReport() {
             </div>
 
             <div>
-              <Label className="muted-foreground mb-3 block">
-                <MapPin size={16} className="inline mr-2" />
-                Location (Click on map to set location)
-              </Label>
               <MapPicker 
                 latitude={latitude}
                 longitude={longitude}
