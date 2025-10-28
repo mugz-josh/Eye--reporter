@@ -14,11 +14,7 @@ export const redFlagsController = {
     
     db.query(query, (err, results: any) => {
       if (err) {
-        const response: ApiResponse = {
-          status: 500,
-          message: 'Database error'
-        };
-        res.status(500).json(response);
+        res.status(500).json('Database error');
         return;
       }
 

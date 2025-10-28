@@ -14,20 +14,12 @@ export const authController = {
       const checkQuery = 'SELECT id FROM users WHERE email = ?';
       db.query(checkQuery, [email], async (err, results: any[]) => {
         if (err) {
-          const response: ApiResponse = {
-            status: 500,
-            message: 'Database error'
-          };
-          res.status(500).json(response);
+          res.status(500).json('Database error');
           return;
         }
 
         if (results.length > 0) {
-          const response: ApiResponse = {
-            status: 400,
-            message: 'User already exists with this email'
-          };
-          res.status(400).json(response);
+          res.status(400).json('User already exists with this email');
           return;
         }
 
@@ -99,20 +91,13 @@ export const authController = {
     const query = 'SELECT * FROM users WHERE email = ?';
     db.query(query, [email], async (err, results: any[]) => {
       if (err) {
-        const response: ApiResponse = {
-          status: 500,
-          message: 'Database error'
-        };
-        res.status(500).json(response);
+        res.status(500).json('Database error');
         return;
       }
 
       if (results.length === 0) {
-        const response: ApiResponse = {
-          status: 400,
-          message: 'Invalid email or password'
-        };
-        res.status(400).json(response);
+        
+        res.status(400).json('Invalid email or password');
         return;
       }
 
