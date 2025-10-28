@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import db from '../config/database';
+import db from '../';
 import { AuthRequest, CreateRecordData, UpdateLocationData, UpdateCommentData, UpdateStatusData, ApiResponse, RecordResponse, Intervention } from '../types';
 
 export const interventionsController = {
