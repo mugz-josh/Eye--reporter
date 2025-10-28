@@ -13,11 +13,11 @@ const Homepage: React.FC = () => {
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
-          <div className="hero-badge">Trusted by 10,000+ Citizens</div>
+          <div className="hero-badge">Trusted by 20,000+ Citizens</div>
           <h1>Empower Your Voice, Drive Change in Your Community</h1>
           <p>
             Report corruption, unethical practices, and infrastructure issues directly to authorities. Join
-            thousands of citizens making Africa more transparent and accountable.
+            thousands of citizens making Africa more transparent and accountable in this World we are living in Today.
           </p>
           <div className="hero-buttons">
             <button className="btn-primary" onClick={() => navigate("/login")}>

@@ -15,8 +15,7 @@
 
 .btn:focus-visible {
   outline: none;
-  ring: 2px;
-  ring-offset: 2px;
+  
 }
 
 .btn:disabled {
@@ -163,7 +162,7 @@
   background-color: hsl(var(--card));
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
-  ring-offset: var(--background);
+  
   color: hsl(var(--foreground));
 }
 
@@ -182,9 +181,8 @@
 
 .input:focus-visible {
   outline: none;
-  ring: 2px;
-  ring-color: var(--ring);
-  ring-offset: 2px;
+  
+  
 }
 
 .input:disabled {
@@ -221,7 +219,7 @@
   background-color: hsl(var(--card));
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  ring-offset: var(--background);
+  
   color: hsl(var(--foreground));
 }
 
@@ -232,9 +230,9 @@
 
 .textarea:focus-visible {
   outline: none;
-  ring: 2px;
-  ring-color: var(--ring);
-  ring-offset: 2px;
+  
+  
+  
 }
 
 .textarea:disabled {
@@ -552,10 +550,7 @@
 
 .otp-slot.active {
   z-index: 10;
-  ring: 2px;
-  ring-color: var(--ring);
-  ring-offset: 2px;
-  ring-offset-color: var(--background);
+  
 }
 
 .otp-caret {
@@ -712,7 +707,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   transition: 0.2s ease;
-  ring-offset: var(--background);
+  
 }
 
 .toast-action:hover {
@@ -750,8 +745,8 @@
 .toast-close:focus {
   opacity: 1;
   outline: none;
-  ring: 2px;
-  ring-color: var(--ring);
+  
+
 }
 
 .toast-title {
