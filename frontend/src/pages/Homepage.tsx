@@ -3,109 +3,190 @@ import { useNavigate } from "react-router-dom";
 import "../components/ui/styles/components.css";
 
 // Import icons from lucide-react
-import { Shield, Activity, Users, Flag, FileText, CheckCircle, ArrowRight, User, AlertCircle } from "lucide-react";
+import { Shield, Activity, Users, Flag, FileText, CheckCircle, MapPin, TrendingUp } from "lucide-react";
 
 const Homepage: React.FC = () => {
   const navigate = useNavigate();
 
+  const handleSignup = () => {
+    // Navigate to auth page with signup mode
+    navigate("/login", { state: { mode: 'signup' } });
+  };
+
   return (
     <div className="homepage">
+      {/* Navigation Header */}
+      <header className="homepage-header">
+        <div className="header-container">
+          <h1 className="header-logo">iReporter</h1>
+          <nav className="header-nav">
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#how-it-works" className="nav-link">How It Works</a>
+            <a href="#impact" className="nav-link">Impact</a>
+          </nav>
+          <div className="header-actions">
+            <button className="btn-ghost" onClick={() => navigate("/login")}>Login</button>
+            <button className="btn-primary" onClick={handleSignup}>Get Started</button>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
-          <div className="hero-badge">Trusted by 20,000+ Citizens</div>
-          <h1>Empower Your Voice, Drive Change in Your Community</h1>
-          <p>
-            Report corruption, unethical practices, and infrastructure issues directly to authorities. Join
-            thousands of citizens making Africa more transparent and accountable in this World we are living in Today.
+          <div className="hero-badge">
+            <Shield size={16} />
+            Trusted by 10,000+ Citizens
+          </div>
+          <h1 className="hero-title">Empower Your Voice, Drive Change in Your Community</h1>
+          <p className="hero-description">
+            Report corruption and infrastructure issues directly to authorities. Join thousands of citizens making Africa more transparent and accountable.
           </p>
           <div className="hero-buttons">
-            <button className="btn-primary" onClick={() => navigate("/login")}>
-              Sign In
+            <button className="btn-primary btn-lg" onClick={handleSignup}>
+              Report an Issue
             </button>
-            <button className="btn-secondary" onClick={() => console.log("Learn More clicked")}>
+            <button className="btn-secondary btn-lg" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
               Learn More
             </button>
           </div>
           <div className="hero-features">
-            <div className="feature">
-              <Shield className="feature-icon" /> Secure & Anonymous
+            <div className="feature-badge">
+              <CheckCircle className="feature-icon" size={20} />
+              Secure & Anonymous
             </div>
-            <div className="feature">
-              <Activity className="feature-icon" /> Real-time Tracking
+            <div className="feature-badge">
+              <Activity className="feature-icon" size={20} />
+              Real-time Tracking
             </div>
-            <div className="feature">
-              <Users className="feature-icon" /> Community Driven
+            <div className="feature-badge">
+              <Users className="feature-icon" size={20} />
+              Community Driven
             </div>
           </div>
         </div>
       </section>
 
-      {/* Cards Section */}
-      <section className="cards-section">
-        <div className="cards-container">
-          <div className="card">
-            <Flag className="card-icon" />
-            <h3>RedFlag Reports</h3>
-            <p>Submit reports on corruption, unethical behavior, or urgent public issues.</p>
+      {/* Impact Statistics Section */}
+      <section id="impact" className="stats-section">
+        <h2 className="section-title">Making Real Impact Across Africa</h2>
+        <p className="section-subtitle">Together, we're building more transparent and accountable communities</p>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)' }}>
+              <Users size={28} />
+            </div>
+            <h3 className="stat-number">10,000+</h3>
+            <p className="stat-label">Active Citizens</p>
           </div>
-          <div className="card">
-            <FileText className="card-icon" />
-            <h3>Intervention Requests</h3>
-            <p>Request support for community or infrastructure challenges.</p>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' }}>
+              <TrendingUp size={28} />
+            </div>
+            <h3 className="stat-number">5,000+</h3>
+            <p className="stat-label">Reports Submitted</p>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+              <CheckCircle size={28} />
+            </div>
+            <h3 className="stat-number">2,500+</h3>
+            <p className="stat-label">Issues Resolved</p>
           </div>
         </div>
       </section>
 
       {/* Process Section */}
-      <section className="process-section">
-        <h2>A Simple Transparent Process</h2>
+      <section id="how-it-works" className="process-section">
+        <h2 className="section-title">Simple, Transparent Process</h2>
+        <p className="section-subtitle">From report to resolution in four easy steps</p>
         <div className="process-steps">
-          {["Create", "Submit", "Track", "See Changes"].map((step, index) => (
-            <div key={index} className="step">
-              <div className="step-circle">{index + 1}</div>
-              <p>{step}</p>
-              {index < 3 && <ArrowRight className="step-arrow" />}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Impact Section */}
-      <section className="impact-section">
-        <h2>Making Real Impact Across Africa</h2>
-        <div className="impact-cards">
-          <div className="impact-card">
-            <User className="impact-icon" />
-            <h3>10,000+</h3>
-            <p>Citizens Engaged</p>
+          <div className="process-step">
+            <div className="step-number">1</div>
+            <h3 className="step-title">Create Account</h3>
+            <p className="step-description">Sign up with your email and create a secure account</p>
           </div>
-          <div className="impact-card">
-            <FileText className="impact-icon" />
-            <h3>5,000+</h3>
-            <p>Reports Submitted</p>
+          <div className="process-step">
+            <div className="step-number">2</div>
+            <h3 className="step-title">Submit Report</h3>
+            <p className="step-description">Describe the issue, add location, and upload evidence</p>
           </div>
-          <div className="impact-card">
-            <CheckCircle className="impact-icon" />
-            <h3>25,000+</h3>
-            <p>Issues Resolved</p>
+          <div className="process-step">
+            <div className="step-number">3</div>
+            <h3 className="step-title">Track Progress</h3>
+            <p className="step-description">Monitor your report status from draft to resolution</p>
           </div>
-          <div className="impact-card">
-            <AlertCircle className="impact-icon" />
-            <h3>2,000+</h3>
-            <p>Corruption Cases Reported</p>
+          <div className="process-step">
+            <div className="step-number">4</div>
+            <h3 className="step-title">See Change</h3>
+            <p className="step-description">Get notified when authorities take action</p>
           </div>
         </div>
       </section>
 
-      {/* Call-to-action Section */}
-      <section className="cta-section">
-        <h2>Ready to Make a Difference?</h2>
-        <div className="cta-card">
-          <p>
-            Join thousands of citizens holding authorities accountable and making Africa transparent.
+      {/* CTA Mid Section */}
+      <section className="cta-mid-section">
+        <div className="cta-mid-content">
+          <h2 className="cta-mid-title">Ready to Make a Difference?</h2>
+          <p className="cta-mid-description">
+            Join thousands of citizens holding authorities accountable and improving infrastructure
           </p>
-          <button className="btn-primary" onClick={() => navigate("/login")}>Join Now</button>
+        </div>
+      </section>
+
+      {/* Report Types Section */}
+      <section id="features" className="report-types-section">
+        <h2 className="section-title">Two Ways to Make a Difference</h2>
+        <p className="section-subtitle">Whether it's corruption or broken infrastructure, your voice matters</p>
+        <div className="report-types-grid">
+          <div className="report-type-card">
+            <div className="report-type-icon red-flag-icon">
+              <Flag size={32} />
+            </div>
+            <h3 className="report-type-title">Red-Flag Reports</h3>
+            <p className="report-type-description">
+              Report incidents of corruption, bribery, embezzlement, and other forms of misconduct by public officials. 
+              Your reports help authorities take action against corruption.
+            </p>
+            <ul className="report-type-features">
+              <li><CheckCircle size={18} /> Anonymous reporting option</li>
+              <li><CheckCircle size={18} /> Upload evidence (photos, videos)</li>
+              <li><CheckCircle size={18} /> Track investigation status</li>
+            </ul>
+          </div>
+          <div className="report-type-card intervention-card">
+            <div className="report-type-icon intervention-icon">
+              <MapPin size={32} />
+            </div>
+            <h3 className="report-type-title">Intervention Requests</h3>
+            <p className="report-type-description">
+              Report infrastructure problems like broken roads, non-functional streetlights, or damaged public facilities. 
+              Help authorities prioritize repairs and maintenance.
+            </p>
+            <ul className="report-type-features">
+              <li><CheckCircle size={18} /> Precise location mapping</li>
+              <li><CheckCircle size={18} /> Visual documentation</li>
+              <li><CheckCircle size={18} /> Resolution updates</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="cta-final-section">
+        <div className="cta-final-content">
+          <h2 className="cta-final-title">Empower Your Voice, Drive Change in Your Community</h2>
+          <p className="cta-final-description">
+            Report corruption and infrastructure issues directly to authorities. Join thousands of citizens making Africa more transparent and accountable.
+          </p>
+          <div className="cta-final-buttons">
+            <button className="btn-primary btn-lg" onClick={handleSignup}>
+              Create an Account
+            </button>
+            <button className="btn-secondary btn-lg" onClick={() => navigate("/login")}>
+              Login
+            </button>
+          </div>
         </div>
       </section>
     </div>
