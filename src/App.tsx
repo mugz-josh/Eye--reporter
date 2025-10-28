@@ -3,11 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-<<<<<<< HEAD
 
 import Homepage from "./pages/Homepage"; // <- landing page
-=======
->>>>>>> 645c975e854d6eaa8470514a40f1384a3fb1d81b
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import CreateReport from "./pages/CreateReport";
@@ -25,14 +22,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-<<<<<<< HEAD
           {/* Make Homepage the landing page */}
           <Route path="/" element={<Homepage />} />
           {/* Login page */}
           <Route path="/login" element={<Auth />} />
-=======
-          <Route path="/" element={<Auth />} />
->>>>>>> 645c975e854d6eaa8470514a40f1384a3fb1d81b
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/red-flags" element={<RedFlags />} />
           <Route path="/interventions" element={<Interventions />} />
