@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { RowDataPacket } from 'mysql2';
 
 export interface User {
   id: number;
@@ -12,6 +13,22 @@ export interface User {
   updated_at: Date;
 }
 
+// Database interfaces (matches your actual schema)
+export interface RedFlagDB extends RowDataPacket {
+  id: number;
+  user_id: number;
+  title: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
+  images: string | null; // JSON string or null in database
+  videos: string | null; // JSON string or null in database
+  created_at: Date;
+  updated_at: Date;
+}
+
+// API response interfaces (with parsed arrays)
 export interface RedFlag {
   id: number;
   user_id: number;
@@ -20,8 +37,22 @@ export interface RedFlag {
   latitude: number;
   longitude: number;
   status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
-  image_url?: string;
-  video_url?: string;
+  images: string[]; // Array of image file paths
+  videos: string[]; // Array of video file paths
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface InterventionDB extends RowDataPacket {
+  id: number;
+  user_id: number;
+  title: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
+  images: string | null; // JSON string or null in database
+  videos: string | null; // JSON string or null in database
   created_at: Date;
   updated_at: Date;
 }
@@ -34,10 +65,23 @@ export interface Intervention {
   latitude: number;
   longitude: number;
   status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
-  image_url?: string;
-  video_url?: string;
+  images: string[]; // Array of image file paths
+  videos: string[]; // Array of video file paths
   created_at: Date;
   updated_at: Date;
+}
+
+// Extended interfaces for joined queries
+export interface RedFlagWithUser extends RedFlagDB {
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+export interface InterventionWithUser extends InterventionDB {
+  first_name: string;
+  last_name: string;
+  email: string;
 }
 
 export interface AuthRequest extends Request {
@@ -84,7 +128,8 @@ export interface UpdateStatusData {
 export interface ApiResponse<T = any> {
   status: number;
   data?: T[];
-  message?: string;
+  error?: string;
+message?: string;
 }
 
 export interface AuthResponse {
@@ -95,4 +140,16 @@ export interface AuthResponse {
 export interface RecordResponse {
   id: number;
   message: string;
+}
+
+// File upload types
+export interface UploadedFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number;
 }
