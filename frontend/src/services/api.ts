@@ -63,7 +63,7 @@ export const api = {
 
     // Add files
     files.forEach(file => {
-      formData.append('files', file);
+      formData.append('media', file);
     });
 
     const response = await fetch(`${API_URL}/red-flags`, {
@@ -122,7 +122,7 @@ export const api = {
     });
 
     files.forEach(file => {
-      formData.append('files', file);
+      formData.append('media', file);
     });
 
     const response = await fetch(`${API_URL}/interventions`, {

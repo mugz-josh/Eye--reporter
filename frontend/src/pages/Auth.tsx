@@ -24,52 +24,28 @@ export default function Auth() {
     
     try {
       if (isLogin) {
-        // Login via API
         const response = await api.login(email, password);
-        
-        if (response.status === 200 && response.data) {
-          authHelper.setToken(response.data[0].token);
-          toast({
-            title: "Success",
-            description: "Logged in successfully!",
-          });
+        const token = (response as any)?.data?.[0]?.token || (response as any)?.token || (response as any)?.data?.token;
+        if ((response.status === 200 || response.status === 201) && token) {
+          authHelper.setToken(token);
+          toast({ title: "Success", description: "Logged in successfully!" });
           navigate("/dashboard");
         } else {
-          toast({
-            title: "Error",
-            description: response.message || "Invalid credentials",
-            variant: "destructive",
-          });
+          toast({ title: "Error", description: response.message || "Invalid credentials", variant: "destructive" });
         }
       } else {
-        // Sign up via API
-        const response = await api.register({
-          name: `${firstName} ${lastName}`,
-          email,
-          password,
-        });
-        
-        if (response.status === 201 && response.data) {
-          authHelper.setToken(response.data[0].token);
-          toast({
-            title: "Success",
-            description: "Account created successfully!",
-          });
+        const response = await api.register({ name: `${firstName} ${lastName}`, email, password });
+        const token = (response as any)?.data?.[0]?.token || (response as any)?.token || (response as any)?.data?.token;
+        if ((response.status === 200 || response.status === 201) && token) {
+          authHelper.setToken(token);
+          toast({ title: "Success", description: "Account created successfully!" });
           navigate("/dashboard");
         } else {
-          toast({
-            title: "Error",
-            description: response.message || "Failed to create account",
-            variant: "destructive",
-          });
+          toast({ title: "Error", description: response.message || "Failed to create account", variant: "destructive" });
         }
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "An error occurred. Please try again.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
