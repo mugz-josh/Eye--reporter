@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate, useLocation } from "react-router-dom";
-import { storage } from "@/utils/storage";
-import { User } from "@/types/report";
+import { api, authHelper } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Auth() {
   const location = useLocation();
@@ -14,49 +14,65 @@ export default function Auth() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    if (isLogin) {
-      // Mock login - check if user exists
-      const users = storage.getUsers();
-      const user = users.find(u => u.email === email);
-      
-      if (user) {
-        storage.setCurrentUser(user);
-        navigate("/dashboard");
+    try {
+      if (isLogin) {
+        // Login via API
+        const response = await api.login(email, password);
+        
+        if (response.status === 200 && response.data) {
+          authHelper.setToken(response.data[0].token);
+          toast({
+            title: "Success",
+            description: "Logged in successfully!",
+          });
+          navigate("/dashboard");
+        } else {
+          toast({
+            title: "Error",
+            description: response.message || "Invalid credentials",
+            variant: "destructive",
+          });
+        }
       } else {
-        alert("User not found. Please sign up first.");
+        // Sign up via API
+        const response = await api.register({
+          name: `${firstName} ${lastName}`,
+          email,
+          password,
+        });
+        
+        if (response.status === 201 && response.data) {
+          authHelper.setToken(response.data[0].token);
+          toast({
+            title: "Success",
+            description: "Account created successfully!",
+          });
+          navigate("/dashboard");
+        } else {
+          toast({
+            title: "Error",
+            description: response.message || "Failed to create account",
+            variant: "destructive",
+          });
+        }
       }
-    } else {
-      // Sign up - create new user
-      const newUser: User = {
-        id: Date.now().toString(),
-        name: `${firstName} ${lastName}`,
-        email,
-        role: 'user',
-        createdAt: new Date().toISOString()
-      };
-      
-      storage.saveUser(newUser);
-      storage.setCurrentUser(newUser);
-      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleAdminLogin = () => {
-    // Mock admin login
-    const adminUser: User = {
-      id: 'admin',
-      name: 'Admin User',
-      email: 'admin@ireporter.com',
-      role: 'admin',
-      createdAt: new Date().toISOString()
-    };
-    storage.setCurrentUser(adminUser);
-    navigate("/admin");
   };
 
   return (
@@ -135,8 +151,8 @@ export default function Auth() {
               />
             </div>
 
-            <Button type="submit" className="btn-full">
-              {isLogin ? "LOGIN" : "SIGN UP"}
+            <Button type="submit" className="btn-full" disabled={isLoading}>
+              {isLoading ? "Please wait..." : (isLogin ? "LOGIN" : "SIGN UP")}
             </Button>
 
             <p className="text-center muted-foreground">
@@ -150,17 +166,6 @@ export default function Auth() {
               </button>
             </p>
           </form>
-
-          <div className="mt-6 pt-6 border-t border-border">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleAdminLogin}
-            >
-              Login as Admin
-            </Button>
-          </div>
         </div>
       </div>
     </div>

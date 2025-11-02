@@ -153,21 +153,8 @@ export default function CreateReport() {
           <form className="auth-form" onSubmit={handleSubmit}>
             <div>
               <Label className="muted-foreground mb-3 block">Type</Label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setReportType("red-flag")}
-                  className={`record-type ${reportType === "red-flag" ? 'badge-destructive' : 'badge-secondary'}`}
-                  style={{ borderRadius: '1rem', padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', border: '2px solid transparent' }}
-                >
-                  <Flag size={24} />
-                  <span className="font-medium">Red Flag</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setReportType("intervention")}
-                  className={`record-type ${reportType === "intervention" ? 'badge-secondary' : 'badge-secondary'}`}
+              {typeParam ? (
+                <div className={`record-type ${reportType === "red-flag" ? 'badge-destructive' : 'badge-secondary'}`}
                   style={{ 
                     borderRadius: '1rem', 
                     padding: '1.25rem', 
@@ -175,13 +162,44 @@ export default function CreateReport() {
                     flexDirection: 'column', 
                     alignItems: 'center', 
                     gap: '0.75rem', 
-                    border: reportType === "intervention" ? '2px solid hsl(var(--primary))' : '2px solid transparent'
+                    border: '2px solid hsl(var(--primary))',
+                    cursor: 'default'
                   }}
                 >
-                  <Plus size={24} />
-                  <span className="font-medium">Intervention</span>
-                </button>
-              </div>
+                  {reportType === "red-flag" ? <Flag size={24} /> : <Plus size={24} />}
+                  <span className="font-medium">{reportType === "red-flag" ? "Red Flag" : "Intervention"}</span>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setReportType("red-flag")}
+                    className={`record-type ${reportType === "red-flag" ? 'badge-destructive' : 'badge-secondary'}`}
+                    style={{ borderRadius: '1rem', padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', border: '2px solid transparent' }}
+                  >
+                    <Flag size={24} />
+                    <span className="font-medium">Red Flag</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setReportType("intervention")}
+                    className={`record-type ${reportType === "intervention" ? 'badge-secondary' : 'badge-secondary'}`}
+                    style={{ 
+                      borderRadius: '1rem', 
+                      padding: '1.25rem', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      gap: '0.75rem', 
+                      border: reportType === "intervention" ? '2px solid hsl(var(--primary))' : '2px solid transparent'
+                    }}
+                  >
+                    <Plus size={24} />
+                    <span className="font-medium">Intervention</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             <div>
