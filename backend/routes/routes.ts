@@ -15,7 +15,9 @@ router.post('/auth/login', authController.login);
 
 router .use(cors({
   origin: 'http://localhost:3001', // or whatever port your frontend is running on
-  credentials: true, // if you are using cookies or authentication headers
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'] // if you are using cookies or authentication headers
 }));
 
 // Protected user routes

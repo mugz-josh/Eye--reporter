@@ -1,102 +1,183 @@
 import { Report, User } from '@/types/report';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 interface ApiResponse<T> {
   status: number;
-  data?: T;
+  data?: T[];
   message?: string;
+  error?: string;
 }
 
 export const api = {
-  // Auth endpoints
-  login: async (email: string, password: string): Promise<ApiResponse<User>> => {
+  // Auth endpoints - Match your backend
+  login: async (email: string, password: string): Promise<ApiResponse<any>> => {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
-      credentials: 'include'
     });
     return response.json();
   },
 
-  register: async (userData: Partial<User>): Promise<ApiResponse<User>> => {
-    const response = await fetch(`${API_URL}/auth/register`, {
+  register: async (userData: Partial<User>): Promise<ApiResponse<any>> => {
+    const response = await fetch(`${API_URL}/auth/signup`, { // Changed from /register to /signup
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
-      credentials: 'include'
     });
     return response.json();
   },
 
-  // Reports endpoints
-  getReports: async (): Promise<ApiResponse<Report[]>> => {
-    const response = await fetch(`${API_URL}/reports`, {
-      credentials: 'include'
+  getProfile: async (): Promise<ApiResponse<User>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     });
     return response.json();
   },
 
-  createReport: async (report: Partial<Report>): Promise<ApiResponse<Report>> => {
+  // Red Flags endpoints
+  getRedFlags: async (): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/red-flags`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.json();
+  },
+
+  createRedFlag: async (redFlagData: any, files: File[] = []): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
     const formData = new FormData();
-    Object.entries(report).forEach(([key, value]) => {
-      if (value instanceof File) {
-        formData.append(key, value);
-      } else {
-        formData.append(key, String(value));
+    
+    // Add text fields
+    Object.entries(redFlagData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value as string);
       }
     });
 
-    const response = await fetch(`${API_URL}/reports`, {
+    // Add files
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    const response = await fetch(`${API_URL}/red-flags`, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
       body: formData,
-      credentials: 'include'
     });
     return response.json();
   },
 
-  updateReport: async (id: string, report: Partial<Report>): Promise<ApiResponse<Report>> => {
+  updateRedFlag: async (id: string, redFlagData: any): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/red-flags/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(redFlagData),
+    });
+    return response.json();
+  },
+
+  deleteRedFlag: async (id: string): Promise<ApiResponse<void>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/red-flags/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.json();
+  },
+
+  // Interventions endpoints
+  getInterventions: async (): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/interventions`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.json();
+  },
+
+  createIntervention: async (interventionData: any, files: File[] = []): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
     const formData = new FormData();
-    Object.entries(report).forEach(([key, value]) => {
-      if (value instanceof File) {
-        formData.append(key, value);
-      } else {
-        formData.append(key, String(value));
+    
+    Object.entries(interventionData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value as string);
       }
     });
 
-    const response = await fetch(`${API_URL}/reports/${id}`, {
-      method: 'PUT',
-      body: formData,
-      credentials: 'include'
+    files.forEach(file => {
+      formData.append('files', file);
     });
-    return response.json();
-  },
 
-  deleteReport: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await fetch(`${API_URL}/reports/${id}`, {
-      method: 'DELETE',
-      credentials: 'include'
+    const response = await fetch(`${API_URL}/interventions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
     });
     return response.json();
   },
 
   // Admin endpoints
-  getUsers: async (): Promise<ApiResponse<User[]>> => {
-    const response = await fetch(`${API_URL}/admin/users`, {
-      credentials: 'include'
+  updateRedFlagStatus: async (id: string, status: string): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/red-flags/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
     });
     return response.json();
   },
 
-  updateReportStatus: async (id: string, status: string): Promise<ApiResponse<Report>> => {
-    const response = await fetch(`${API_URL}/admin/reports/${id}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+  updateInterventionStatus: async (id: string, status: string): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/interventions/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ status }),
-      credentials: 'include'
     });
     return response.json();
+  }
+};
+
+// Auth helper functions
+export const authHelper = {
+  setToken: (token: string) => {
+    localStorage.setItem('token', token);
+  },
+
+  getToken: (): string | null => {
+    return localStorage.getItem('token');
+  },
+
+  removeToken: () => {
+    localStorage.removeItem('token');
+  },
+
+  isAuthenticated: (): boolean => {
+    return !!localStorage.getItem('token');
   }
 };
