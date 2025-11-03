@@ -17,7 +17,7 @@ router .use(cors({
   origin: 'http://localhost:3001', // or whatever port your frontend is running on
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'] // if you are using cookies or authentication headers
+  allowedHeaders: ['Content-Type', 'Authorization'] 
 }));
 
 // Protected user routes

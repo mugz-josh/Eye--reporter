@@ -51,4 +51,4 @@ CREATE INDEX idx_interventions_status ON interventions(status);
 CREATE INDEX idx_users_email ON users(email);
 -- Insert a default admin user (password: admin123)
 INSERT INTO users (first_name, last_name, email, password, is_admin)
-VALUES ('Admin', 'User', 'Mollyadmin@ireporter.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', TRUE);
+VALUES ('Admin', 'User', 'Mollyadmin@ireporter.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', TRUE)
