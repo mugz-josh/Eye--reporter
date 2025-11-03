@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 export const api = {
   // Auth endpoints - Match your backend
   login: async (email: string, password: string): Promise<ApiResponse<any>> => {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_URL}/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -21,7 +21,7 @@ export const api = {
   },
 
   register: async (userData: Partial<User>): Promise<ApiResponse<any>> => {
-    const response = await fetch(`${API_URL}/auth/signup`, {
+    const response = await fetch(`${API_URL}/v1/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
@@ -31,7 +31,7 @@ export const api = {
 
   getProfile: async (): Promise<ApiResponse<User>> => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/auth/profile`, {
+    const response = await fetch(`${API_URL}/v1/auth/profile`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -42,7 +42,7 @@ export const api = {
   // Red Flags endpoints
   getRedFlags: async (): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/red-flags`, {
+    const response = await fetch(`${API_URL}/v1/red-flags`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -66,7 +66,7 @@ export const api = {
       formData.append('media', file);
     });
 
-    const response = await fetch(`${API_URL}/red-flags`, {
+    const response = await fetch(`${API_URL}/v1/red-flags`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -78,7 +78,7 @@ export const api = {
 
   updateRedFlag: async (id: string, redFlagData: any): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/red-flags/${id}`, {
+    const response = await fetch(`${API_URL}/v1/red-flags/${id}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -91,7 +91,7 @@ export const api = {
 
   deleteRedFlag: async (id: string): Promise<ApiResponse<void>> => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/red-flags/${id}`, {
+    const response = await fetch(`${API_URL}/v1/red-flags/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -103,7 +103,7 @@ export const api = {
   // Interventions endpoints
   getInterventions: async (): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/interventions`, {
+    const response = await fetch(`${API_URL}/v1/interventions`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -125,7 +125,7 @@ export const api = {
       formData.append('media', file);
     });
 
-    const response = await fetch(`${API_URL}/interventions`, {
+    const response = await fetch(`${API_URL}/v1/interventions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -138,7 +138,7 @@ export const api = {
   // Admin endpoints
   updateRedFlagStatus: async (id: string, status: string): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/red-flags/${id}/status`, {
+    const response = await fetch(`${API_URL}/v1/red-flags/${id}/status`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -151,7 +151,7 @@ export const api = {
 
   updateInterventionStatus: async (id: string, status: string): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/interventions/${id}/status`, {
+    const response = await fetch(`${API_URL}/v1/interventions/${id}/status`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
