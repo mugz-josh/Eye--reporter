@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useNavigate, useLocation } from "react-router-dom";
 import { api, authHelper } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { storage } from "@/utils/storage";
+import type { User } from "@/types/report";
 
 export default function Auth() {
   const location = useLocation();
@@ -18,6 +20,31 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const fetchAndStoreProfile = async () => {
+    try {
+      const resp = await api.getProfile();
+      const raw: any = (resp as any)?.data?.[0] ?? (resp as any)?.data ?? (resp as any)?.user ?? null;
+      if (raw) {
+        const mapped: User = {
+          id: raw.id || raw.user_id || raw.uuid || "",
+          name:
+            [raw.first_name, raw.last_name].filter(Boolean).join(" ") ||
+            raw.name ||
+            raw.full_name ||
+            raw.username ||
+            raw.email ||
+            "User",
+          email: raw.email || "",
+          role: (raw.role || "user") as "user" | "admin",
+          createdAt: raw.created_at || raw.createdAt || new Date().toISOString(),
+        };
+        storage.setCurrentUser(mapped);
+      }
+    } catch {
+      // ignore profile fetch errors; token is set
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,6 +55,7 @@ export default function Auth() {
         const token = (response as any)?.data?.[0]?.token || (response as any)?.token || (response as any)?.data?.token;
         if ((response.status === 200 || response.status === 201) && token) {
           authHelper.setToken(token);
+          await fetchAndStoreProfile();
           toast({ title: "Success", description: "Logged in successfully!" });
           navigate("/dashboard");
         } else {
@@ -38,6 +66,7 @@ export default function Auth() {
         const token = (response as any)?.data?.[0]?.token || (response as any)?.token || (response as any)?.data?.token;
         if ((response.status === 200 || response.status === 201) && token) {
           authHelper.setToken(token);
+          await fetchAndStoreProfile();
           toast({ title: "Success", description: "Account created successfully!" });
           navigate("/dashboard");
         } else {
