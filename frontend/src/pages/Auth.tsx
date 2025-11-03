@@ -34,7 +34,7 @@ export default function Auth() {
           toast({ title: "Error", description: response.message || "Invalid credentials", variant: "destructive" });
         }
       } else {
-        const response = await api.register({ name: `${firstName} ${lastName}`, email, password });
+        const response = await api.register({ first_name: firstName, last_name: lastName, email, password });
         const token = (response as any)?.data?.[0]?.token || (response as any)?.token || (response as any)?.data?.token;
         if ((response.status === 200 || response.status === 201) && token) {
           authHelper.setToken(token);
