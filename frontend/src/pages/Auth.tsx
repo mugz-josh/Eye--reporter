@@ -35,7 +35,8 @@ export default function Auth() {
             raw.email ||
             "User",
           email: raw.email || "",
-          role: (raw.role || "user") as "user" | "admin",
+          // backend stores admin flag as `is_admin` (or `isAdmin`) so map it to frontend role
+          role: (raw.is_admin || raw.isAdmin || raw.role === 'admin') ? 'admin' : 'user',
           createdAt: raw.created_at || raw.createdAt || new Date().toISOString(),
         };
         storage.setCurrentUser(mapped);
@@ -57,7 +58,10 @@ export default function Auth() {
           authHelper.setToken(token);
           await fetchAndStoreProfile();
           toast({ title: "Success", description: "Logged in successfully!" });
-          navigate("/dashboard");
+          // redirect based on role stored in local storage by fetchAndStoreProfile
+          const u = storage.getCurrentUser();
+          if (u?.role === 'admin') navigate('/admin');
+          else navigate('/dashboard');
         } else {
           toast({ title: "Error", description: response.message || "Invalid credentials", variant: "destructive" });
         }
@@ -68,7 +72,9 @@ export default function Auth() {
           authHelper.setToken(token);
           await fetchAndStoreProfile();
           toast({ title: "Success", description: "Account created successfully!" });
-          navigate("/dashboard");
+          const u2 = storage.getCurrentUser();
+          if (u2?.role === 'admin') navigate('/admin');
+          else navigate('/dashboard');
         } else {
           toast({ title: "Error", description: response.message || "Failed to create account", variant: "destructive" });
         }
