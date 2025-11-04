@@ -2,6 +2,7 @@ import { Flag, LogOut, Grid3x3, Plus, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
+import { api } from "@/services/api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -15,17 +16,36 @@ export default function Dashboard() {
       return;
     }
 
-    const reports = storage.getReports();
-    const userReports = reports.filter(r => r.userId === currentUser.id);
-    const redFlags = userReports.filter(r => r.type === 'red-flag').length;
-    const interventions = userReports.filter(r => r.type === 'intervention').length;
-    
-    setStats({
-      redFlags,
-      interventions,
-      total: redFlags + interventions
-    });
+    loadStats();
   }, []);
+
+  const loadStats = async () => {
+    try {
+      const [redFlagsRes, interventionsRes] = await Promise.all([
+        api.getRedFlags(),
+        api.getInterventions()
+      ]);
+
+      let redFlagsCount = 0;
+      let interventionsCount = 0;
+
+      if (redFlagsRes.status === 200 && redFlagsRes.data) {
+        redFlagsCount = redFlagsRes.data.filter((r: any) => r.user_id.toString() === currentUser?.id).length;
+      }
+
+      if (interventionsRes.status === 200 && interventionsRes.data) {
+        interventionsCount = interventionsRes.data.filter((r: any) => r.user_id.toString() === currentUser?.id).length;
+      }
+      
+      setStats({
+        redFlags: redFlagsCount,
+        interventions: interventionsCount,
+        total: redFlagsCount + interventionsCount
+      });
+    } catch (error) {
+      console.error("Failed to load stats:", error);
+    }
+  };
 
   const handleLogout = () => {
     storage.clearCurrentUser();
