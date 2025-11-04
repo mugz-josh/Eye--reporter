@@ -11,17 +11,32 @@ import {
 import { ResultSetHeader } from 'mysql2';
 
 export const redFlagsController = {
-  // Get all red-flags
+  // Get all red-flags (filtered by user unless admin)
   getAllRedFlags: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const query = `
-        SELECT rf.*, u.first_name, u.last_name, u.email 
-        FROM red_flags rf 
-        JOIN users u ON rf.user_id = u.id 
-        ORDER BY rf.created_at DESC
-      `;
+      const userId = req.user?.id;
+      const isAdmin = req.user?.isAdmin;
+
+      // Admin sees all reports, regular users see only their own
+      const query = isAdmin 
+        ? `
+          SELECT rf.*, u.first_name, u.last_name, u.email 
+          FROM red_flags rf 
+          JOIN users u ON rf.user_id = u.id 
+          ORDER BY rf.created_at DESC
+        `
+        : `
+          SELECT rf.*, u.first_name, u.last_name, u.email 
+          FROM red_flags rf 
+          JOIN users u ON rf.user_id = u.id 
+          WHERE rf.user_id = ?
+          ORDER BY rf.created_at DESC
+        `;
       
-      const [results] = await pool.execute<RedFlagWithUser[]>(query);
+      const [results] = await pool.execute<RedFlagWithUser[]>(
+        query, 
+        isAdmin ? [] : [userId]
+      );
 
       // Parse JSON fields for images and videos
       const redFlagsWithParsedMedia = results.map(redFlag => ({

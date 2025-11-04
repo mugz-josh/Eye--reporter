@@ -11,17 +11,32 @@ import {
 import { ResultSetHeader } from 'mysql2';
 
 export const interventionsController = {
-  // Get all interventions
+  // Get all interventions (filtered by user unless admin)
   getAllInterventions: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const query = `
-        SELECT i.*, u.first_name, u.last_name, u.email 
-        FROM interventions i 
-        JOIN users u ON i.user_id = u.id 
-        ORDER BY i.created_at DESC
-      `;
+      const userId = req.user?.id;
+      const isAdmin = req.user?.isAdmin;
+
+      // Admin sees all reports, regular users see only their own
+      const query = isAdmin 
+        ? `
+          SELECT i.*, u.first_name, u.last_name, u.email 
+          FROM interventions i 
+          JOIN users u ON i.user_id = u.id 
+          ORDER BY i.created_at DESC
+        `
+        : `
+          SELECT i.*, u.first_name, u.last_name, u.email 
+          FROM interventions i 
+          JOIN users u ON i.user_id = u.id 
+          WHERE i.user_id = ?
+          ORDER BY i.created_at DESC
+        `;
       
-      const [results] = await pool.execute<InterventionWithUser[]>(query);
+      const [results] = await pool.execute<InterventionWithUser[]>(
+        query, 
+        isAdmin ? [] : [userId]
+      );
 
       // Parse JSON fields for images and videos
       const interventionsWithParsedMedia = results.map(intervention => ({
