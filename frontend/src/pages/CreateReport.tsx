@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
 import { storage } from "@/utils/storage";
+import { api } from "@/services/api";
 import { Report } from "@/types/report";
 
 export default function CreateReport() {
@@ -67,7 +68,6 @@ export default function CreateReport() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!title || !description) {
       toast({
         title: "Error",
@@ -77,31 +77,40 @@ export default function CreateReport() {
       return;
     }
 
-    const report: Report = {
-      id: reportId || Date.now().toString(),
-      type: reportType,
+    // Prepare payload for backend
+    const payload = {
       title,
       description,
       latitude,
-      longitude,
-      status: 'DRAFT',
-      image: imagePreview,
-      userId: currentUser!.id,
-      userName: currentUser!.name,
-      createdAt: reportId ? storage.getReportById(reportId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      longitude
     };
 
-    storage.saveReport(report);
+    (async () => {
+      try {
+        let resp: any;
+        if (reportType === 'red-flag') {
+          resp = await api.createRedFlag(payload, []);
+        } else {
+          resp = await api.createIntervention(payload, []);
+        }
 
-    toast({
-      title: reportId ? "Report updated" : "Report created",
-      description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
-    });
+        if (resp?.status === 201 || resp?.status === 200) {
+          toast({
+            title: reportId ? "Report updated" : "Report created",
+            description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
+          });
 
-    setTimeout(() => {
-      navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
-    }, 1500);
+          setTimeout(() => {
+            navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
+          }, 800);
+        } else {
+          toast({ title: 'Error', description: resp?.message || 'Failed to save report', variant: 'destructive' });
+        }
+      } catch (err) {
+        console.error('Create report error', err);
+        toast({ title: 'Error', description: 'Server error while creating report', variant: 'destructive' });
+      }
+    })();
   };
 
   return (
