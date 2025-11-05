@@ -26,7 +26,7 @@ export default function Auth() {
       const raw: any = (resp as any)?.data?.[0] ?? (resp as any)?.data ?? (resp as any)?.user ?? null;
       if (raw) {
         const mapped: User = {
-          id: raw.id || raw.user_id || raw.uuid || "",
+          id: String(raw.id || raw.user_id || raw.uuid || ""),
           name:
             [raw.first_name, raw.last_name].filter(Boolean).join(" ") ||
             raw.name ||

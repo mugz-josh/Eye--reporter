@@ -99,6 +99,20 @@ export const api = {
     return response.json();
   },
 
+  // Update only the location (latitude, longitude)
+  updateRedFlagLocation: async (id: string, latitude: number, longitude: number): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/red-flags/${id}/location`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ latitude, longitude }),
+    });
+    return response.json();
+  },
+
   updateIntervention: async (id: string, interventionData: any): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
     const response = await fetch(`${API_URL}/v1/interventions/${id}`, {
@@ -108,6 +122,19 @@ export const api = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(interventionData),
+    });
+    return response.json();
+  },
+
+  updateInterventionLocation: async (id: string, latitude: number, longitude: number): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/interventions/${id}/location`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ latitude, longitude }),
     });
     return response.json();
   },

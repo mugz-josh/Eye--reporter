@@ -11,8 +11,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+// Allow requests from local dev frontends (common ports). Use function to be flexible.
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
+  origin: (origin, callback) => {
+    // allow requests with no origin (like curl/postman)
+    if (!origin) return callback(null, true);
+    const allowed = [
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3002',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173'
+    ];
+    if (allowed.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json());

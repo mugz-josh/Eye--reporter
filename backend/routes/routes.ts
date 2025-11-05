@@ -13,12 +13,7 @@ router.post('/auth/signup', authController.signup);
 router.post('/auth/login', authController.login);
 
 
-router .use(cors({
-  origin: 'http://localhost:3001', // or whatever port your frontend is running on
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'] 
-}));
+// CORS is handled at the application level in server.ts
 
 // Protected user routes
 router.get('/auth/profile', auth.verifyToken, authController.getProfile);

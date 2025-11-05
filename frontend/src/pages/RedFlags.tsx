@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { storage } from "@/utils/storage";
@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Report } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import MapPicker from "@/components/MapPicker";
 
 export default function RedFlags() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function RedFlags() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 });
   const [loading, setLoading] = useState(true);
+  const [editingLocation, setEditingLocation] = useState<{ id?: string; lat: number; lng: number; open: boolean; } | null>(null);
   const { toast } = useToast();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
   const FILE_BASE = (API_URL).replace(/\/api$/, '');
@@ -92,6 +94,30 @@ export default function RedFlags() {
       return;
     }
     navigate(`/create?id=${reportId}&type=red-flag`);
+  };
+
+  const openLocationEditor = (report: Report) => {
+    if (report.status !== 'DRAFT') {
+      toast({ title: 'Error', description: 'Cannot update location - status changed', variant: 'destructive' });
+      return;
+    }
+    setEditingLocation({ id: report.id, lat: report.latitude, lng: report.longitude, open: true });
+  };
+
+  const saveLocation = async () => {
+    if (!editingLocation?.id) return;
+    try {
+      const resp = await api.updateRedFlagLocation(editingLocation.id, editingLocation.lat, editingLocation.lng);
+      if (resp.status >= 400) {
+        toast({ title: 'Error', description: resp.message || 'Failed to update location', variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Success', description: 'Location updated' });
+      setEditingLocation(null);
+      loadReports();
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to update location', variant: 'destructive' });
+    }
   };
 
   return (
@@ -230,6 +256,15 @@ export default function RedFlags() {
                       <Edit size={16} />
                       Edit
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openLocationEditor(report)}
+                      disabled={report.status !== 'DRAFT'}
+                    >
+                      <MapPin size={16} />
+                      Update Location
+                    </Button>
                     <Button 
                       size="sm" 
                       variant="destructive"
@@ -243,6 +278,18 @@ export default function RedFlags() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {editingLocation && editingLocation.open && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} onClick={() => setEditingLocation(null)}>
+            <div className="bg-card" style={{ width: '90%', maxWidth: '800px', padding: '1.5rem', borderRadius: '0.75rem' }} onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-bold mb-2">Update Location</h3>
+              <MapPicker latitude={editingLocation.lat} longitude={editingLocation.lng} onLocationChange={(lat, lng) => setEditingLocation({ ...editingLocation, lat, lng })} />
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                <Button variant="outline" onClick={() => setEditingLocation(null)}>Cancel</Button>
+                <Button onClick={saveLocation}>Save Location</Button>
+              </div>
+            </div>
           </div>
         )}
       </main>
