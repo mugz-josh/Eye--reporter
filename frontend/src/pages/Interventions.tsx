@@ -49,14 +49,13 @@ export default function Interventions() {
           videos: item.videos || []
         }));
 
-        // Filter for current user's reports
-        const userInterventions = mappedReports.filter((r: Report) => r.userId === currentUser?.id);
-        setReports(userInterventions);
+        // Backend already filters by user, no need to filter again
+        setReports(mappedReports);
         
         // Calculate stats
-        const resolved = userInterventions.filter((r: Report) => r.status === 'RESOLVED').length;
-        const unresolved = userInterventions.filter((r: Report) => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
-        const rejected = userInterventions.filter((r: Report) => r.status === 'REJECTED').length;
+        const resolved = mappedReports.filter((r: Report) => r.status === 'RESOLVED').length;
+        const unresolved = mappedReports.filter((r: Report) => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
+        const rejected = mappedReports.filter((r: Report) => r.status === 'REJECTED').length;
         setStats({ resolved, unresolved, rejected });
       }
     } catch (error) {

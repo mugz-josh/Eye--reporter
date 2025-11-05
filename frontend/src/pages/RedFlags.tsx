@@ -49,14 +49,13 @@ export default function RedFlags() {
           videos: item.videos || []
         }));
 
-        // Filter for current user's reports
-        const userRedFlags = mappedReports.filter((r: Report) => r.userId === currentUser?.id);
-        setReports(userRedFlags);
+        // Backend already filters by user, no need to filter again
+        setReports(mappedReports);
         
         // Calculate stats
-        const resolved = userRedFlags.filter((r: Report) => r.status === 'RESOLVED').length;
-        const unresolved = userRedFlags.filter((r: Report) => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
-        const rejected = userRedFlags.filter((r: Report) => r.status === 'REJECTED').length;
+        const resolved = mappedReports.filter((r: Report) => r.status === 'RESOLVED').length;
+        const unresolved = mappedReports.filter((r: Report) => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
+        const rejected = mappedReports.filter((r: Report) => r.status === 'REJECTED').length;
         setStats({ resolved, unresolved, rejected });
       }
     } catch (error) {
