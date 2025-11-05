@@ -25,6 +25,7 @@ export default function CreateReport() {
   const [latitude, setLatitude] = useState(0.3476);
   const [longitude, setLongitude] = useState(32.5825);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [files, setFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -33,15 +34,30 @@ export default function CreateReport() {
     }
 
     if (reportId) {
-      const report = storage.getReportById(reportId);
-      if (report && report.userId === currentUser.id) {
-        setReportType(report.type);
-        setTitle(report.title);
-        setDescription(report.description);
-        setLatitude(report.latitude);
-        setLongitude(report.longitude);
-        setImagePreview(report.image || "");
-      }
+      // fetch the report from the API instead of local storage
+      (async () => {
+        try {
+          const resp = reportType === 'red-flag' ? await api.getRedFlag(reportId) : await api.getIntervention(reportId);
+          if (resp && resp.status === 200 && resp.data && resp.data.length > 0) {
+            const item = resp.data[0];
+            // set form fields from API
+            setTitle(item.title || "");
+            setDescription(item.description || "");
+            setLatitude(item.latitude ? parseFloat(item.latitude) : latitude);
+            setLongitude(item.longitude ? parseFloat(item.longitude) : longitude);
+
+            // build a preview URL for first media (if any)
+            const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
+            if (item.images && item.images.length > 0) {
+              setImagePreview(`${API_BASE}/uploads/${item.images[0]}`);
+            } else if (item.videos && item.videos.length > 0) {
+              setImagePreview(`${API_BASE}/uploads/${item.videos[0]}`);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to load report', err);
+        }
+      })();
     }
   }, [reportId]);
 
@@ -56,14 +72,28 @@ export default function CreateReport() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const selected = e.target.files ? Array.from(e.target.files) : [];
+    setFiles(selected);
+
+    // preview first image (if any)
+    const firstImage = selected.find(f => f.type.startsWith('image/'));
+    if (firstImage) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(firstImage);
+      return;
     }
+
+    // if no image, but there is a video, set a placeholder preview (will not show thumbnail)
+    const firstVideo = selected.find(f => f.type.startsWith('video/'));
+    if (firstVideo) {
+      // create object URL for video preview
+      const url = URL.createObjectURL(firstVideo);
+      setImagePreview(url);
+      return;
+    }
+
+    setImagePreview("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,9 +119,9 @@ export default function CreateReport() {
       try {
         let resp: any;
         if (reportType === 'red-flag') {
-          resp = await api.createRedFlag(payload, []);
+          resp = reportId ? await api.updateRedFlag(reportId, payload) : await api.createRedFlag(payload, files);
         } else {
-          resp = await api.createIntervention(payload, []);
+          resp = reportId ? await api.updateIntervention(reportId, payload) : await api.createIntervention(payload, files);
         }
 
         if (resp?.status === 201 || resp?.status === 200) {
@@ -272,7 +302,8 @@ export default function CreateReport() {
               <Label className="muted-foreground">Upload Image (Optional)</Label>
               <Input 
                 type="file" 
-                accept="image/*" 
+                accept="image/*,video/*" 
+                multiple
                 onChange={handleImageChange}
                 className="input-with-margin"
               />

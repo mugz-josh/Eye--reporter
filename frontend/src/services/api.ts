@@ -50,6 +50,16 @@ export const api = {
     return response.json();
   },
 
+  getRedFlag: async (id: string): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/red-flags/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.json();
+  },
+
   createRedFlag: async (redFlagData: any, files: File[] = []): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
     const formData = new FormData();
@@ -89,9 +99,33 @@ export const api = {
     return response.json();
   },
 
+  updateIntervention: async (id: string, interventionData: any): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/interventions/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(interventionData),
+    });
+    return response.json();
+  },
+
   deleteRedFlag: async (id: string): Promise<ApiResponse<void>> => {
     const token = localStorage.getItem('token');
     const response = await fetch(`${API_URL}/v1/red-flags/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.json();
+  },
+
+  deleteIntervention: async (id: string): Promise<ApiResponse<void>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/interventions/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -104,6 +138,16 @@ export const api = {
   getInterventions: async (): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
     const response = await fetch(`${API_URL}/v1/interventions`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.json();
+  },
+
+  getIntervention: async (id: string): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/interventions/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

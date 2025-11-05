@@ -16,6 +16,7 @@ export default function Interventions() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const FILE_BASE = (API_URL).replace(/\/api$/, '');
 
   useEffect(() => {
     if (!currentUser) {
@@ -77,18 +78,9 @@ export default function Interventions() {
     }
     if (confirm("Are you sure you want to delete this report?")) {
       try {
-        const response = await fetch(`${API_URL}/v1/interventions/${reportId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        if (response.ok) {
-          toast({ title: "Success", description: "Intervention deleted successfully" });
-          loadReports();
-        } else {
-          toast({ title: "Error", description: "Failed to delete intervention", variant: "destructive" });
-        }
+        await api.deleteIntervention(reportId);
+        toast({ title: "Success", description: "Intervention deleted successfully" });
+        loadReports();
       } catch (error) {
         toast({ title: "Error", description: "Failed to delete intervention", variant: "destructive" });
       }
@@ -211,10 +203,10 @@ export default function Interventions() {
                     <p className="text-xs">Created: {new Date(report.createdAt).toLocaleDateString()}</p>
                   </div>
 
-                  {report.images && report.images.length > 0 && (
+                  {(report as any).images && (report as any).images.length > 0 && (
                     <div className="space-y-2 mb-4">
-                      {report.images.map((img: string, idx: number) => (
-                        <img key={idx} src={`${API_URL}/uploads/${img}`} alt={`${report.title} ${idx + 1}`} className="record-image" />
+                      {(report as any).images.map((img: string, idx: number) => (
+                        <img key={idx} src={`${FILE_BASE}/uploads/${img}`} alt={`${report.title} ${idx + 1}`} className="record-image" />
                       ))}
                     </div>
                   )}
@@ -223,7 +215,7 @@ export default function Interventions() {
                     <div className="space-y-2 mb-4">
                       {report.videos.map((vid: string, idx: number) => (
                         <video key={idx} controls className="record-image">
-                          <source src={`${API_URL}/uploads/${vid}`} />
+                          <source src={`${FILE_BASE}/uploads/${vid}`} />
                         </video>
                       ))}
                     </div>

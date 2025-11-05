@@ -53,8 +53,12 @@ export default function Auth() {
     try {
       if (isLogin) {
         const response = await api.login(email, password);
-        const token = (response as any)?.data?.[0]?.token || (response as any)?.token || (response as any)?.data?.token;
-        if ((response.status === 200 || response.status === 201) && token) {
+        if (response.status >= 400) {
+          toast({ title: "Error", description: response.message || "Login failed", variant: "destructive" });
+          return;
+        }
+        const token = response?.data?.[0]?.token;
+        if (token) {
           authHelper.setToken(token);
           await fetchAndStoreProfile();
           toast({ title: "Success", description: "Logged in successfully!" });
@@ -63,12 +67,16 @@ export default function Auth() {
           if (u?.role === 'admin') navigate('/admin');
           else navigate('/dashboard');
         } else {
-          toast({ title: "Error", description: response.message || "Invalid credentials", variant: "destructive" });
+          toast({ title: "Error", description: "Invalid response from server", variant: "destructive" });
         }
       } else {
         const response = await api.register({ first_name: firstName, last_name: lastName, email, password });
-        const token = (response as any)?.data?.[0]?.token || (response as any)?.token || (response as any)?.data?.token;
-        if ((response.status === 200 || response.status === 201) && token) {
+        if (response.status >= 400) {
+          toast({ title: "Error", description: response.message || "Registration failed", variant: "destructive" });
+          return;
+        }
+        const token = response?.data?.[0]?.token;
+        if (token) {
           authHelper.setToken(token);
           await fetchAndStoreProfile();
           toast({ title: "Success", description: "Account created successfully!" });

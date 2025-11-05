@@ -16,6 +16,7 @@ export default function RedFlags() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const FILE_BASE = (API_URL).replace(/\/api$/, '');
 
   useEffect(() => {
     if (!currentUser) {
@@ -204,17 +205,17 @@ export default function RedFlags() {
 
                   {report.images && report.images.length > 0 && (
                     <div className="space-y-2 mb-4">
-                      {report.images.map((img: string, idx: number) => (
-                        <img key={idx} src={`${API_URL}/uploads/${img}`} alt={`${report.title} ${idx + 1}`} className="record-image" />
+                        {report.images.map((img: string, idx: number) => (
+                        <img key={idx} src={`${FILE_BASE}/uploads/${img}`} alt={`${report.title} ${idx + 1}`} className="record-image" />
                       ))}
                     </div>
                   )}
 
                   {report.videos && report.videos.length > 0 && (
                     <div className="space-y-2 mb-4">
-                      {report.videos.map((vid: string, idx: number) => (
+                        {report.videos.map((vid: string, idx: number) => (
                         <video key={idx} controls className="record-image">
-                          <source src={`${API_URL}/uploads/${vid}`} />
+                          <source src={`${FILE_BASE}/uploads/${vid}`} />
                         </video>
                       ))}
                     </div>
