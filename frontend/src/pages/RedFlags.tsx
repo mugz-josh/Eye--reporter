@@ -177,7 +177,7 @@ export default function RedFlags() {
           </div>
         </div>
 
-        <div className="cards-grid mb-6">
+        <div className="cards-grid mb-10">
           <div className="stat-card">
             <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{stats.resolved}</div>
             <div className="stat-label">Resolved Red Flags</div>
