@@ -86,8 +86,36 @@ export const api = {
     return response.json();
   },
 
-  updateRedFlag: async (id: string, redFlagData: any): Promise<ApiResponse<any>> => {
-    const token = localStorage.getItem('token');
+  updateRedFlag: async (id: string, redFlagData: any, files: File[] = []): Promise<ApiResponse<any>> => {
+  const token = localStorage.getItem('token');
+  
+  // If there are files, use FormData, otherwise use JSON
+  if (files.length > 0) {
+    const formData = new FormData();
+    
+    // Add text fields
+    Object.entries(redFlagData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value as string);
+      }
+    });
+
+    // Add files
+    files.forEach(file => {
+      formData.append('media', file);
+    });
+
+    const response = await fetch(`${API_URL}/v1/red-flags/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // Don't set Content-Type for FormData - browser will set it
+      },
+      body: formData,
+    });
+    return response.json();
+  } else {
+    // No files, use JSON
     const response = await fetch(`${API_URL}/v1/red-flags/${id}`, {
       method: 'PUT',
       headers: {
@@ -97,7 +125,8 @@ export const api = {
       body: JSON.stringify(redFlagData),
     });
     return response.json();
-  },
+  }
+},
 
   // Update only the location (latitude, longitude)
   updateRedFlagLocation: async (id: string, latitude: number, longitude: number): Promise<ApiResponse<any>> => {
@@ -113,8 +142,38 @@ export const api = {
     return response.json();
   },
 
-  updateIntervention: async (id: string, interventionData: any): Promise<ApiResponse<any>> => {
-    const token = localStorage.getItem('token');
+  
+
+  updateIntervention: async (id: string, interventionData: any, files: File[] = []): Promise<ApiResponse<any>> => {
+  const token = localStorage.getItem('token');
+  
+  // If there are files, use FormData, otherwise use JSON
+  if (files.length > 0) {
+    const formData = new FormData();
+    
+    // Add text fields
+    Object.entries(interventionData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value as string);
+      }
+    });
+
+    // Add files
+    files.forEach(file => {
+      formData.append('media', file);
+    });
+
+    const response = await fetch(`${API_URL}/v1/interventions/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // Don't set Content-Type for FormData
+      },
+      body: formData,
+    });
+    return response.json();
+  } else {
+    // No files, use JSON
     const response = await fetch(`${API_URL}/v1/interventions/${id}`, {
       method: 'PUT',
       headers: {
@@ -124,7 +183,8 @@ export const api = {
       body: JSON.stringify(interventionData),
     });
     return response.json();
-  },
+  }
+},
 
   updateInterventionLocation: async (id: string, latitude: number, longitude: number): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');

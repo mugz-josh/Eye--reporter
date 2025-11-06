@@ -246,35 +246,27 @@ export default function RedFlags() {
                     </div>
                   )}
 
-                  <div className="flex gap-2 mt-4">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleEdit(report.id, report.status)}
-                      disabled={report.status !== 'DRAFT'}
-                    >
-                      <Edit size={16} />
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openLocationEditor(report)}
-                      disabled={report.status !== 'DRAFT'}
-                    >
-                      <MapPin size={16} />
-                      Update Location
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDelete(report.id, report.status)}
-                      disabled={report.status !== 'DRAFT'}
-                    >
-                      <Trash2 size={16} />
-                      Delete
-                    </Button>
-                  </div>
+                
+                <div className="flex gap-2 mt-4">
+  <Button 
+    size="sm" 
+    variant="outline"
+    onClick={() => handleEdit(report.id, report.status)}
+    disabled={report.status !== 'DRAFT'}
+  >
+    <Edit size={16} />
+    Edit Report
+  </Button>
+  <Button 
+    size="sm" 
+    variant="destructive"
+    onClick={() => handleDelete(report.id, report.status)}
+    disabled={report.status !== 'DRAFT'}
+  >
+    <Trash2 size={16} />
+    Delete
+  </Button>
+</div>
                 </div>
               </div>
             ))}

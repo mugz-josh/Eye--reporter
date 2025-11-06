@@ -470,6 +470,13 @@ export const redFlagsController = {
         return;
       }
 
+
+
+    
+
+
+      
+
       const validStatuses = ['under-investigation', 'rejected', 'resolved'];
       if (!status || !validStatuses.includes(status)) {
         res.status(400).json({
@@ -504,7 +511,101 @@ export const redFlagsController = {
         error: 'Failed to update status'
       });
     }
-  }
+  },
+
+  
+  // 🚨 ADD THE NEW updateRedFlag FUNCTION HERE (AFTER updateStatus):
+  updateRedFlag: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { title, description, latitude, longitude }: CreateRecordData = req.body;
+      const files = req.files as Express.Multer.File[];
+
+      if (!id) {
+        res.status(400).json({
+          status: 400,
+          error: 'ID parameter is required'
+        });
+        return;
+      }
+
+      // Check if red-flag exists and user owns it
+      const checkQuery = 'SELECT user_id, status, images, videos FROM red_flags WHERE id = ?';
+      const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [id]);
+
+      if (checkResults.length === 0) {
+        res.status(404).json({
+          status: 404,
+          error: 'Red-flag record not found'
+        });
+        return;
+      }
+
+      const redFlag = checkResults[0];
+      
+      // Check ownership
+      if (redFlag?.user_id !== req.user?.id && !req.user?.isAdmin) {
+        res.status(403).json({
+          status: 403,
+          error: 'Access denied. You can only modify your own records.'
+        });
+        return;
+      }
+
+      // Check if record can be modified
+      if (redFlag?.status !== 'draft') {
+        res.status(403).json({
+          status: 403,
+          error: 'Cannot modify record that is under investigation, rejected, or resolved'
+        });
+        return;
+      }
+
+      // Handle file updates if new files are uploaded
+      let updatedImages = redFlag.images ? JSON.parse(redFlag.images) : [];
+      let updatedVideos = redFlag.videos ? JSON.parse(redFlag.videos) : [];
+
+      if (files && files.length > 0) {
+        // Replace existing media with new files
+        const imageFiles = files.filter(file => file.mimetype.startsWith('image/'));
+        const videoFiles = files.filter(file => file.mimetype.startsWith('video/'));
+
+        updatedImages = imageFiles.map(file => file.filename);
+        updatedVideos = videoFiles.map(file => file.filename);
+      }
+
+      // Update the record
+      const updateQuery = `
+        UPDATE red_flags 
+        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ? 
+        WHERE id = ?
+      `;
+      
+      await pool.execute(updateQuery, [
+        title,
+        description,
+        latitude,
+        longitude,
+        updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
+        updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
+        id
+      ]);
+
+      res.status(200).json({
+        status: 200,
+        data: [{
+          id: parseInt(id),
+          message: 'Updated red-flag record'
+        }]
+      });
+    } catch (error) {
+      console.error('Error updating red flag:', error);
+      res.status(500).json({
+        status: 500,
+        error: 'Server error during red-flag update'
+      });
+    }
+  } // ← NO COMMA HERE (last function)
 };
 
 export default redFlagsController;

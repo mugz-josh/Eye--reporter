@@ -96,52 +96,65 @@ export default function CreateReport() {
     setImagePreview("");
   };
 
+  
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title || !description) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
+  e.preventDefault();
+  
+  // DEBUG: See what's happening
+  console.log('🔄 SUBMITTING - reportId:', reportId, 'files count:', files.length, 'type:', reportType);
+  
+  if (!title || !description) {
+    toast({
+      title: "Error",
+      description: "Please fill in all required fields",
+      variant: "destructive"
+    });
+    return;
+  }
 
-    // Prepare payload for backend
-    const payload = {
-      title,
-      description,
-      latitude,
-      longitude
-    };
-
-    (async () => {
-      try {
-        let resp: any;
-        if (reportType === 'red-flag') {
-          resp = reportId ? await api.updateRedFlag(reportId, payload) : await api.createRedFlag(payload, files);
-        } else {
-          resp = reportId ? await api.updateIntervention(reportId, payload) : await api.createIntervention(payload, files);
-        }
-
-        if (resp?.status === 201 || resp?.status === 200) {
-          toast({
-            title: reportId ? "Report updated" : "Report created",
-            description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
-          });
-
-          setTimeout(() => {
-            navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
-          }, 800);
-        } else {
-          toast({ title: 'Error', description: resp?.message || 'Failed to save report', variant: 'destructive' });
-        }
-      } catch (err) {
-        console.error('Create report error', err);
-        toast({ title: 'Error', description: 'Server error while creating report', variant: 'destructive' });
-      }
-    })();
+  // Prepare payload for backend
+  const payload = {
+    title,
+    description,
+    latitude,
+    longitude
   };
+
+  (async () => {
+    try {
+      let resp: any;
+      
+      // FIX: Include files for BOTH create and update
+      if (reportType === 'red-flag') {
+        resp = reportId 
+          ? await api.updateRedFlag(reportId, payload, files)  // ADD FILES HERE
+          : await api.createRedFlag(payload, files);
+      } else {
+        resp = reportId 
+          ? await api.updateIntervention(reportId, payload, files)  // ADD FILES HERE
+          : await api.createIntervention(payload, files);
+      }
+
+      console.log('✅ API Response:', resp);
+      
+      if (resp?.status === 201 || resp?.status === 200) {
+        toast({
+          title: reportId ? "Report updated" : "Report created",
+          description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
+        });
+
+        setTimeout(() => {
+          navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
+        }, 800);
+      } else {
+        toast({ title: 'Error', description: resp?.message || 'Failed to save report', variant: 'destructive' });
+      }
+    } catch (err) {
+      console.error('Create report error', err);
+      toast({ title: 'Error', description: 'Server error while creating report', variant: 'destructive' });
+    }
+  })();
+};
 
   return (
     <div className="page-create">
