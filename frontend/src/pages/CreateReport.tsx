@@ -320,9 +320,24 @@ export default function CreateReport() {
                 onChange={handleImageChange}
                 className="input-with-margin"
               />
-              {imagePreview && (
-                <img src={imagePreview} alt="Preview" style={{ marginTop: '1rem', maxWidth: '100%', borderRadius: '0.5rem' }} />
-              )}
+              {files.length > 0 && (
+  <>
+    {files[0].type.startsWith('video/') ? (
+      <video
+        src={URL.createObjectURL(files[0])}
+        controls
+        style={{ marginTop: '1rem', maxWidth: '100%', borderRadius: '0.5rem' }}
+      />
+    ) : files[0].type.startsWith('image/') ? (
+      <img
+        src={URL.createObjectURL(files[0])}
+        alt="Preview"
+        style={{ marginTop: '1rem', maxWidth: '100%', borderRadius: '0.5rem' }}
+      />
+    ) : null}
+  </>
+)}
+
             </div>
 
             <div style={{ display: 'flex', gap: '1rem' }}>
