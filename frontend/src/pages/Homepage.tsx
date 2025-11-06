@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../components/ui/styles/components.css";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Import icons from lucide-react
 import { Shield, Activity, Users, Flag, FileText, CheckCircle, MapPin, TrendingUp } from "lucide-react";
@@ -25,6 +26,7 @@ const Homepage: React.FC = () => {
             <a href="#impact" className="nav-link">Impact</a>
           </nav>
           <div className="header-actions">
+            <ThemeToggle />
             <button className="btn-ghost" onClick={() => navigate("/login")}>Login</button>
             <button className="btn-primary" onClick={handleSignup}>Get Started</button>
           </div>

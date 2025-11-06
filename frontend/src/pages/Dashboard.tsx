@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -89,6 +90,13 @@ export default function Dashboard() {
             <span>Logout</span>
           </button>
         </nav>
+
+        <div style={{ marginTop: 'auto', padding: '1rem', borderTop: '1px solid hsl(var(--border))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.875rem' }}>Theme</span>
+            <ThemeToggle />
+          </div>
+        </div>
       </aside>
 
       <main className="main-content">
