@@ -21,29 +21,29 @@ router.get('/auth/profile', auth.verifyToken, authController.getProfile);
 // Red-flag routes with file upload support
 router.get('/red-flags', auth.verifyToken, redFlagsController.getAllRedFlags);
 router.get('/red-flags/:id', auth.verifyToken, redFlagsController.getRedFlag);
-router.post('/red-flags', auth.verifyToken, upload.array('media', 10), redFlagsController.createRedFlag);
+router.post('/red-flags', auth.verifyToken, upload.array('media', 2), redFlagsController.createRedFlag);
 router.patch('/red-flags/:id/location', auth.verifyToken, auth.checkRecordOwnership('red_flags'), redFlagsController.updateLocation);
 router.patch('/red-flags/:id/comment', auth.verifyToken, auth.checkRecordOwnership('red_flags'), redFlagsController.updateComment);
-router.post('/red-flags/:id/media', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 10), redFlagsController.addMedia);
+router.post('/red-flags/:id/media', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.addMedia);
 router.delete('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), redFlagsController.deleteRedFlag);
 router.patch('/red-flags/:id/status', auth.verifyToken, auth.isAdmin, redFlagsController.updateStatus);
 
 // 🚨 ADD THE RED-FLAG UPDATE ROUTE RIGHT HERE:
-router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 10), redFlagsController.updateRedFlag);
+router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);
 
 // Intervention routes with file upload support
 router.get('/interventions', auth.verifyToken, interventionsController.getAllInterventions);
 router.get('/interventions/:id', auth.verifyToken, interventionsController.getIntervention);
-router.post('/interventions', auth.verifyToken, upload.array('media', 10), interventionsController.createIntervention);
+router.post('/interventions', auth.verifyToken, upload.array('media', 2), interventionsController.createIntervention);
 router.patch('/interventions/:id/location', auth.verifyToken, auth.checkRecordOwnership('interventions'), interventionsController.updateLocation);
 router.patch('/interventions/:id/comment', auth.verifyToken, auth.checkRecordOwnership('interventions'), interventionsController.updateComment);
-router.post('/interventions/:id/media', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 10), interventionsController.addMedia);
+router.post('/interventions/:id/media', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.addMedia);
 router.delete('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), interventionsController.deleteIntervention);
 router.patch('/interventions/:id/status', auth.verifyToken, auth.isAdmin, interventionsController.updateStatus);
 
 
 
 // 🚨 ADD THE INTERVENTION UPDATE ROUTE RIGHT HERE:
-router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 10), interventionsController.updateIntervention);
+router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.updateIntervention);
 
 export default router;

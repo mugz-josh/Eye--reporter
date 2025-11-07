@@ -155,6 +155,29 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            <div className="cards-grid mb-10" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--primary))' }}>{reports.length}</div>
+                <div className="stat-label">Total Reports</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--muted-foreground))' }}>{reports.filter(r => r.status === 'DRAFT').length}</div>
+                <div className="stat-label">Draft</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--chart-2))' }}>{reports.filter(r => r.status === 'UNDER INVESTIGATION').length}</div>
+                <div className="stat-label">Under Investigation</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{reports.filter(r => r.status === 'RESOLVED').length}</div>
+                <div className="stat-label">Resolved</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--destructive))' }}>{reports.filter(r => r.status === 'REJECTED').length}</div>
+                <div className="stat-label">Rejected</div>
+              </div>
+            </div>
+
             {loading ? (
               <div className="text-center py-12">
                 <p className="muted-foreground">Loading reports...</p>

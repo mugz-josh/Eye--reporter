@@ -19,7 +19,10 @@ const Homepage: React.FC = () => {
       {/* Navigation Header */}
       <header className="homepage-header">
         <div className="header-container">
-          <h1 className="header-logo">iReporter</h1>
+          <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Flag size={24} style={{ color: 'hsl(var(--destructive))' }} />
+            <h1 style={{ margin: 0 }}>iReporter</h1>
+          </div>
           <nav className="header-nav">
             <a href="#features" className="nav-link">Features</a>
             <a href="#how-it-works" className="nav-link">How It Works</a>
