@@ -312,31 +312,43 @@ export default function CreateReport() {
             </div>
 
             <div>
-              <Label className="muted-foreground">Upload Image (Optional)</Label>
+              <Label className="muted-foreground">Upload Media (Max 2 files)</Label>
               <Input 
                 type="file" 
                 accept="image/*,video/*" 
                 multiple
-                onChange={handleImageChange}
+                onChange={(e) => {
+                  const selected = e.target.files ? Array.from(e.target.files) : [];
+                  if (selected.length > 2) {
+                    toast({ title: "Warning", description: "Maximum 2 files allowed", variant: "destructive" });
+                    e.target.value = '';
+                    return;
+                  }
+                  handleImageChange(e);
+                }}
                 className="input-with-margin"
               />
               {files.length > 0 && (
-  <>
-    {files[0].type.startsWith('video/') ? (
-      <video
-        src={URL.createObjectURL(files[0])}
-        controls
-        style={{ marginTop: '1rem', maxWidth: '100%', borderRadius: '0.5rem' }}
-      />
-    ) : files[0].type.startsWith('image/') ? (
-      <img
-        src={URL.createObjectURL(files[0])}
-        alt="Preview"
-        style={{ marginTop: '1rem', maxWidth: '100%', borderRadius: '0.5rem' }}
-      />
-    ) : null}
-  </>
-)}
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                  {files.map((file, idx) => (
+                    <div key={idx} style={{ flex: '1 1 calc(50% - 0.5rem)', minWidth: '200px' }}>
+                      {file.type.startsWith('video/') ? (
+                        <video
+                          src={URL.createObjectURL(file)}
+                          controls
+                          style={{ width: '100%', borderRadius: '0.5rem' }}
+                        />
+                      ) : file.type.startsWith('image/') ? (
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${idx + 1}`}
+                          style={{ width: '100%', borderRadius: '0.5rem' }}
+                        />
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
 
             </div>
 
