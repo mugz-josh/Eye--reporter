@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import db from '../config/database';
+import pool from '../config/database';
 import { AuthRequest, ApiResponse } from '../types';
 
 export const auth = {
@@ -46,7 +46,7 @@ export const auth = {
 
       const query = 'SELECT is_admin FROM users WHERE id = ?';
       // Fixed: Using async/await instead of callback
-      const [results] = await db.execute(query, [userId]) as any[];
+      const [results] = await pool.execute(query, [userId]) as any[];
 
       if (results.length === 0 || !results[0].is_admin) {
         const response: ApiResponse = {
@@ -85,7 +85,7 @@ export const auth = {
 
         const query = `SELECT user_id FROM ${table} WHERE id = ?`;
         // Fixed: Using async/await instead of callback
-        const [results] = await db.execute(query, [recordId]) as any[];
+        const [results] = await pool.execute(query, [recordId]) as any[];
 
         if (results.length === 0) {
           const response: ApiResponse = {

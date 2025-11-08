@@ -42,7 +42,7 @@ const Homepage: React.FC = () => {
           </div>
           <h1 className="hero-title">Empower Your Voice, Drive Change in Your Community</h1>
           <p className="hero-description">
-            Report corruption and infrastructure issues directly to authorities. Join thousands of citizens making Africa more transparent and accountable.
+            Report corruption and any other issues that would require government intervention directly to  the authorities. Join thousands of citizens making Africa more transparent and accountable.
           </p>
           <div className="hero-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
@@ -126,15 +126,7 @@ const Homepage: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Mid Section */}
-      <section className="cta-mid-section">
-        <div className="cta-mid-content">
-          <h2 className="cta-mid-title">Ready to Make a Difference?</h2>
-          <p className="cta-mid-description">
-            Join thousands of citizens holding authorities accountable and improving infrastructure
-          </p>
-        </div>
-      </section>
+      
 
       {/* Report Types Section */}
       <section id="features" className="report-types-section">
@@ -148,7 +140,7 @@ const Homepage: React.FC = () => {
             <h3 className="report-type-title">Red-Flag Reports</h3>
             <p className="report-type-description">
               Report incidents of corruption, bribery, embezzlement, and other forms of misconduct by public officials. 
-              Your reports help authorities take action against corruption.
+              Your reports help authorities take action against corruption and misuse of government offices.
             </p>
             <ul className="report-type-features">
               <li><CheckCircle size={18} /> Anonymous reporting option</li>
@@ -162,7 +154,7 @@ const Homepage: React.FC = () => {
             </div>
             <h3 className="report-type-title">Intervention Requests</h3>
             <p className="report-type-description">
-              Report infrastructure problems like broken roads, non-functional streetlights, or damaged public facilities. 
+              Report infrastructure problems like broken roads and bridges, non-functional streetlights, drug understocked hospitals, or damaged public facilities. 
               Help authorities prioritize repairs and maintenance.
             </p>
             <ul className="report-type-features">
@@ -173,15 +165,14 @@ const Homepage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Final CTA Section */}
-      <section className="cta-final-section">
-        <div className="cta-final-content">
-          <h2 className="cta-final-title">Empower Your Voice, Drive Change in Your Community</h2>
-          <p className="cta-final-description">
-            Report corruption and infrastructure issues directly to authorities. Join thousands of citizens making Africa more transparent and accountable.
+{/* CTA Mid Section */}
+      <section className="cta-mid-section">
+        <div className="cta-mid-content">
+          <h2 className="cta-mid-title">Ready to Make a Difference?</h2>
+          <p className="cta-mid-description">
+            Join thousands of citizens holding authorities accountable and improving government services. Your voice matters!
           </p>
-          <div className="cta-final-buttons">
+           <div className="cta-final-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
               Create an Account
             </button>
@@ -191,6 +182,7 @@ const Homepage: React.FC = () => {
           </div>
         </div>
       </section>
+      
     </div>
   );
 };
