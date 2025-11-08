@@ -4,16 +4,12 @@ import redFlagsController from '../Controllers/redFlagsController';
 import interventionsController from '../Controllers/interventionsController';
 import auth from '../middleware/auth';
 import upload from '../config/multer';
-import cors from 'cors';
 
 const router = express.Router();
 
 // Public auth routes
 router.post('/auth/signup', authController.signup);
 router.post('/auth/login', authController.login);
-
-
-// CORS is handled at the application level in server.ts
 
 // Protected user routes
 router.get('/auth/profile', auth.verifyToken, authController.getProfile);
@@ -29,7 +25,7 @@ router.delete('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red
 router.patch('/red-flags/:id/status', auth.verifyToken, auth.isAdmin, redFlagsController.updateStatus);
 
 // 🚨 ADD THE RED-FLAG UPDATE ROUTE RIGHT HERE:
-router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);
+//router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);
 
 // Intervention routes with file upload support
 router.get('/interventions', auth.verifyToken, interventionsController.getAllInterventions);
@@ -44,6 +40,6 @@ router.patch('/interventions/:id/status', auth.verifyToken, auth.isAdmin, interv
 
 
 // 🚨 ADD THE INTERVENTION UPDATE ROUTE RIGHT HERE:
-router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.updateIntervention);
+//router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.updateIntervention);
 
 export default router;

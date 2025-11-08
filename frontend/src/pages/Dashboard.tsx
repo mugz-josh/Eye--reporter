@@ -83,7 +83,7 @@ export default function Dashboard() {
         <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
           <Link to="/dashboard" className="nav-link nav-link-active">
             <Grid3x3 size={20} />
-            <span>Dashboard</span>
+            <span>My reports</span>
           </Link>
 
           <Link to="/red-flags" className="nav-link">
@@ -117,7 +117,7 @@ export default function Dashboard() {
               <Grid3x3 size={20} />
               <span>Overview</span>
             </div>
-            <h2 className="text-2xl font-semibold">Dashboard</h2>
+            <h2 className="text-2xl font-semibold">My Reports</h2>
           </div>
 
           <div className="flex items-center gap-3">
