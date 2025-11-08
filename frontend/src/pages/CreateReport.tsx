@@ -71,8 +71,7 @@ export default function CreateReport() {
     setLongitude(lng);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files ? Array.from(e.target.files) : [];
+  const handleImageChange = (selected: File[]) => {
     setFiles(selected);
 
     // preview first image (if any)
@@ -324,7 +323,7 @@ export default function CreateReport() {
                     e.target.value = '';
                     return;
                   }
-                  handleImageChange(e);
+                  handleImageChange(selected);
                 }}
                 className="input-with-margin"
               />

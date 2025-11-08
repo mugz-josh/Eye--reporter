@@ -218,6 +218,7 @@ export default function Interventions() {
                   <h4 className="text-lg font-semibold mb-2">{report.title}</h4>
 
                   <div className="space-y-2 text-sm muted-foreground mb-4">
+                    <p><strong>Report ID:</strong> {report.id}</p>
                     <p><strong>Description:</strong></p>
                     <p>{report.description}</p>
                     <p><strong>Status:</strong></p>
