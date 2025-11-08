@@ -1,5 +1,6 @@
-import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
@@ -16,6 +17,7 @@ export default function AdminDashboard() {
   const currentUser = storage.getCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
   const FILE_BASE = (API_URL).replace(/\/api$/, '');
@@ -110,6 +112,15 @@ export default function AdminDashboard() {
   const isUsersPage = location.pathname === '/admin/users';
   const getUserReports = (userId: string) => reports.filter(r => r.userId === userId);
 
+  const filteredReports = reports.filter(report => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      report.id.toLowerCase().includes(query) ||
+      report.userName.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="page-admin">
       <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -155,6 +166,17 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            <div className="mb-6" style={{ position: 'relative', maxWidth: '500px' }}>
+              <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
+              <Input 
+                type="text" 
+                placeholder="Search by Report ID or User Name..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ paddingLeft: '3rem' }}
+              />
+            </div>
+
             <div className="cards-grid mb-10" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
               <div className="stat-card">
                 <div className="stat-value" style={{ color: 'hsl(var(--primary))' }}>{reports.length}</div>
@@ -184,7 +206,7 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="cards-grid">
-                {reports.map((report) => (
+                {filteredReports.map((report) => (
                   <div key={report.id} className="record-card">
                     <div className="record-body">
                       <span className={`record-badge ${report.type === "red-flag" ? 'badge-destructive' : 'badge-secondary'}`}>
@@ -193,6 +215,7 @@ export default function AdminDashboard() {
                       <h4 className="text-lg font-semibold mb-2">{report.title}</h4>
                       <div className="space-y-2 text-sm muted-foreground mb-4">
                         <p>{report.description}</p>
+                        <p><strong>Report ID:</strong> {report.id}</p>
                         <p><strong>By:</strong> {report.userName}</p>
                         <p><strong>Status:</strong> {report.status}</p>
                       </div>
@@ -243,6 +266,7 @@ export default function AdminDashboard() {
                   <div className="record-body">
                     <h4 className="text-lg font-semibold mb-2">{user.name}</h4>
                     <div className="space-y-2 text-sm muted-foreground mb-4">
+                      <p><strong>User ID:</strong> {user.id}</p>
                       <p><strong>Email:</strong> {user.email}</p>
                       <p><strong>Reports:</strong> {getUserReports(user.id).length}</p>
                     </div>

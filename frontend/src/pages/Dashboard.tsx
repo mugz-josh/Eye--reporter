@@ -27,32 +27,17 @@ export default function Dashboard() {
         api.getInterventions()
       ]);
 
-      let draft = 0, underInvestigation = 0, resolved = 0, rejected = 0;
-
-      if (redFlagsRes.status === 200 && redFlagsRes.data) {
-        const userReports = redFlagsRes.data.filter((r: any) => r.user_id.toString() === currentUser?.id);
-        draft += userReports.filter((r: any) => r.status === 'draft').length;
-        underInvestigation += userReports.filter((r: any) => r.status === 'under-investigation').length;
-        resolved += userReports.filter((r: any) => r.status === 'resolved').length;
-        rejected += userReports.filter((r: any) => r.status === 'rejected').length;
-      }
-
-      if (interventionsRes.status === 200 && interventionsRes.data) {
-        const userReports = interventionsRes.data.filter((r: any) => r.user_id.toString() === currentUser?.id);
-        draft += userReports.filter((r: any) => r.status === 'draft').length;
-        underInvestigation += userReports.filter((r: any) => r.status === 'under-investigation').length;
-        resolved += userReports.filter((r: any) => r.status === 'resolved').length;
-        rejected += userReports.filter((r: any) => r.status === 'rejected').length;
-      }
+      const redFlagsCount = (redFlagsRes.data || []).filter((r: any) => r.user_id.toString() === currentUser?.id).length;
+      const interventionsCount = (interventionsRes.data || []).filter((r: any) => r.user_id.toString() === currentUser?.id).length;
       
       setStats({
-        redFlags: (redFlagsRes.data || []).filter((r: any) => r.user_id.toString() === currentUser?.id).length,
-        interventions: (interventionsRes.data || []).filter((r: any) => r.user_id.toString() === currentUser?.id).length,
-        total: draft + underInvestigation + resolved + rejected,
-        draft,
-        underInvestigation,
-        resolved,
-        rejected
+        redFlags: redFlagsCount,
+        interventions: interventionsCount,
+        total: redFlagsCount + interventionsCount,
+        draft: 0,
+        underInvestigation: 0,
+        resolved: 0,
+        rejected: 0
       });
     } catch (error) {
       console.error("Failed to load stats:", error);
@@ -135,23 +120,13 @@ export default function Dashboard() {
           </div>
 
           <div className="stat-card">
-            <div className="stat-value" style={{ color: 'hsl(var(--muted-foreground))' }}>{stats.draft}</div>
-            <div className="stat-label">Draft</div>
+            <div className="stat-value" style={{ color: 'hsl(var(--destructive))' }}>{stats.redFlags}</div>
+            <div className="stat-label">Red Flags</div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-value" style={{ color: 'hsl(var(--chart-2))' }}>{stats.underInvestigation}</div>
-            <div className="stat-label">Under Investigation</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{stats.resolved}</div>
-            <div className="stat-label">Resolved</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: 'hsl(var(--destructive))' }}>{stats.rejected}</div>
-            <div className="stat-label">Rejected</div>
+            <div className="stat-value" style={{ color: 'hsl(var(--chart-2))' }}>{stats.interventions}</div>
+            <div className="stat-label">Interventions</div>
           </div>
         </div>
       </main>
