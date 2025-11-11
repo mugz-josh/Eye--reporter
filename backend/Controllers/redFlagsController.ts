@@ -9,6 +9,7 @@ import {
   RedFlagWithUser 
 } from '../types';
 import { ResultSetHeader } from 'mysql2';
+import notificationController from './notificationController';
 
 export const redFlagsController = {
   // Get all red-flags (filtered by user unless admin)
@@ -486,6 +487,14 @@ export const redFlagsController = {
         return;
       }
 
+      // Fetch report to get owner and title
+      const [rows] = await pool.execute<RedFlagWithUser[]>('SELECT id, user_id, title FROM red_flags WHERE id = ?', [id]);
+      if ((rows as any).length === 0) {
+        res.status(404).json({ status: 404, error: 'Red-flag record not found' });
+        return;
+      }
+      const report = (rows as any)[0];
+
       const query = 'UPDATE red_flags SET status = ? WHERE id = ?';
       const [result] = await pool.execute<ResultSetHeader>(query, [status, id]);
 
@@ -495,6 +504,20 @@ export const redFlagsController = {
           error: 'Red-flag record not found'
         });
         return;
+      }
+
+      // Create a notification for the report owner (best-effort)
+      try {
+        await notificationController.createNotificationForUser({
+          user_id: report.user_id,
+          title: 'Report status updated',
+          message: `Your report "${report.title}" status changed to "${status}"`,
+          type: 'info',
+          related_entity_type: 'red_flag',
+          related_entity_id: parseInt(id, 10)
+        });
+      } catch (nErr) {
+        console.error('Failed to create notification after status change:', nErr);
       }
 
       res.status(200).json({

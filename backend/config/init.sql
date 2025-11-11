@@ -51,4 +51,18 @@ CREATE INDEX idx_interventions_status ON interventions(status);
 CREATE INDEX idx_users_email ON users(email);
 -- Insert a default admin user (password: admin123)
 INSERT INTO users (first_name, last_name, email, password, is_admin)
-VALUES ('Admin', 'User', 'Mollyadmin@ireporter.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', TRUE)
+VALUES ('Admin', 'User', 'Mollyadmin@ireporter.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', TRUE);
+
+-- Notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(50) DEFAULT 'info',
+    is_read BOOLEAN DEFAULT FALSE,
+    related_entity_type VARCHAR(50) DEFAULT NULL,
+    related_entity_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

@@ -3,6 +3,7 @@ import authController from '../Controllers/authController';
 import redFlagsController from '../Controllers/redFlagsController';
 import interventionsController from '../Controllers/interventionsController';
 import auth from '../middleware/auth';
+import notificationController from '../Controllers/notificationController';
 import upload from '../config/multer';
 
 const router = express.Router();
@@ -23,6 +24,10 @@ router.patch('/red-flags/:id/comment', auth.verifyToken, auth.checkRecordOwnersh
 router.post('/red-flags/:id/media', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.addMedia);
 router.delete('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), redFlagsController.deleteRedFlag);
 router.patch('/red-flags/:id/status', auth.verifyToken, auth.isAdmin, redFlagsController.updateStatus);
+
+// Notifications
+router.get('/notifications', auth.verifyToken, notificationController.getUserNotifications);
+router.put('/notifications/read', auth.verifyToken, notificationController.markAllAsRead);
 
 // 🚨 ADD THE RED-FLAG UPDATE ROUTE RIGHT HERE:
 //router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);

@@ -4,6 +4,7 @@ import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -106,6 +107,7 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <span>{currentUser?.name}</span>
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
               <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>

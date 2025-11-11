@@ -292,6 +292,31 @@ export const api = {
     });
     return response.json();
   }
+,
+
+  // Notifications
+  getNotifications: async (): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/notifications`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.json();
+  },
+
+  markAllNotificationsRead: async (): Promise<ApiResponse<any>> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/v1/notifications/read`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+    return response.json();
+  }
 };
 
 // Auth helper functions

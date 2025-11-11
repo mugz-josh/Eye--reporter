@@ -9,6 +9,7 @@ import {
   InterventionWithUser 
 } from '../types';
 import { ResultSetHeader } from 'mysql2';
+import notificationController from './notificationController';
 
 export const interventionsController = {
   // Get all interventions (filtered by user unless admin)
@@ -479,6 +480,14 @@ export const interventionsController = {
         return;
       }
 
+      // Fetch report to get owner and title
+      const [rows] = await pool.execute<InterventionWithUser[]>('SELECT id, user_id, title FROM interventions WHERE id = ?', [id]);
+      if ((rows as any).length === 0) {
+        res.status(404).json({ status: 404, error: 'Intervention record not found' });
+        return;
+      }
+      const report = (rows as any)[0];
+
       const query = 'UPDATE interventions SET status = ? WHERE id = ?';
       const [result] = await pool.execute<ResultSetHeader>(query, [status, id]);
 
@@ -488,6 +497,20 @@ export const interventionsController = {
           error: 'Intervention record not found'
         });
         return;
+      }
+
+      // Create a notification for the report owner (best-effort)
+      try {
+        await notificationController.createNotificationForUser({
+          user_id: report.user_id,
+          title: 'Report status updated',
+          message: `Your intervention "${report.title}" status changed to "${status}"`,
+          type: 'info',
+          related_entity_type: 'intervention',
+          related_entity_id: parseInt(id, 10)
+        });
+      } catch (nErr) {
+        console.error('Failed to create notification after status change:', nErr);
       }
 
       res.status(200).json({

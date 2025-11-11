@@ -13,6 +13,7 @@ import RedFlags from "./pages/RedFlags";
 import Interventions from "./pages/Interventions";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import NotificationsPage from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/create" element={<CreateReport />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminDashboard />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
