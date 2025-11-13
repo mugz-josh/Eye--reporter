@@ -10,6 +10,15 @@ import {
 } from '../types';
 import { ResultSetHeader } from 'mysql2';
 import notificationController from './notificationController';
+import {
+  sendError,
+  sendSuccess,
+  processMediaFiles,
+  parseMedia,
+  validateCreateRecord,
+  validateUserAuth,
+  buildRecordResponse,
+} from '../utils/controllerHelpers';
 
 export const interventionsController = {
   // Get all interventions (filtered by user unless admin)
@@ -39,23 +48,12 @@ export const interventionsController = {
         isAdmin ? [] : [userId]
       );
 
-      // Parse JSON fields for images and videos
-      const interventionsWithParsedMedia = results.map(intervention => ({
-        ...intervention,
-        images: intervention.images ? JSON.parse(intervention.images) : [],
-        videos: intervention.videos ? JSON.parse(intervention.videos) : []
-      }));
+      // Use helper to parse JSON fields
+      const interventionsWithParsedMedia = parseMedia(results);
 
-      res.status(200).json({
-        status: 200,
-        data: interventionsWithParsedMedia
-      });
+      sendSuccess(res, 200, interventionsWithParsedMedia);
     } catch (err) {
-      console.error('Database error:', err);
-      res.status(500).json({
-        status: 500,
-        error: 'Database error'
-      });
+      sendError(res, 500, 'Database error', err);
     }
   },
 
@@ -117,31 +115,24 @@ export const interventionsController = {
       const userId = req.user?.id;
       const files = req.files as Express.Multer.File[];
 
-      if (!userId) {
-        res.status(401).json({
-          status: 401,
-          error: 'Authentication required'
-        });
+      // Validate user auth
+      const authCheck = validateUserAuth(userId);
+      if (!authCheck.valid) {
+        sendError(res, 401, authCheck.error!);
         return;
       }
 
-      // Validate required fields - latitude and longitude are required in your schema
-      if (!title || !description || latitude === undefined || longitude === undefined) {
-        res.status(400).json({
-          status: 400,
-          error: 'Title, description, latitude, and longitude are required fields'
-        });
+      // Validate required fields
+      const validation = validateCreateRecord(title, description, latitude, longitude);
+      if (!validation.valid) {
+        sendError(res, 400, validation.error!);
         return;
       }
 
-      // Separate images and videos
-      const imageFiles = files?.filter(file => file.mimetype.startsWith('image/')) || [];
-      const videoFiles = files?.filter(file => file.mimetype.startsWith('video/')) || [];
+      // Process media files
+      const media = files && files.length > 0 ? processMediaFiles(files) : { images: [], videos: [] };
 
-      const images = imageFiles.map(file => file.filename);
-      const videos = videoFiles.map(file => file.filename);
-
-      // Create intervention record with media
+      // Create intervention record
       const query = `
         INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -153,23 +144,13 @@ export const interventionsController = {
         description, 
         latitude, 
         longitude, 
-        images.length > 0 ? JSON.stringify(images) : null,
-        videos.length > 0 ? JSON.stringify(videos) : null
+        media.images.length > 0 ? JSON.stringify(media.images) : null,
+        media.videos.length > 0 ? JSON.stringify(media.videos) : null
       ]);
 
-      res.status(201).json({
-        status: 201,
-        data: [{
-          id: result.insertId,
-          message: 'Created intervention record'
-        }]
-      });
+      sendSuccess(res, 201, buildRecordResponse(result.insertId, 'Created intervention record'));
     } catch (error) {
-      console.error('Error creating intervention:', error);
-      res.status(500).json({
-        status: 500,
-        error: 'Server error during intervention creation'
-      });
+      sendError(res, 500, 'Server error during intervention creation', error);
     }
   },
 

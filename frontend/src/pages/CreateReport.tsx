@@ -26,6 +26,7 @@ export default function CreateReport() {
   const [longitude, setLongitude] = useState(32.5825);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
@@ -95,6 +96,11 @@ export default function CreateReport() {
     setImagePreview("");
   };
 
+  const handleRemoveFile = (indexToRemove: number) => {
+    const updated = files.filter((_, idx) => idx !== indexToRemove);
+    handleImageChange(updated);
+  };
+
   
   const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
@@ -119,6 +125,7 @@ export default function CreateReport() {
     longitude
   };
 
+  setIsLoading(true);
   (async () => {
     try {
       let resp: any;
@@ -126,11 +133,11 @@ export default function CreateReport() {
       // FIX: Include files for BOTH create and update
       if (reportType === 'red-flag') {
         resp = reportId 
-          ? await api.updateRedFlag(reportId, payload, files)  // ADD FILES HERE
+          ? await api.updateRedFlag(reportId, payload, files)
           : await api.createRedFlag(payload, files);
       } else {
         resp = reportId 
-          ? await api.updateIntervention(reportId, payload, files)  // ADD FILES HERE
+          ? await api.updateIntervention(reportId, payload, files)
           : await api.createIntervention(payload, files);
       }
 
@@ -143,12 +150,15 @@ export default function CreateReport() {
         });
 
         setTimeout(() => {
+          setIsLoading(false);
           navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
         }, 800);
       } else {
+        setIsLoading(false);
         toast({ title: 'Error', description: resp?.message || 'Failed to save report', variant: 'destructive' });
       }
     } catch (err) {
+      setIsLoading(false);
       console.error('Create report error', err);
       toast({ title: 'Error', description: 'Server error while creating report', variant: 'destructive' });
     }
@@ -202,7 +212,7 @@ export default function CreateReport() {
 
         <div className="bg-card record-card" style={{ borderRadius: '1rem', padding: '2rem', maxWidth: '50rem' }}>
           <form className="auth-form" onSubmit={handleSubmit}>
-            <div>
+            <div className="record-type-selector">
               <Label className="muted-foreground mb-3 block">Type</Label>
               {typeParam ? (
                 <div className={`record-type ${reportType === "red-flag" ? 'badge-destructive' : 'badge-secondary'}`}
@@ -312,38 +322,88 @@ export default function CreateReport() {
 
             <div>
               <Label className="muted-foreground">Upload Media (Max 2 files)</Label>
-              <Input 
-                type="file" 
-                accept="image/*,video/*" 
+              <div style={{ marginBottom: '0.5rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                {files.length > 0 && <span>{files.length}/2 file{files.length !== 1 ? 's' : ''} selected</span>}
+              </div>
+              <Input
+                type="file"
+                accept="image/*,video/*"
                 multiple
                 onChange={(e) => {
                   const selected = e.target.files ? Array.from(e.target.files) : [];
-                  if (selected.length > 2) {
+                  if (selected.length === 0) return;
+
+                  // Merge newly selected files with existing ones (avoid exact duplicates)
+                  const existing = files || [];
+                  const merged: File[] = [...existing];
+
+                  selected.forEach((f) => {
+                    const exists = merged.some((m) => m.name === f.name && m.size === f.size);
+                    if (!exists) merged.push(f);
+                  });
+
+                  if (merged.length > 2) {
                     toast({ title: "Warning", description: "Maximum 2 files allowed", variant: "destructive" });
-                    e.target.value = '';
+                    // clear file input so user can re-select
+                    (e.currentTarget as HTMLInputElement).value = '';
                     return;
                   }
-                  handleImageChange(selected);
+
+                  handleImageChange(merged);
+                  // clear file input to allow selecting the same file again later if needed
+                  (e.currentTarget as HTMLInputElement).value = '';
                 }}
                 className="input-with-margin"
               />
               {files.length > 0 && (
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
                   {files.map((file, idx) => (
-                    <div key={idx} style={{ flex: '1 1 calc(50% - 0.5rem)', minWidth: '200px' }}>
-                      {file.type.startsWith('video/') ? (
-                        <video
-                          src={URL.createObjectURL(file)}
-                          controls
-                          style={{ width: '100%', borderRadius: '0.5rem' }}
-                        />
-                      ) : file.type.startsWith('image/') ? (
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Preview ${idx + 1}`}
-                          style={{ width: '100%', borderRadius: '0.5rem' }}
-                        />
-                      ) : null}
+                    <div key={idx} style={{ flex: '1 1 calc(50% - 0.5rem)', minWidth: '200px', position: 'relative' }}>
+                      <div style={{ position: 'relative' }}>
+                        {file.type.startsWith('video/') ? (
+                          <video
+                            src={URL.createObjectURL(file)}
+                            controls
+                            style={{ width: '100%', borderRadius: '0.5rem' }}
+                          />
+                        ) : file.type.startsWith('image/') ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${idx + 1}`}
+                            style={{ width: '100%', borderRadius: '0.5rem' }}
+                          />
+                        ) : null}
+                        {/* Remove button */}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFile(idx)}
+                          style={{
+                            position: 'absolute',
+                            top: '0.5rem',
+                            right: '0.5rem',
+                            background: 'rgba(0, 0, 0, 0.6)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '2rem',
+                            height: '2rem',
+                            cursor: 'pointer',
+                            fontSize: '1.2rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)')}
+                          title="Remove file"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', wordBreak: 'break-word' }}>
+                        {file.name}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -351,11 +411,11 @@ export default function CreateReport() {
 
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <Button type="submit" className="flex-1">
-                {reportId ? 'UPDATE REPORT' : 'CREATE REPORT'}
+            <div style={{ display: 'flex', gap: '1rem' }} className="form-buttons-section">
+              <Button type="submit" className="flex-1" disabled={isLoading}>
+                {isLoading ? 'Processing...' : (reportId ? 'UPDATE REPORT' : 'CREATE REPORT')}
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+              <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isLoading}>
                 Cancel
               </Button>
             </div>

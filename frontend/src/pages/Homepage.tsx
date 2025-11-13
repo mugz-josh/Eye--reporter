@@ -30,7 +30,7 @@ const Homepage: React.FC = () => {
           </nav>
           <div className="header-actions">
             <ThemeToggle />
-            <button className="btn-ghost" onClick={() => navigate("/login")}>Login</button>
+            <button className="btn-ghost" onClick={() => navigate("/login", { state: { mode: 'login' } })}>Login</button>
             <button className="btn-primary" onClick={handleSignup}>Get Started</button>
           </div>
         </div>
@@ -179,7 +179,7 @@ const Homepage: React.FC = () => {
             <button className="btn-primary btn-lg" onClick={handleSignup}>
               Create an Account
             </button>
-            <button className="btn-secondary btn-lg" onClick={() => navigate("/login")}>
+            <button className="btn-secondary btn-lg" onClick={() => navigate("/login", { state: { mode: 'login' } })}>
               Login
             </button>
           </div>

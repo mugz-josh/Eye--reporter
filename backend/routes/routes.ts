@@ -29,8 +29,8 @@ router.patch('/red-flags/:id/status', auth.verifyToken, auth.isAdmin, redFlagsCo
 router.get('/notifications', auth.verifyToken, notificationController.getUserNotifications);
 router.put('/notifications/read', auth.verifyToken, notificationController.markAllAsRead);
 
-// 🚨 ADD THE RED-FLAG UPDATE ROUTE RIGHT HERE:
-//router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);
+// Red-flag update route with file upload support
+router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);
 
 // Intervention routes with file upload support
 router.get('/interventions', auth.verifyToken, interventionsController.getAllInterventions);
@@ -42,9 +42,7 @@ router.post('/interventions/:id/media', auth.verifyToken, auth.checkRecordOwners
 router.delete('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), interventionsController.deleteIntervention);
 router.patch('/interventions/:id/status', auth.verifyToken, auth.isAdmin, interventionsController.updateStatus);
 
-
-
-// 🚨 ADD THE INTERVENTION UPDATE ROUTE RIGHT HERE:
-//router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.updateIntervention);
+// Intervention update route with file upload support
+router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.updateIntervention);
 
 export default router;

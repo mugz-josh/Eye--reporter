@@ -125,6 +125,9 @@
   height: 2.75rem;
   padding: 0.625rem 1.5rem;
   font-size: 0.9375rem;
+  margin-top: -5000
+
+
 }
 
 .btn-size-sm {
@@ -932,6 +935,27 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.auth-toggle-text {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
+/* Spacing tweak for signup/login toggles */
+.signup-actions {
+  margin-top: 0.5rem;
+}
+
+.login-card {
+  margin-top: 1.25rem;
+}
+
+/* Inline login area inside signup card */
+.inline-login {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid hsl(var(--border));
 }
 
 .input-with-margin {
@@ -1851,6 +1875,43 @@
     width: 100%;
     max-width: 300px;
   }
+}
+
+/* ===============================================
+   FORM SPACING & LAYOUT
+   =============================================== */
+
+/* Add spacing between type selector buttons and form fields */
+.record-type-selector {
+  margin-bottom: 2.5rem !important;
+  padding-bottom: 1.5rem;
+}
+
+.record-type-selector + div {
+  margin-top: 1rem;
+}
+
+/* Improve button hover effects */
+.record-type {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.record-type:hover {
+  transform: translateY(-2px);
+}
+
+/* ===============================================
+   FORM BUTTONS SPACING
+   =============================================== */
+
+/* Add big spacing above submit/cancel buttons */
+.form-buttons-section {
+  display: flex;
+  gap: 1rem;
+  margin-top: 3rem !important;
+  padding-top: 2rem;
+  border-top: 1px solid hsl(var(--border));
 }
 
 
