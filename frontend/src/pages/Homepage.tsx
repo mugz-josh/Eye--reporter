@@ -14,6 +14,8 @@ const Homepage: React.FC = () => {
     navigate("/login", { state: { mode: 'signup' } });
   };
 
+  
+
   return (
     <div className="homepage">
       {/* Navigation Header */}
@@ -37,7 +39,16 @@ const Homepage: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="hero">
+      <section
+        className="hero"
+        style={{
+          backgroundImage: 'url(https://www.shutterstock.com/image-photo/corrupt-government-260nw-2526355811.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="hero-overlay" />
         <div className="hero-content">
           <div className="hero-badge">
             <Shield size={16} />

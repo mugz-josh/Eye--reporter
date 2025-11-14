@@ -1,52 +1,95 @@
-/* Notifications page styles */
+/* ===============================
+   📄 Notifications Page Styles
+   =============================== */
+
 .page-notifications {
   padding: 2rem;
   max-width: 1100px;
   margin: 0 auto;
+  background: none; /* Remove white background from entire page */
+  color: hsl(var(--foreground), 1); /* Ensures text is visible */
 }
 
+/* ---------- Header ---------- */
 .page-notifications .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
+/* ---------- Buttons ---------- */
 .page-notifications .btn {
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
+  background-color: hsl(var(--primary)); /* Visible background */
+  color: hsl(var(--primary-foreground)); /* Text visible */
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  background-color: hsl(var(--primary)) !important;
+color: hsl(var(--primary-foreground)) !important;
+.page-notifications .btn:hover {
+  background-color: hsl(var(--primary) / 0.85); /* Slightly lighter/darker on hover */
 }
 
+}
+
+.page-notifications .btn:hover {
+  background-color: hsl(var(--primary) / 0.85);
+}
+
+/* Add spacing between buttons */
+.page-notifications .btn + .btn {
+  margin-left: 0.5rem;
+}
+
+/* ---------- Table Container ---------- */
 .notifications-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
-  background: hsl(var(--card));
+  background: hsl(var(--card)); /* Keep table distinct */
   border: 1px solid hsl(var(--border));
   border-radius: 0.75rem;
   overflow: hidden;
 }
 
+/* ---------- Table Header ---------- */
 .notifications-table thead {
-  background: linear-gradient(90deg, hsl(var(--primary) / 0.12), transparent);
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary) / 0.12),
+    transparent
+  );
 }
 
+/* ---------- Table Cells ---------- */
 .notifications-table th,
 .notifications-table td {
   padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid hsl(var(--border));
   vertical-align: top;
+  color: hsl(var(--foreground)); /* Ensure text visible */
 }
 
+/* ---------- Hover Effect ---------- */
 .notifications-table tbody tr:hover {
   background: hsl(var(--accent) / 0.06);
 }
 
+/* ---------- Unread Row Highlight ---------- */
 .notification-unread {
-  background: linear-gradient(90deg, hsl(var(--primary) / 0.06), transparent);
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary) / 0.06),
+    transparent
+  );
 }
 
+/* ---------- Notification Badge ---------- */
 .notification-badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -54,18 +97,31 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: hsl(var(--primary-foreground));
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.9));
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)),
+    hsl(var(--primary) / 0.9)
+  );
 }
 
+/* ---------- Empty State ---------- */
 .notifications-empty {
   padding: 2rem;
   text-align: center;
   color: hsl(var(--muted-foreground));
 }
 
+/* ---------- Responsive Design ---------- */
 @media (max-width: 768px) {
   .notifications-table th:nth-child(3),
   .notifications-table td:nth-child(3) {
     display: none;
+  }
+
+  /* Buttons stacking on small screens */
+  .page-notifications .page-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }

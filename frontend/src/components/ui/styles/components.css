@@ -42,7 +42,7 @@
   color: hsl(var(--primary-foreground));
   box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
   border-radius: 0.5rem;
-  height: 30px;
+  height: 40px;
 
   
 }
@@ -85,10 +85,12 @@
 .btn-secondary {
   background-color: hsl(var(--secondary));
   color: hsl(var(--secondary-foreground));
-  border: 1px solid hsl(var(--border));
+  border: 2px solid hsl(var(--border)); /* THICKER BORDER */
   border-radius: 0.5rem;
-  height: 30px;
+  height: 40px;
+  width: 120px;
 }
+
 
 .btn-secondary:hover {
   background-color: hsl(220 15% 25%);
@@ -101,6 +103,8 @@
   height: 30px;
   border: 1px solid hsl(var(--border));
   border-radius: 0.5rem;
+    padding: 0 12px; /* ADD THIS */
+   
 }
 
 .btn-ghost:hover {
@@ -125,10 +129,10 @@
   height: 2.75rem;
   padding: 0.625rem 1.5rem;
   font-size: 0.9375rem;
-  margin-top: -5000
-
-
+  position: relative; /* enables top/bottom/left/right adjustments */
+  top: -12px;          /* moves the button up by 8 pixels */
 }
+
 
 .btn-size-sm {
   height: 2.25rem;
@@ -1493,12 +1497,92 @@
 .hero {
   padding: 6rem 2rem 4rem;
   text-align: center;
+  position: relative;
+  color: hsl(var(--foreground));
+  /* fallback gradient if no image is provided */
   background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--card)) 50%, hsl(var(--background)) 100%);
+  /* background image can be provided at /images/corrupt.jpg or via inline style */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  /* use theme-aware overlay color */
+  background: linear-gradient(var(--overlay), var(--overlay));
+  z-index: 0;
 }
 
 .hero-content {
   max-width: 900px;
   margin: 0 auto;
+  position: relative; /* ensure content sits above overlay */
+  z-index: 1;
+}
+
+/* make hero larger and improve legibility */
+.hero { min-height: 60vh; display: flex; align-items: center; }
+
+.hero-title {
+  text-shadow: 0 6px 18px rgba(2,6,23,0.65);
+}
+
+.hero-description {
+  color: rgba(255,255,255,0.92);
+}
+
+@media (max-width: 640px) {
+  .hero-overlay { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.55)); }
+}
+
+/* Subtle entrance animation for hero content */
+.hero-content {
+  animation: heroFadeIn 700ms ease both;
+}
+
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stronger CTA styling inside hero */
+.hero-buttons .btn-primary {
+  box-shadow: 0 12px 30px rgba(14,165,233,0.18);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.hero-buttons .btn-primary:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(14,165,233,0.22);
+}
+
+.hero-buttons .btn-secondary {
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.hero-buttons .btn-secondary:hover {
+  transform: translateY(-3px);
+}
+
+/* Feature badges/cards: hover lift */
+.feature-badge,
+.report-type-card {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.feature-badge:hover,
+.report-type-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+}
+
+/* Make hero text slightly more readable on narrow screens */
+@media (max-width: 640px) {
+  .hero-title { font-size: 1.9rem; }
+  .hero-description { font-size: 1rem; }
+  .hero { padding: 3.25rem 1rem 2rem; }
 }
 
 .hero-title {
@@ -1514,6 +1598,11 @@
   color: hsl(var(--muted-foreground));
   margin: 1.5rem 0 2rem;
   line-height: 1.6;
+}
+
+/* In light theme, force hero description to white for better contrast over the image as requested */
+[data-theme="light"] .hero-description {
+  color: hsl(0 0% 100%) !important;
 }
 
 .hero-badge {

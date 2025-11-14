@@ -19,7 +19,7 @@ All colors MUST be HSL.
   --secondary-foreground: 0 0% 100%;
 
   --muted: 220 15% 20%;
-  --muted-foreground: 0 0% 70%;
+  --muted-foreground: 215 16% 60%;
 
   --accent: 347 95% 55%;
   --accent-foreground: 0 0% 100%;
@@ -30,6 +30,9 @@ All colors MUST be HSL.
   --border: 220 15% 18%;
   --input: 220 15% 18%;
   --ring: 347 95% 55%;
+
+  /* overlay used for hero/large images to improve contrast */
+  --overlay: rgba(0,0,0,0.55);
 
   --radius: 0.75rem;
 
@@ -71,6 +74,9 @@ All colors MUST be HSL.
   --border: 214 32% 91%;
   --input: 214 32% 91%;
   --ring: 347 95% 55%;
+
+  /* lighter overlay for images in light mode */
+  --overlay: rgba(255,255,255,0.18);
 
   --sidebar-background: 0 0% 100%;
   --sidebar-foreground: 222 47% 11%;
