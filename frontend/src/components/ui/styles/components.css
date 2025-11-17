@@ -132,7 +132,7 @@
   position: relative; /* enables top/bottom/left/right adjustments */
   top: -12px;          /* moves the button up by 8 pixels */
 }
-
+`
 
 .btn-size-sm {
   height: 2.25rem;
