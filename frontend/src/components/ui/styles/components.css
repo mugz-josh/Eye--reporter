@@ -132,7 +132,7 @@
   position: relative; /* enables top/bottom/left/right adjustments */
   top: -12px;          /* moves the button up by 8 pixels */
 }
-`
+
 
 .btn-size-sm {
   height: 2.25rem;
@@ -207,7 +207,7 @@
   background-color: hsl(var(--card));
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
-  ring-offset: var(--background);
+  motion-offset: var(--background);
   color: hsl(var(--foreground));
 }
 
@@ -226,9 +226,9 @@
 
 .input:focus-visible {
   outline: none;
-  ring: 2px;
-  ring-color: var(--ring);
-  ring-offset: 2px;
+  kerning: 2px;
+  lighting-color: var(--ring);
+  motion-offset: 2px;
 }
 
 .input:disabled {
@@ -265,7 +265,7 @@
   background-color: hsl(var(--card));
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  ring-offset: var(--background);
+  motion-offset: var(--background);
   color: hsl(var(--foreground));
 }
 
@@ -276,9 +276,9 @@
 
 .textarea:focus-visible {
   outline: none;
-  ring: 2px;
-  ring-color: var(--ring);
-  ring-offset: 2px;
+  kerning: 2px;
+  lighting-color: var(--ring);
+  motion-offset: 2px;
 }
 
 .textarea:disabled {

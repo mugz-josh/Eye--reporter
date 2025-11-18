@@ -184,7 +184,7 @@ const Homepage: React.FC = () => {
         <div className="cta-mid-content">
           <h2 className="cta-mid-title">Ready to Make a Difference?</h2>
           <p className="cta-mid-description">
-            Join thousands of citizens holding authorities accountable and improving government services. Your voice matters!
+            Join thousands of citizens holding authorities accountable and improving government services. Your voice really matters!
           </p>
            <div className="cta-final-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
