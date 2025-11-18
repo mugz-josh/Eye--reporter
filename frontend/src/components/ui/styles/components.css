@@ -209,6 +209,9 @@
   font-size: 1rem;
   motion-offset: var(--background);
   color: hsl(var(--foreground));
+  position: relative;
+  top: -15px;
+
 }
 
 .input::file-selector-button {
