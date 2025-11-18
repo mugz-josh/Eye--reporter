@@ -1,11 +1,6 @@
 import { Response } from 'express';
 import pool from '../config/database';
-import { 
-  AuthRequest, 
-  CreateRecordData, 
-  UpdateLocationData, 
-  UpdateCommentData, 
-  UpdateStatusData, 
+import {  AuthRequest,CreateRecordData,UpdateLocationData, UpdateCommentData,UpdateStatusData, 
   InterventionWithUser 
 } from '../types';
 import { ResultSetHeader } from 'mysql2';

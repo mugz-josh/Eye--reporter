@@ -11,29 +11,29 @@ export const authController = {
       const { first_name, last_name, email, password, phone }: SignupData = req.body;
 
       if (!first_name || !last_name || !email || !password) {
-        res.status(400).json({ 
-          status: 400, 
-          message: 'First name, last name, email, and password are required' 
+        res.status(400).json({
+          status: 400,
+          message: 'First name, last name, email, and password are required'
         });
         return;
       }
 
       // Simple database calls - no complex types needed
       const [existingUsers]: any = await pool.execute(
-        'SELECT id FROM users WHERE email = ?', 
+        'SELECT id FROM users WHERE email = ?',
         [email]
       );
 
       if (existingUsers.length > 0) {
-        res.status(400).json({ 
-          status: 400, 
-          message: 'User already exists with this email' 
+        res.status(400).json({
+          status: 400,
+          message: 'User already exists with this email'
         });
         return;
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      
+
       const [result]: any = await pool.execute(
         'INSERT INTO users (first_name, last_name, email, password, phone) VALUES (?, ?, ?, ?, ?)',
         [first_name, last_name, email, hashedPassword, phone || null]
@@ -45,9 +45,9 @@ export const authController = {
       );
 
       if (userResults.length === 0) {
-        res.status(500).json({ 
-          status: 500, 
-          message: 'Failed to retrieve user after creation' 
+        res.status(500).json({
+          status: 500,
+          message: 'Failed to retrieve user after creation'
         });
         return;
       }
@@ -75,9 +75,9 @@ export const authController = {
 
     } catch (error) {
       console.error('Signup error:', error);
-      res.status(500).json({ 
-        status: 500, 
-        message: 'Server error during signup' 
+      res.status(500).json({
+        status: 500,
+        message: 'Server error during signup'
       });
     }
   },
@@ -88,33 +88,33 @@ export const authController = {
       const { email, password }: LoginData = req.body;
 
       if (!email || !password) {
-        res.status(400).json({ 
-          status: 400, 
-          message: 'Email and password are required' 
+        res.status(400).json({
+          status: 400,
+          message: 'Email and password are required'
         });
         return;
       }
 
       const [results]: any = await pool.execute(
-        'SELECT * FROM users WHERE email = ?', 
+        'SELECT * FROM users WHERE email = ?',
         [email]
       );
 
       if (results.length === 0) {
-        res.status(400).json({ 
-          status: 400, 
-          message: 'Invalid email or password' 
+        res.status(400).json({
+          status: 400,
+          message: 'Invalid email or password'
         });
         return;
       }
 
       const user = results[0];
       const isPasswordValid = await bcrypt.compare(password, user.password);
-      
+
       if (!isPasswordValid) {
-        res.status(400).json({ 
-          status: 400, 
-          message: 'Invalid email or password' 
+        res.status(400).json({
+          status: 400,
+          message: 'Invalid email or password'
         });
         return;
       }
@@ -125,8 +125,8 @@ export const authController = {
         { expiresIn: '24h' }
       );
 
-      const authResponse: AuthResponse = { 
-        token, 
+      const authResponse: AuthResponse = {
+        token,
         user: {
           id: user.id,
           first_name: user.first_name,
@@ -138,13 +138,13 @@ export const authController = {
           updated_at: user.updated_at
         }
       };
-      
+
       res.status(200).json({ status: 200, data: [authResponse] });
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({ 
-        status: 500, 
-        message: 'Database error' 
+      res.status(500).json({
+        status: 500,
+        message: 'Database error'
       });
     }
   },
@@ -155,9 +155,9 @@ export const authController = {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({ 
-          status: 401, 
-          message: 'Unauthorized: No user found' 
+        res.status(401).json({
+          status: 401,
+          message: 'Unauthorized: No user found'
         });
         return;
       }
@@ -168,9 +168,9 @@ export const authController = {
       );
 
       if (results.length === 0) {
-        res.status(404).json({ 
-          status: 404, 
-          message: 'User not found' 
+        res.status(404).json({
+          status: 404,
+          message: 'User not found'
         });
         return;
       }
@@ -190,9 +190,9 @@ export const authController = {
       res.status(200).json({ status: 200, data: [user] });
     } catch (error) {
       console.error('Get profile error:', error);
-      res.status(500).json({ 
-        status: 500, 
-        message: 'Server error while fetching profile' 
+      res.status(500).json({
+        status: 500,
+        message: 'Server error while fetching profile'
       });
     }
   }
