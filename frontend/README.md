@@ -34,4 +34,5 @@ Admins can update the status of these records, ensuring accountability and trans
 ---
 
 ## Project Structure
-
+ Frontend used React of TypeScript .
+ Backend used mysql
