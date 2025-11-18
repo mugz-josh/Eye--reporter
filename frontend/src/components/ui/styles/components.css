@@ -210,7 +210,9 @@
   motion-offset: var(--background);
   color: hsl(var(--foreground));
   position: relative;
-  top: -15px;
+  top: 0px;
+  margin-bottom: 20px;
+
 
 }
 
