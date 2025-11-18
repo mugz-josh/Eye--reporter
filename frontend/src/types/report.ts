@@ -41,7 +41,8 @@ export interface Report {
   latitude: number;
   longitude: number;
   status: 'DRAFT' | 'UNDER INVESTIGATION' | 'RESOLVED' | 'REJECTED';
-  image?: string;
+  images?: string[];
+  videos?: string[];
   userId: string;
   userName: string;
   createdAt: string;

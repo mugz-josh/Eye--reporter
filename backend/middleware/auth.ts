@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import db from '../config/database';
+import pool from '../config/database';
 import { AuthRequest, ApiResponse } from '../types';
 
 export const auth = {
@@ -11,7 +11,7 @@ export const auth = {
     if (!token) {
       const response: ApiResponse = {
         status: 401,
-        message: 'Access denied. No token provided.'
+        error: 'Access denied. No token provided.' // Changed from 'message' to 'error'
       };
       res.status(401).json(response);
       return;
@@ -24,79 +24,73 @@ export const auth = {
     } catch (err) {
       const response: ApiResponse = {
         status: 400,
-        message: 'Invalid token.'
+        error: 'Invalid token.' // Changed from 'message' to 'error'
       };
       res.status(400).json(response);
     }
   },
 
   // Check if user is admin
-  isAdmin: (req: AuthRequest, res: Response, next: NextFunction): void => {
-    const userId = req.user?.id;
-    
-    if (!userId) {
-      const response: ApiResponse = {
-        status: 401,
-        message: 'Authentication required.'
-      };
-      res.status(401).json(response);
-      return;
-    }
-
-    const query = 'SELECT is_admin FROM users WHERE id = ?';
-    db.query(query, [userId], (err, results: any[]) => {
-      if (err) {
+  isAdmin: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
         const response: ApiResponse = {
-          status: 500,
-          message: 'Database error'
+          status: 401,
+          error: 'Authentication required.' // Changed from 'message' to 'error'
         };
-        res.status(500).json(response);
+        res.status(401).json(response);
         return;
       }
+
+      const query = 'SELECT is_admin FROM users WHERE id = ?';
+      // Fixed: Using async/await instead of callback
+      const [results] = await pool.execute(query, [userId]) as any[];
 
       if (results.length === 0 || !results[0].is_admin) {
         const response: ApiResponse = {
           status: 403,
-          message: 'Access denied. Admin privileges required.'
+          error: 'Access denied. Admin privileges required.' // Changed from 'message' to 'error'
         };
         res.status(403).json(response);
         return;
       }
 
       next();
-    });
+    } catch (err) {
+      const response: ApiResponse = {
+        status: 500,
+        error: 'Database error' // Changed from 'message' to 'error'
+      };
+      res.status(500).json(response);
+    }
   },
 
   // Check if user owns the record
   checkRecordOwnership: (table: string) => {
-    return (req: AuthRequest, res: Response, next: NextFunction): void => {
-      const recordId = req.params.id;
-      const userId = req.user?.id;
+    return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        const recordId = req.params.id;
+        const userId = req.user?.id;
 
-      if (!userId) {
-        const response: ApiResponse = {
-          status: 401,
-          message: 'Authentication required.'
-        };
-        res.status(401).json(response);
-        return;
-      }
-
-      const query = `SELECT user_id FROM ${table} WHERE id = ?`;
-      db.query(query, [recordId], (err, results: any[]) => {
-        if (err) {
+        if (!userId) {
           const response: ApiResponse = {
-            status: 500,
-            message: 'Database error'
+            status: 401,
+            error: 'Authentication required.' // Changed from 'message' to 'error'
           };
-          res.status(500).json(response);
+          res.status(401).json(response);
           return;
         }
+
+        const query = `SELECT user_id FROM ${table} WHERE id = ?`;
+        // Fixed: Using async/await instead of callback
+        const [results] = await pool.execute(query, [recordId]) as any[];
 
         if (results.length === 0) {
           const response: ApiResponse = {
             status: 404,
-            message: 'Record not found'
+            error: 'Record not found' // Changed from 'message' to 'error'
           };
           res.status(404).json(response);
           return;
@@ -105,14 +99,20 @@ export const auth = {
         if (results[0].user_id !== userId && !req.user?.isAdmin) {
           const response: ApiResponse = {
             status: 403,
-            message: 'Access denied. You can only modify your own records.'
+            error: 'Access denied. You can only modify your own records.' // Changed from 'message' to 'error'
           };
           res.status(403).json(response);
           return;
         }
 
         next();
-      });
+      } catch (err) {
+        const response: ApiResponse = {
+          status: 500,
+          error: 'Database error' // Changed from 'message' to 'error'
+        };
+        res.status(500).json(response);
+      }
     };
   }
 };

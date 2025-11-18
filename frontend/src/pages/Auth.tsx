@@ -1,61 +1,119 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { api, authHelper } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/utils/storage";
-import { User } from "@/types/report";
+import type { User } from "@/types/report";
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Sign up state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupLoading, setSignupLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (isLogin) {
-      // Mock login - check if user exists
-      const users = storage.getUsers();
-      const user = users.find(u => u.email === email);
-      
-      if (user) {
-        storage.setCurrentUser(user);
-        navigate("/dashboard");
-      } else {
-        alert("User not found. Please sign up first.");
+  // Login state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const location = useLocation();
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search || "");
+      const q = params.get("mode");
+      const fromState = (location.state as any)?.mode;
+      if (q === "login" || fromState === "login") {
+        setShowLogin(true);
       }
-    } else {
-      // Sign up - create new user
-      const newUser: User = {
-        id: Date.now().toString(),
-        name: `${firstName} ${lastName}`,
-        email,
-        role: 'user',
-        createdAt: new Date().toISOString()
-      };
-      
-      storage.saveUser(newUser);
-      storage.setCurrentUser(newUser);
-      navigate("/dashboard");
+    } catch (e) {
+      // ignore
+    }
+  }, [location.search, (location as any).state]);
+
+  const fetchAndStoreProfile = async () => {
+    try {
+      const resp = await api.getProfile();
+      const raw: any = (resp as any)?.data?.[0] ?? (resp as any)?.data ?? (resp as any)?.user ?? null;
+      if (raw) {
+        const mapped: User = {
+          id: String(raw.id || raw.user_id || raw.uuid || ""),
+          name:
+            [raw.first_name, raw.last_name].filter(Boolean).join(" ") ||
+            raw.name ||
+            raw.full_name ||
+            raw.username ||
+            raw.email ||
+            "User",
+          email: raw.email || "",
+          role: (raw.is_admin || raw.isAdmin || raw.role === 'admin') ? 'admin' : 'user',
+          createdAt: raw.created_at || raw.createdAt || new Date().toISOString(),
+        };
+        storage.setCurrentUser(mapped);
+      }
+    } catch {
+      // ignore
     }
   };
 
-  const handleAdminLogin = () => {
-    // Mock admin login
-    const adminUser: User = {
-      id: 'admin',
-      name: 'Admin User',
-      email: 'admin@ireporter.com',
-      role: 'admin',
-      createdAt: new Date().toISOString()
-    };
-    storage.setCurrentUser(adminUser);
-    navigate("/admin");
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignupLoading(true);
+    try {
+      const response = await api.register({ first_name: firstName, last_name: lastName, email: signupEmail, password: signupPassword } as any);
+      if (response.status >= 400) {
+        toast({ title: "Error", description: response.message || "Registration failed", variant: "destructive" });
+        return;
+      }
+      const token = response?.data?.[0]?.token;
+      if (token) {
+        authHelper.setToken(token);
+        await fetchAndStoreProfile();
+        toast({ title: "Success", description: "Account created successfully!" });
+        const u = storage.getCurrentUser();
+        if (u?.role === 'admin') navigate('/admin');
+        else navigate('/dashboard');
+      }
+    } catch (err) {
+      toast({ title: "Error", description: "Registration failed", variant: "destructive" });
+    } finally {
+      setSignupLoading(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    try {
+      const response = await api.login(loginEmail, loginPassword);
+      if (response.status >= 400) {
+        toast({ title: "Error", description: response.message || "Login failed", variant: "destructive" });
+        return;
+      }
+      const token = response?.data?.[0]?.token;
+      if (token) {
+        authHelper.setToken(token);
+        await fetchAndStoreProfile();
+        toast({ title: "Success", description: "Logged in successfully!" });
+        const u = storage.getCurrentUser();
+        if (u?.role === 'admin') navigate('/admin');
+        else navigate('/dashboard');
+      }
+    } catch (err) {
+      toast({ title: "Error", description: "Login failed", variant: "destructive" });
+    } finally {
+      setLoginLoading(false);
+    }
   };
 
   return (
@@ -69,97 +127,55 @@ export default function Auth() {
         </div>
 
         <div className="auth-card">
-          <h2 className="auth-title">{isLogin ? "Login" : "Sign Up"}</h2>
-
-          <form className="auth-form" onSubmit={handleSubmit}>
-            {!isLogin && (
-              <>
+          {showLogin ? (
             <div>
-              <Label htmlFor="firstname" className="muted-foreground">
-                First Name
-              </Label>
-              <Input 
-                id="firstname" 
-                placeholder="John" 
-                className="input-with-margin"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
+              <h2 className="auth-title">Login</h2>
+              <form className="auth-form" onSubmit={handleLogin}>
+                <div>
+                  <Label htmlFor="login-email" className="muted-foreground">Email</Label>
+                  <Input id="login-email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required className="input-with-margin" />
+                </div>
+                <div>
+                  <Label htmlFor="login-password" className="muted-foreground">Password</Label>
+                  <Input id="login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className="input-with-margin" />
+                </div>
+                <div className="signup-actions">
+                  <Button type="submit" className="btn-full" disabled={loginLoading}>{loginLoading ? 'Signing In...' : 'LOGIN'}</Button>
+                </div>
+              </form>
+              <div className="text-center" style={{ marginTop: 12 }}>
+                <button type="button" className="link-primary" onClick={() => setShowLogin(false)}>Don't have an account? Sign Up</button>
+              </div>
             </div>
-
+          ) : (
             <div>
-              <Label htmlFor="lastname" className="muted-foreground">
-                Last Name
-              </Label>
-              <Input
-                id="lastname"
-                placeholder="Doe"
-                className="input-with-margin"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
+              <h2 className="auth-title">Sign Up</h2>
+              <form className="auth-form" onSubmit={handleSignup}>
+                <div>
+                  <Label htmlFor="firstname" className="muted-foreground">First Name</Label>
+                  <Input id="firstname" value={firstName} onChange={(e) => setFirstName(e.target.value)} required className="input-with-margin" />
+                </div>
+                <div>
+                  <Label htmlFor="lastname" className="muted-foreground">Last Name</Label>
+                  <Input id="lastname" value={lastName} onChange={(e) => setLastName(e.target.value)} required className="input-with-margin" />
+                </div>
+                <div>
+                  <Label htmlFor="signup-email" className="muted-foreground">Email</Label>
+                  <Input id="signup-email" type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required className="input-with-margin" />
+                </div>
+                <div>
+                  <Label htmlFor="signup-password" className="muted-foreground">Password</Label>
+                  <Input id="signup-password" type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required className="input-with-margin" />
+                </div>
+                <div className="signup-actions">
+                  <Button type="submit" className="btn-full" disabled={signupLoading}>{signupLoading ? 'Creating Account...' : 'SIGN UP'}</Button>
+                </div>
+              </form>
+              <div className="text-center" style={{ marginTop: 12 }}>
+                <button type="button" className="link-primary" onClick={() => setShowLogin(true)}>Already have an account? Login</button>
+              </div>
             </div>
-              </>
-            )}
-
-            <div>
-              <Label htmlFor="email" className="muted-foreground">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="johndoo@gmail.com"
-                className="input-with-margin"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="password" className="muted-foreground">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="****"
-                className="input-with-margin"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" className="btn-full">
-              {isLogin ? "LOGIN" : "SIGN UP"}
-            </Button>
-
-            <p className="text-center muted-foreground">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="link-primary"
-              >
-                {isLogin ? "Sign Up" : "Login"}
-              </button>
-            </p>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-border">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleAdminLogin}
-            >
-              Login as Admin
-            </Button>
-          </div>
+          )}
         </div>
       </div>
     </div>
