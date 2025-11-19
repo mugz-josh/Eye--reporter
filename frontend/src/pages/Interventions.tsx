@@ -1,39 +1,56 @@
-import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
-import { storage } from "@/utils/storage";
-import { useState, useEffect } from "react";
-import { Report } from "@/types/report";
-import { api } from "@/services/api";
-import { useToast } from "@/hooks/use-toast";
-import MapPicker from "@/components/MapPicker";
+import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X, MapPin } from "lucide-react"; 
+// Icons for buttons, sidebar, etc.
+
+import { Button } from "@/components/ui/button"; 
+// Reusable Button component
+
+import { Link, useNavigate } from "react-router-dom"; 
+// Navigation helpers
+
+import { storage } from "@/utils/storage"; 
+// Local storage helper for current user
+
+import { useState, useEffect } from "react"; 
+// React hooks
+
+import { Report } from "@/types/report"; 
+// TypeScript type for reports
+
+import { api } from "@/services/api"; 
+// API service for backend requests
+
+import { useToast } from "@/hooks/use-toast"; 
+// Custom toast notifications
+
+import MapPicker from "@/components/MapPicker"; 
+// Map component to select latitude/longitude
 
 export default function Interventions() {
-  const navigate = useNavigate();
-  const [reports, setReports] = useState<Report[]>([]);
-  const currentUser = storage.getCurrentUser();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 });
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Programmatic navigation
+  const [reports, setReports] = useState<Report[]>([]); // Store interventions
+  const currentUser = storage.getCurrentUser(); // Logged-in user
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar state
+  const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 }); // Counts for stats cards
+  const [loading, setLoading] = useState(true); // Loading state
   const [editingLocation, setEditingLocation] = useState<{ id?: string; lat: number; lng: number; open: boolean; } | null>(null);
-  const { toast } = useToast();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-  const FILE_BASE = (API_URL).replace(/\/api$/, '');
-  
+  // Track location editing modal
+  const { toast } = useToast(); // Toast function
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'; // API base URL
+  const FILE_BASE = (API_URL).replace(/\/api$/, ''); // Base path for uploaded files
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/");
+      navigate("/"); // Redirect if not logged in
       return;
     }
-    loadReports();
+    loadReports(); // Fetch interventions on mount
   }, []);
 
   const loadReports = async () => {
     try {
       setLoading(true);
-      const response = await api.getInterventions();
-      
+      const response = await api.getInterventions(); // Fetch interventions from backend
+
       if (response.status === 200 && response.data) {
         // Map backend data to frontend Report type
         const mappedReports = response.data.map((item: any) => ({
@@ -52,13 +69,12 @@ export default function Interventions() {
           videos: item.videos || []
         }));
 
-        // Backend already filters by user, no need to filter again
         setReports(mappedReports);
-        
+
         // Calculate stats
-        const resolved = mappedReports.filter((r: Report) => r.status === 'RESOLVED').length;
-        const unresolved = mappedReports.filter((r: Report) => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
-        const rejected = mappedReports.filter((r: Report) => r.status === 'REJECTED').length;
+        const resolved = mappedReports.filter(r => r.status === 'RESOLVED').length;
+        const unresolved = mappedReports.filter(r => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
+        const rejected = mappedReports.filter(r => r.status === 'REJECTED').length;
         setStats({ resolved, unresolved, rejected });
       }
     } catch (error) {
@@ -69,8 +85,8 @@ export default function Interventions() {
   };
 
   const handleLogout = () => {
-    storage.clearCurrentUser();
-    navigate("/");
+    storage.clearCurrentUser(); // Remove user from storage
+    navigate("/"); // Redirect to login/homepage
   };
 
   const handleDelete = async (reportId: string, status: string) => {
@@ -82,7 +98,7 @@ export default function Interventions() {
       try {
         await api.deleteIntervention(reportId);
         toast({ title: "Success", description: "Intervention deleted successfully" });
-        loadReports();
+        loadReports(); // Refresh after deletion
       } catch (error) {
         toast({ title: "Error", description: "Failed to delete intervention", variant: "destructive" });
       }
@@ -94,7 +110,7 @@ export default function Interventions() {
       alert("Cannot edit report - status has been changed by admin");
       return;
     }
-    navigate(`/create?id=${reportId}&type=intervention`);
+    navigate(`/create?id=${reportId}&type=intervention`); // Redirect to create/edit page
   };
 
   const openLocationEditor = (report: Report) => {
@@ -114,8 +130,8 @@ export default function Interventions() {
         return;
       }
       toast({ title: 'Success', description: 'Location updated' });
-      setEditingLocation(null);
-      loadReports();
+      setEditingLocation(null); // Close modal
+      loadReports(); // Refresh reports
     } catch (err) {
       toast({ title: 'Error', description: 'Failed to update location', variant: 'destructive' });
     }
@@ -123,12 +139,15 @@ export default function Interventions() {
 
   return (
     <div className="page-dashboard">
+      {/* Mobile menu toggle */}
       <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
       
+      {/* Mobile overlay */}
       <div className={`mobile-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
       
+      {/* Sidebar */}
       <aside className={`page-aside ${sidebarOpen ? '' : 'mobile-hidden'}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
@@ -160,7 +179,9 @@ export default function Interventions() {
         </nav>
       </aside>
 
+      {/* Main content */}
       <main className="main-content">
+        {/* Page header */}
         <div className="page-header">
           <div>
             <div className="page-subtitle">
@@ -178,6 +199,7 @@ export default function Interventions() {
           </div>
         </div>
 
+        {/* Stats cards */}
         <div className="cards-grid mb-10">
           <div className="stat-card">
             <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{stats.resolved}</div>
@@ -194,11 +216,13 @@ export default function Interventions() {
           </div>
         </div>
 
+        {/* Create intervention button */}
         <Button onClick={() => navigate('/create?type=intervention')} className="mb-6">
           <Plus size={20} />
           Create Intervention
         </Button>
 
+        {/* Reports listing */}
         {loading ? (
           <div className="text-center py-12">
             <p className="muted-foreground">Loading interventions...</p>
@@ -210,7 +234,7 @@ export default function Interventions() {
           </div>
         ) : (
           <div className="cards-grid">
-            {reports.map((report) => (
+            {reports.map(report => (
               <div key={report.id} className="record-card">
                 <div className="record-body">
                   <span className="record-badge badge-secondary">Intervention</span>
@@ -222,15 +246,14 @@ export default function Interventions() {
                     <p><strong>Description:</strong></p>
                     <p>{report.description}</p>
                     <p><strong>Status:</strong></p>
-                    <p className={report.status === "RESOLVED" ? 'status-resolved' : 'status-other'}>
-                      {report.status}
-                    </p>
+                    <p className={report.status === "RESOLVED" ? 'status-resolved' : 'status-other'}>{report.status}</p>
                     <p><strong>Location:</strong></p>
                     <p>Lat: {report.latitude.toFixed(6)}, Lon: {report.longitude.toFixed(6)}</p>
                     <p className="text-xs">Created: {new Date(report.createdAt).toLocaleDateString()}</p>
                   </div>
 
-                  {(report as any).images && (report as any).images.length > 0 && (
+                  {/* Images */}
+                  {(report as any).images?.length > 0 && (
                     <div className="space-y-2 mb-4">
                       {(report as any).images.map((img: string, idx: number) => (
                         <img key={idx} src={`${FILE_BASE}/uploads/${img}`} alt={`${report.title} ${idx + 1}`} className="record-image" />
@@ -238,7 +261,8 @@ export default function Interventions() {
                     </div>
                   )}
 
-                  {report.videos && report.videos.length > 0 && (
+                  {/* Videos */}
+                  {report.videos?.length > 0 && (
                     <div className="space-y-2 mb-4">
                       {report.videos.map((vid: string, idx: number) => (
                         <video key={idx} controls className="record-image">
@@ -248,35 +272,26 @@ export default function Interventions() {
                     </div>
                   )}
 
+                  {/* Edit/Delete buttons */}
                   <div className="flex gap-2 mt-4">
-  <Button 
-    size="sm" 
-    variant="outline"
-    onClick={() => handleEdit(report.id, report.status)}
-    disabled={report.status !== 'DRAFT'}
-  >
-    <Edit size={16} />
-    Edit Report
-  </Button>
-  <Button 
-    size="sm" 
-    variant="destructive"
-    onClick={() => handleDelete(report.id, report.status)}
-    disabled={report.status !== 'DRAFT'}
-  >
-    <Trash2 size={16} />
-    Delete
-  </Button>
-</div>
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(report.id, report.status)} disabled={report.status !== 'DRAFT'}>
+                      <Edit size={16} /> Edit Report
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(report.id, report.status)} disabled={report.status !== 'DRAFT'}>
+                      <Trash2 size={16} /> Delete
+                    </Button>
+                  </div>
 
                 </div>
               </div>
             ))}
           </div>
         )}
-        {editingLocation && editingLocation.open && (
+
+        {/* Location editor modal */}
+        {editingLocation?.open && (
           <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} onClick={() => setEditingLocation(null)}>
-            <div className="bg-card" style={{ width: '90%', maxWidth: '800px', padding: '1.5rem', borderRadius: '0.75rem' }} onClick={(e) => e.stopPropagation()}>
+            <div className="bg-card" style={{ width: '90%', maxWidth: '800px', padding: '1.5rem', borderRadius: '0.75rem' }} onClick={e => e.stopPropagation()}>
               <h3 className="text-lg font-bold mb-2">Update Location</h3>
               <MapPicker latitude={editingLocation.lat} longitude={editingLocation.lng} onLocationChange={(lat, lng) => setEditingLocation({ ...editingLocation, lat, lng })} />
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
@@ -286,6 +301,7 @@ export default function Interventions() {
             </div>
           </div>
         )}
+
       </main>
     </div>
   );
