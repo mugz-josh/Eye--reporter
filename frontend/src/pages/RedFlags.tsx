@@ -1,40 +1,59 @@
+// Importing icons from lucide-react for UI
 import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X, MapPin } from "lucide-react";
+
+// Importing custom Button component
 import { Button } from "@/components/ui/button";
+
+// React Router imports for navigation and linking between pages
 import { Link, useNavigate } from "react-router-dom";
+
+// Utilities for storing and retrieving user info locally
 import { storage } from "@/utils/storage";
+
+// React hooks
 import { useState, useEffect } from "react";
+
+// TypeScript type for reports
 import { Report } from "@/types/report";
+
+// API functions for interacting with backend
 import { api } from "@/services/api";
+
+// Custom hook for showing toast notifications
 import { useToast } from "@/hooks/use-toast";
+
+// Component for picking map location
 import MapPicker from "@/components/MapPicker";
 
 export default function RedFlags() {
-  const navigate = useNavigate();
-  const [reports, setReports] = useState<Report[]>([]);
-  const currentUser = storage.getCurrentUser();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 });
-  const [loading, setLoading] = useState(true);
-  const [editingLocation, setEditingLocation] = useState<{ id?: string; lat: number; lng: number; open: boolean; } | null>(null);
-  const { toast } = useToast();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-  const FILE_BASE = (API_URL).replace(/\/api$/, '');
+  const navigate = useNavigate(); // Hook to programmatically navigate
+  const [reports, setReports] = useState<Report[]>([]); // State to store fetched reports
+  const currentUser = storage.getCurrentUser(); // Get current logged-in user
+  const [sidebarOpen, setSidebarOpen] = useState(false); // State for mobile sidebar
+  const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 }); // Stats counters
+  const [loading, setLoading] = useState(true); // Loading state for API calls
+  const [editingLocation, setEditingLocation] = useState<{ id?: string; lat: number; lng: number; open: boolean; } | null>(null); // State for editing report location
+  const { toast } = useToast(); // Toast notifications
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'; // Base URL for backend API
+  const FILE_BASE = (API_URL).replace(/\/api$/, ''); // Base URL for static files (images/videos)
 
+  // Run once on component mount
   useEffect(() => {
     if (!currentUser) {
-      navigate("/");
+      navigate("/"); // Redirect to home if not logged in
       return;
     }
-    loadReports();
+    loadReports(); // Fetch reports from backend
   }, []);
 
+  // Function to load reports from backend
   const loadReports = async () => {
     try {
-      setLoading(true);
-      const response = await api.getRedFlags();
-      
+      setLoading(true); // Show loading spinner
+      const response = await api.getRedFlags(); // Call backend API for red flags
+
       if (response.status === 200 && response.data) {
-        // Map backend data to frontend Report type
+        // Map backend response to frontend Report type
         const mappedReports = response.data.map((item: any) => ({
           id: item.id.toString(),
           type: 'red-flag' as const,
@@ -42,36 +61,37 @@ export default function RedFlags() {
           description: item.description,
           latitude: parseFloat(item.latitude),
           longitude: parseFloat(item.longitude),
-          status: item.status.toUpperCase().replace('-', ' ') as Report['status'],
+          status: item.status.toUpperCase().replace('-', ' ') as Report['status'], // Format status
           userId: item.user_id.toString(),
           userName: `${item.first_name} ${item.last_name}`,
           createdAt: item.created_at,
           updatedAt: item.updated_at,
-          images: item.images || [],
-          videos: item.videos || []
+          images: item.images || [], // Default empty array if no images
+          videos: item.videos || []  // Default empty array if no videos
         }));
 
-        // Backend already filters by user, no need to filter again
-        setReports(mappedReports);
-        
+        setReports(mappedReports); // Save mapped reports to state
+
         // Calculate stats
         const resolved = mappedReports.filter((r: Report) => r.status === 'RESOLVED').length;
         const unresolved = mappedReports.filter((r: Report) => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
         const rejected = mappedReports.filter((r: Report) => r.status === 'REJECTED').length;
-        setStats({ resolved, unresolved, rejected });
+        setStats({ resolved, unresolved, rejected }); // Save stats to state
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to load red flags", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to load red flags", variant: "destructive" }); // Show error if API fails
     } finally {
-      setLoading(false);
+      setLoading(false); // Hide loading spinner
     }
   };
 
+  // Function to log out user
   const handleLogout = () => {
-    storage.clearCurrentUser();
-    navigate("/");
+    storage.clearCurrentUser(); // Remove user from local storage
+    navigate("/"); // Redirect to home page
   };
 
+  // Function to delete a red flag report
   const handleDelete = async (reportId: string, status: string) => {
     if (status !== 'DRAFT') {
       toast({ title: "Error", description: "Cannot delete report - status has been changed by admin", variant: "destructive" });
@@ -79,23 +99,25 @@ export default function RedFlags() {
     }
     if (confirm("Are you sure you want to delete this report?")) {
       try {
-        await api.deleteRedFlag(reportId);
+        await api.deleteRedFlag(reportId); // Call backend to delete report
         toast({ title: "Success", description: "Red flag deleted successfully" });
-        loadReports();
+        loadReports(); // Reload reports
       } catch (error) {
         toast({ title: "Error", description: "Failed to delete red flag", variant: "destructive" });
       }
     }
   };
 
+  // Function to edit a report
   const handleEdit = (reportId: string, status: string) => {
     if (status !== 'DRAFT') {
       alert("Cannot edit report - status has been changed by admin");
       return;
     }
-    navigate(`/create?id=${reportId}&type=red-flag`);
+    navigate(`/create?id=${reportId}&type=red-flag`); // Navigate to create/edit page
   };
 
+  // Open location editor modal
   const openLocationEditor = (report: Report) => {
     if (report.status !== 'DRAFT') {
       toast({ title: 'Error', description: 'Cannot update location - status changed', variant: 'destructive' });
@@ -104,6 +126,7 @@ export default function RedFlags() {
     setEditingLocation({ id: report.id, lat: report.latitude, lng: report.longitude, open: true });
   };
 
+  // Save updated location to backend
   const saveLocation = async () => {
     if (!editingLocation?.id) return;
     try {
@@ -113,8 +136,8 @@ export default function RedFlags() {
         return;
       }
       toast({ title: 'Success', description: 'Location updated' });
-      setEditingLocation(null);
-      loadReports();
+      setEditingLocation(null); // Close modal
+      loadReports(); // Reload reports
     } catch (err) {
       toast({ title: 'Error', description: 'Failed to update location', variant: 'destructive' });
     }
@@ -122,12 +145,15 @@ export default function RedFlags() {
 
   return (
     <div className="page-dashboard">
+      {/* Mobile menu button */}
       <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
-      
+
+      {/* Overlay for mobile sidebar */}
       <div className={`mobile-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
-      
+
+      {/* Sidebar */}
       <aside className={`page-aside ${sidebarOpen ? '' : 'mobile-hidden'}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
@@ -159,6 +185,7 @@ export default function RedFlags() {
         </nav>
       </aside>
 
+      {/* Main content */}
       <main className="main-content">
         <div className="page-header">
           <div>
@@ -169,14 +196,17 @@ export default function RedFlags() {
             <h2 className="text-2xl font-semibold">My Red Flags</h2>
           </div>
 
+          {/* Current user info */}
           <div className="flex items-center gap-3">
             <span>{currentUser?.name}</span>
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
+              {/* Initials */}
               <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
             </div>
           </div>
         </div>
 
+        {/* Stats cards */}
         <div className="cards-grid mb-10">
           <div className="stat-card">
             <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{stats.resolved}</div>
@@ -193,11 +223,13 @@ export default function RedFlags() {
           </div>
         </div>
 
+        {/* Button to create new red flag */}
         <Button onClick={() => navigate('/create?type=red-flag')} className="mb-6">
           <Plus size={20} />
           Create Red Flag
         </Button>
 
+        {/* Display loading, empty state, or reports */}
         {loading ? (
           <div className="text-center py-12">
             <p className="muted-foreground">Loading red flags...</p>
@@ -229,6 +261,7 @@ export default function RedFlags() {
                     <p className="text-xs">Created: {new Date(report.createdAt).toLocaleDateString()}</p>
                   </div>
 
+                  {/* Images */}
                   {report.images && report.images.length > 0 && (
                     <div className="space-y-2 mb-4">
                         {report.images.map((img: string, idx: number) => (
@@ -237,6 +270,7 @@ export default function RedFlags() {
                     </div>
                   )}
 
+                  {/* Videos */}
                   {report.videos && report.videos.length > 0 && (
                     <div className="space-y-2 mb-4">
                         {report.videos.map((vid: string, idx: number) => (
@@ -247,32 +281,34 @@ export default function RedFlags() {
                     </div>
                   )}
 
-                
-                <div className="flex gap-2 mt-4">
-  <Button 
-    size="sm" 
-    variant="outline"
-    onClick={() => handleEdit(report.id, report.status)}
-    disabled={report.status !== 'DRAFT'}
-  >
-    <Edit size={16} />
-    Edit Report
-  </Button>
-  <Button 
-    size="sm" 
-    variant="destructive"
-    onClick={() => handleDelete(report.id, report.status)}
-    disabled={report.status !== 'DRAFT'}
-  >
-    <Trash2 size={16} />
-    Delete
-  </Button>
-</div>
+                  {/* Edit/Delete buttons */}
+                  <div className="flex gap-2 mt-4">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleEdit(report.id, report.status)}
+                      disabled={report.status !== 'DRAFT'}
+                    >
+                      <Edit size={16} />
+                      Edit Report
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => handleDelete(report.id, report.status)}
+                      disabled={report.status !== 'DRAFT'}
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        {/* Location editing modal */}
         {editingLocation && editingLocation.open && (
           <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} onClick={() => setEditingLocation(null)}>
             <div className="bg-card" style={{ width: '90%', maxWidth: '800px', padding: '1.5rem', borderRadius: '0.75rem' }} onClick={(e) => e.stopPropagation()}>
