@@ -1,55 +1,39 @@
-import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X, MapPin } from "lucide-react"; 
-// Icons for buttons, sidebar, etc.
-
-import { Button } from "@/components/ui/button"; 
-// Reusable Button component
-
-import { Link, useNavigate } from "react-router-dom"; 
-// Navigation helpers
-
-import { storage } from "@/utils/storage"; 
-// Local storage helper for current user
-
-import { useState, useEffect } from "react"; 
-// React hooks
-
-import { Report } from "@/types/report"; 
-// TypeScript type for reports
-
-import { api } from "@/services/api"; 
-// API service for backend requests
-
-import { useToast } from "@/hooks/use-toast"; 
-// Custom toast notifications
-
-import MapPicker from "@/components/MapPicker"; 
-// Map component to select latitude/longitude
+import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from "react-router-dom";
+import { storage } from "@/utils/storage";
+import { useState, useEffect } from "react";
+import { Report } from "@/types/report";
+import { api } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
+import MapPicker from "@/components/MapPicker";
 
 export default function Interventions() {
-  const navigate = useNavigate(); // Programmatic navigation
-  const [reports, setReports] = useState<Report[]>([]); // Store interventions
-  const currentUser = storage.getCurrentUser(); // Logged-in user
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar state
-  const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 }); // Counts for stats cards
-  const [loading, setLoading] = useState(true); // Loading state
+  const navigate = useNavigate();
+  const [reports, setReports] = useState<Report[]>([]); // Stores fetched interventions
+  const currentUser = storage.getCurrentUser(); // Current logged-in user
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar toggle
+  const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 }); // Stats for display
+  const [loading, setLoading] = useState(true); // Loading state for fetch
   const [editingLocation, setEditingLocation] = useState<{ id?: string; lat: number; lng: number; open: boolean; } | null>(null);
-  // Track location editing modal
-  const { toast } = useToast(); // Toast function
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'; // API base URL
-  const FILE_BASE = (API_URL).replace(/\/api$/, ''); // Base path for uploaded files
+  const { toast } = useToast();
+  
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const FILE_BASE = (API_URL).replace(/\/api$/, ''); 
+  // Used to build full paths for images/videos (backend returns filename only)
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/"); // Redirect if not logged in
+      navigate("/"); // If user not logged in, redirect to login
       return;
     }
-    loadReports(); // Fetch interventions on mount
+    loadReports(); // Load reports on mount
   }, []);
 
   const loadReports = async () => {
     try {
       setLoading(true);
-      const response = await api.getInterventions(); // Fetch interventions from backend
+      const response = await api.getInterventions();
 
       if (response.status === 200 && response.data) {
         // Map backend data to frontend Report type
@@ -71,7 +55,7 @@ export default function Interventions() {
 
         setReports(mappedReports);
 
-        // Calculate stats
+        // Compute statistics for resolved/unresolved/rejected
         const resolved = mappedReports.filter(r => r.status === 'RESOLVED').length;
         const unresolved = mappedReports.filter(r => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length;
         const rejected = mappedReports.filter(r => r.status === 'REJECTED').length;
@@ -85,12 +69,13 @@ export default function Interventions() {
   };
 
   const handleLogout = () => {
-    storage.clearCurrentUser(); // Remove user from storage
-    navigate("/"); // Redirect to login/homepage
+    storage.clearCurrentUser(); // Remove user info from local storage
+    navigate("/"); // Redirect to login
   };
 
   const handleDelete = async (reportId: string, status: string) => {
     if (status !== 'DRAFT') {
+      // Only drafts can be deleted; once admin changes status, deletion is blocked
       toast({ title: "Error", description: "Cannot delete report - status has been changed by admin", variant: "destructive" });
       return;
     }
@@ -98,7 +83,7 @@ export default function Interventions() {
       try {
         await api.deleteIntervention(reportId);
         toast({ title: "Success", description: "Intervention deleted successfully" });
-        loadReports(); // Refresh after deletion
+        loadReports(); // Refresh list after deletion
       } catch (error) {
         toast({ title: "Error", description: "Failed to delete intervention", variant: "destructive" });
       }
@@ -107,10 +92,12 @@ export default function Interventions() {
 
   const handleEdit = (reportId: string, status: string) => {
     if (status !== 'DRAFT') {
-      alert("Cannot edit report - status has been changed by admin");
+      alert("Cannot edit report - status has been changed by admin"); 
+      // Admin has locked editing for this report
       return;
     }
-    navigate(`/create?id=${reportId}&type=intervention`); // Redirect to create/edit page
+    navigate(`/create?id=${reportId}&type=intervention`); 
+    // Navigate to create page with pre-filled data for editing
   };
 
   const openLocationEditor = (report: Report) => {
@@ -118,6 +105,7 @@ export default function Interventions() {
       toast({ title: 'Error', description: 'Cannot update location - status changed', variant: 'destructive' });
       return;
     }
+    // Open modal with current latitude/longitude to edit
     setEditingLocation({ id: report.id, lat: report.latitude, lng: report.longitude, open: true });
   };
 
@@ -131,7 +119,7 @@ export default function Interventions() {
       }
       toast({ title: 'Success', description: 'Location updated' });
       setEditingLocation(null); // Close modal
-      loadReports(); // Refresh reports
+      loadReports(); // Refresh list
     } catch (err) {
       toast({ title: 'Error', description: 'Failed to update location', variant: 'destructive' });
     }
@@ -143,11 +131,11 @@ export default function Interventions() {
       <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
-      
-      {/* Mobile overlay */}
+
+      {/* Overlay for mobile menu */}
       <div className={`mobile-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
-      
-      {/* Sidebar */}
+
+      {/* Sidebar navigation */}
       <aside className={`page-aside ${sidebarOpen ? '' : 'mobile-hidden'}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
@@ -161,17 +149,14 @@ export default function Interventions() {
             <Grid3x3 size={20} />
             <span>Dashboard</span>
           </Link>
-
           <Link to="/red-flags" className="nav-link">
             <Flag size={20} />
             <span>Red Flags</span>
           </Link>
-
           <Link to="/interventions" className="nav-link nav-link-active">
             <Plus size={20} />
             <span>Interventions</span>
           </Link>
-
           <button onClick={handleLogout} className="nav-link" style={{ width: '100%', textAlign: 'left' }}>
             <LogOut size={20} />
             <span>Logout</span>
@@ -179,7 +164,6 @@ export default function Interventions() {
         </nav>
       </aside>
 
-      {/* Main content */}
       <main className="main-content">
         {/* Page header */}
         <div className="page-header">
@@ -193,6 +177,7 @@ export default function Interventions() {
 
           <div className="flex items-center gap-3">
             <span>{currentUser?.name}</span>
+            {/* Display user initials */}
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
               <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
             </div>
@@ -216,13 +201,12 @@ export default function Interventions() {
           </div>
         </div>
 
-        {/* Create intervention button */}
+        {/* Create Intervention button */}
         <Button onClick={() => navigate('/create?type=intervention')} className="mb-6">
-          <Plus size={20} />
-          Create Intervention
+          <Plus size={20} /> Create Intervention
         </Button>
 
-        {/* Reports listing */}
+        {/* Conditional rendering for loading / empty / reports */}
         {loading ? (
           <div className="text-center py-12">
             <p className="muted-foreground">Loading interventions...</p>
@@ -238,7 +222,6 @@ export default function Interventions() {
               <div key={report.id} className="record-card">
                 <div className="record-body">
                   <span className="record-badge badge-secondary">Intervention</span>
-
                   <h4 className="text-lg font-semibold mb-2">{report.title}</h4>
 
                   <div className="space-y-2 text-sm muted-foreground mb-4">
@@ -301,7 +284,6 @@ export default function Interventions() {
             </div>
           </div>
         )}
-
       </main>
     </div>
   );
