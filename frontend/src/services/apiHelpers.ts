@@ -1,144 +1,100 @@
-/**
- * API Helper Utilities - Eliminate repeated code patterns
- * Handles: Token management, headers, FormData construction, error handling
- */
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// Set the base URL for API calls. If the environment variable is not defined, fallback to localhost.
 
-/**
- * Get authorization headers with token
- * REPLACES: const token = localStorage.getItem('token'); + 'Authorization': `Bearer ${token}`
- */
 export function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token'); // Retrieve the JWT token stored in localStorage
   return {
-    'Authorization': `Bearer ${token}`,
+    'Authorization': `Bearer ${token}`, // Construct Authorization header with Bearer token
   };
 }
 
-/**
- * Get authorization headers WITH Content-Type for JSON
- * REPLACES: headers with both Authorization and Content-Type
- */
 export function getJsonHeaders(): HeadersInit {
   return {
-    ...getAuthHeaders(),
-    'Content-Type': 'application/json',
+    ...getAuthHeaders(), // Include Authorization header
+    'Content-Type': 'application/json', // Add Content-Type for JSON requests
   };
 }
 
-/**
- * Make an authenticated GET request
- * REPLACES: Every GET request pattern in api.ts
- */
 export async function fetchGet(endpoint: string) {
   const response = await fetch(`${API_URL}${endpoint}`, {
-    headers: getAuthHeaders(),
+    headers: getAuthHeaders(), // Attach authorization header for authenticated GET
   });
-  return response.json();
+  return response.json(); // Parse and return the JSON response
 }
 
-/**
- * Make an authenticated POST request with JSON body
- * REPLACES: POST requests with JSON in api.ts
- */
 export async function fetchPost(endpoint: string, body: any) {
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'POST',
-    headers: getJsonHeaders(),
-    body: JSON.stringify(body),
+    method: 'POST', // HTTP POST method
+    headers: getJsonHeaders(), // Include Authorization + Content-Type headers
+    body: JSON.stringify(body), // Convert JS object to JSON string
   });
-  return response.json();
+  return response.json(); // Return parsed JSON response
 }
 
-/**
- * Make an authenticated PATCH request with JSON body
- * REPLACES: PATCH requests in api.ts
- */
 export async function fetchPatch(endpoint: string, body: any) {
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'PATCH',
-    headers: getJsonHeaders(),
-    body: JSON.stringify(body),
+    method: 'PATCH', // HTTP PATCH for partial updates
+    headers: getJsonHeaders(), // Authorization + JSON headers
+    body: JSON.stringify(body), // Convert payload to JSON
   });
-  return response.json();
+  return response.json(); // Return JSON
 }
 
-/**
- * Make an authenticated PUT request with JSON body
- * REPLACES: PUT requests in api.ts
- */
 export async function fetchPut(endpoint: string, body: any) {
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'PUT',
+    method: 'PUT', // HTTP PUT for full updates
     headers: getJsonHeaders(),
     body: JSON.stringify(body),
   });
   return response.json();
 }
 
-/**
- * Make an authenticated DELETE request
- * REPLACES: DELETE requests in api.ts
- */
 export async function fetchDelete(endpoint: string) {
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
+    method: 'DELETE', // HTTP DELETE
+    headers: getAuthHeaders(), // Authorization header only, no body needed
   });
   return response.json();
 }
 
-/**
- * Make an authenticated POST request with FormData (for file uploads)
- * REPLACES: FormData construction + file appending in api.ts (used 4 times!)
- */
 export async function fetchPostFormData(endpoint: string, data: any, files: File[] = []) {
-  const formData = new FormData();
+  const formData = new FormData(); // Initialize FormData object for file uploads
   
-  // Add text fields
   Object.entries(data).forEach(([key, value]) => {
     if (value !== null && value !== undefined) {
-      formData.append(key, value as string);
+      formData.append(key, value as string); // Add non-null text fields to FormData
     }
   });
 
-  // Add files
   files.forEach(file => {
-    formData.append('media', file);
+    formData.append('media', file); // Append each file to FormData under 'media' field
   });
 
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'POST',
-    headers: getAuthHeaders(), // Don't set Content-Type, browser will set it
-    body: formData,
+    method: 'POST', // POST request with multipart/form-data
+    headers: getAuthHeaders(), // Only Authorization header; browser handles Content-Type
+    body: formData, // Attach FormData as request body
   });
-  return response.json();
+  return response.json(); // Return parsed JSON response
 }
 
-/**
- * Make an authenticated PUT request with FormData (for file uploads)
- * REPLACES: FormData construction for PUT requests
- */
 export async function fetchPutFormData(endpoint: string, data: any, files: File[] = []) {
   const formData = new FormData();
-  
-  // Add text fields
+
   Object.entries(data).forEach(([key, value]) => {
     if (value !== null && value !== undefined) {
-      formData.append(key, value as string);
+      formData.append(key, value as string); // Add text fields
     }
   });
 
-  // Add files
   files.forEach(file => {
-    formData.append('media', file);
+    formData.append('media', file); // Add files
   });
 
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
+    method: 'PUT', // PUT request for FormData
+    headers: getAuthHeaders(), // Authorization header only
     body: formData,
   });
-  return response.json();
+  return response.json(); // Return JSON
 }
