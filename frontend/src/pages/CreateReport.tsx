@@ -12,42 +12,49 @@ import { api } from "@/services/api";
 import { Report } from "@/types/report";
 
 export default function CreateReport() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [searchParams] = useSearchParams();
-  const reportId = searchParams.get('id');
-  const typeParam = searchParams.get('type') as 'red-flag' | 'intervention' | null;
-  
-  const currentUser = storage.getCurrentUser();
-  const [reportType, setReportType] = useState<"red-flag" | "intervention">(typeParam || "red-flag");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [latitude, setLatitude] = useState(0.3476);
-  const [longitude, setLongitude] = useState(32.5825);
-  const [imagePreview, setImagePreview] = useState<string>("");
-  const [files, setFiles] = useState<File[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate(); // React Router hook to programmatically navigate
+  const { toast } = useToast();   // Custom hook for toast notifications
+  const [searchParams] = useSearchParams(); // Get query params from URL
+  const reportId = searchParams.get('id');  // Report ID (if editing an existing report)
+  const typeParam = searchParams.get('type') as 'red-flag' | 'intervention' | null; // Type from query params
+
+  const currentUser = storage.getCurrentUser(); // Fetch current user from localStorage
+  const [reportType, setReportType] = useState<"red-flag" | "intervention">(typeParam || "red-flag"); // Default type
+  const [title, setTitle] = useState("");        // Form title
+  const [description, setDescription] = useState(""); // Form description
+  const [latitude, setLatitude] = useState(0.3476);    // Default latitude
+  const [longitude, setLongitude] = useState(32.5825); // Default longitude
+  const [imagePreview, setImagePreview] = useState<string>(""); // Preview for first image/video
+  const [files, setFiles] = useState<File[]>([]);    // Uploaded files
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
   useEffect(() => {
     if (!currentUser) {
+      // If no user is logged in, redirect to home
       navigate("/");
       return;
     }
 
     if (reportId) {
-      // fetch the report from the API instead of local storage
+      // === DIFFICULT LOGIC ===
+      // IIFE (Immediately Invoked Function Expression) is used here because useEffect cannot be async
       (async () => {
         try {
+          // Fetch existing report from API based on report type
           const resp = reportType === 'red-flag' ? await api.getRedFlag(reportId) : await api.getIntervention(reportId);
+
           if (resp && resp.status === 200 && resp.data && resp.data.length > 0) {
             const item = resp.data[0];
-            // set form fields from API
+
+            // Set form fields with existing data
             setTitle(item.title || "");
             setDescription(item.description || "");
             setLatitude(item.latitude ? parseFloat(item.latitude) : latitude);
             setLongitude(item.longitude ? parseFloat(item.longitude) : longitude);
 
-            // build a preview URL for first media (if any)
+            // === DIFFICULT LOGIC ===
+            // Construct a preview URL for the first media file
+            // This works for both images and videos
             const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
             if (item.images && item.images.length > 0) {
               setImagePreview(`${API_BASE}/uploads/${item.images[0]}`);
@@ -58,16 +65,18 @@ export default function CreateReport() {
         } catch (err) {
           console.error('Failed to load report', err);
         }
-      })();
+      })(); // IIFE ends here
     }
   }, [reportId]);
 
   const handleLogout = () => {
+    // Clear current user and navigate to home
     storage.clearCurrentUser();
     navigate("/");
   };
 
   const handleLocationChange = (lat: number, lng: number) => {
+    // Update latitude and longitude when map picker changes
     setLatitude(lat);
     setLongitude(lng);
   };
@@ -75,7 +84,8 @@ export default function CreateReport() {
   const handleImageChange = (selected: File[]) => {
     setFiles(selected);
 
-    // preview first image (if any)
+    // === DIFFICULT LOGIC ===
+    // Preview the first image if available
     const firstImage = selected.find(f => f.type.startsWith('image/'));
     if (firstImage) {
       const reader = new FileReader();
@@ -84,89 +94,88 @@ export default function CreateReport() {
       return;
     }
 
-    // if no image, but there is a video, set a placeholder preview (will not show thumbnail)
+    // If no image but a video exists, create object URL for preview
     const firstVideo = selected.find(f => f.type.startsWith('video/'));
     if (firstVideo) {
-      // create object URL for video preview
       const url = URL.createObjectURL(firstVideo);
       setImagePreview(url);
       return;
     }
 
+    // No media available
     setImagePreview("");
   };
 
   const handleRemoveFile = (indexToRemove: number) => {
+    // Remove a file by index
     const updated = files.filter((_, idx) => idx !== indexToRemove);
-    handleImageChange(updated);
+    handleImageChange(updated); // Update files and preview
   };
 
-  
   const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // DEBUG: See what's happening
-  console.log('🔄 SUBMITTING - reportId:', reportId, 'files count:', files.length, 'type:', reportType);
-  
-  if (!title || !description) {
-    toast({
-      title: "Error",
-      description: "Please fill in all required fields",
-      variant: "destructive"
-    });
-    return;
-  }
+    e.preventDefault();
 
-  // Prepare payload for backend
-  const payload = {
-    title,
-    description,
-    latitude,
-    longitude
-  };
+    console.log('🔄 SUBMITTING - reportId:', reportId, 'files count:', files.length, 'type:', reportType);
 
-  setIsLoading(true);
-  (async () => {
-    try {
-      let resp: any;
-      
-      // FIX: Include files for BOTH create and update
-      if (reportType === 'red-flag') {
-        resp = reportId 
-          ? await api.updateRedFlag(reportId, payload, files)
-          : await api.createRedFlag(payload, files);
-      } else {
-        resp = reportId 
-          ? await api.updateIntervention(reportId, payload, files)
-          : await api.createIntervention(payload, files);
-      }
-
-      console.log('✅ API Response:', resp);
-      
-      if (resp?.status === 201 || resp?.status === 200) {
-        toast({
-          title: reportId ? "Report updated" : "Report created",
-          description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
-        });
-
-        setTimeout(() => {
-          setIsLoading(false);
-          navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
-        }, 800);
-      } else {
-        setIsLoading(false);
-        toast({ title: 'Error', description: resp?.message || 'Failed to save report', variant: 'destructive' });
-      }
-    } catch (err) {
-      setIsLoading(false);
-      console.error('Create report error', err);
-      toast({ title: 'Error', description: 'Server error while creating report', variant: 'destructive' });
+    if (!title || !description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
     }
-  })();
-};
+
+    // Payload to send to backend
+    const payload = { title, description, latitude, longitude };
+
+    setIsLoading(true);
+
+    // === DIFFICULT LOGIC ===
+    // Using IIFE again to allow async/await inside handleSubmit
+    (async () => {
+      try {
+        let resp: any;
+
+        // Call appropriate API method for create/update depending on type and existence of reportId
+        if (reportType === 'red-flag') {
+          resp = reportId 
+            ? await api.updateRedFlag(reportId, payload, files)
+            : await api.createRedFlag(payload, files);
+        } else {
+          resp = reportId 
+            ? await api.updateIntervention(reportId, payload, files)
+            : await api.createIntervention(payload, files);
+        }
+
+        console.log('✅ API Response:', resp);
+
+        if (resp?.status === 201 || resp?.status === 200) {
+          toast({
+            title: reportId ? "Report updated" : "Report created",
+            description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
+          });
+
+          // Give a short delay before navigating away to let user see toast
+          setTimeout(() => {
+            setIsLoading(false);
+            navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
+          }, 800);
+        } else {
+          setIsLoading(false);
+          toast({ title: 'Error', description: resp?.message || 'Failed to save report', variant: 'destructive' });
+        }
+      } catch (err) {
+        setIsLoading(false);
+        console.error('Create report error', err);
+        toast({ title: 'Error', description: 'Server error while creating report', variant: 'destructive' });
+      }
+    })();
+  };
 
   return (
     <div className="page-create">
+      {/* Sidebar navigation */}
       <aside className="page-aside">
         <div className="sidebar-brand">
           <div className="brand-icon">
@@ -198,6 +207,7 @@ export default function CreateReport() {
         </nav>
       </aside>
 
+      {/* Main form */}
       <main className="main-content">
         <div className="page-header">
           <h2 className="text-3xl font-semibold">{reportId ? 'Edit' : 'Create'} Report</h2>
@@ -212,6 +222,7 @@ export default function CreateReport() {
 
         <div className="bg-card record-card" style={{ borderRadius: '1rem', padding: '2rem', maxWidth: '50rem' }}>
           <form className="auth-form" onSubmit={handleSubmit}>
+            {/* Record type selector */}
             <div className="record-type-selector">
               <Label className="muted-foreground mb-3 block">Type</Label>
               {typeParam ? (
@@ -263,6 +274,7 @@ export default function CreateReport() {
               )}
             </div>
 
+            {/* Title and description inputs */}
             <div>
               <Label htmlFor="title" className="muted-foreground">Title *</Label>
               <Input 
@@ -287,6 +299,7 @@ export default function CreateReport() {
               />
             </div>
 
+            {/* Map Picker for location */}
             <div>
               <MapPicker 
                 latitude={latitude}
@@ -320,6 +333,7 @@ export default function CreateReport() {
               </div>
             </div>
 
+            {/* File upload */}
             <div>
               <Label className="muted-foreground">Upload Media (Max 2 files)</Label>
               <div style={{ marginBottom: '0.5rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
@@ -333,7 +347,8 @@ export default function CreateReport() {
                   const selected = e.target.files ? Array.from(e.target.files) : [];
                   if (selected.length === 0) return;
 
-                  // Merge newly selected files with existing ones (avoid exact duplicates)
+                  // === DIFFICULT LOGIC ===
+                  // Merge newly selected files with existing ones, avoiding duplicates
                   const existing = files || [];
                   const merged: File[] = [...existing];
 
@@ -342,19 +357,20 @@ export default function CreateReport() {
                     if (!exists) merged.push(f);
                   });
 
+                  // Limit to 2 files
                   if (merged.length > 2) {
                     toast({ title: "Warning", description: "Maximum 2 files allowed", variant: "destructive" });
-                    // clear file input so user can re-select
-                    (e.currentTarget as HTMLInputElement).value = '';
+                    (e.currentTarget as HTMLInputElement).value = ''; // clear input
                     return;
                   }
 
                   handleImageChange(merged);
-                  // clear file input to allow selecting the same file again later if needed
-                  (e.currentTarget as HTMLInputElement).value = '';
+                  (e.currentTarget as HTMLInputElement).value = ''; // clear input
                 }}
                 className="input-with-margin"
               />
+
+              {/* Media preview */}
               {files.length > 0 && (
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
                   {files.map((file, idx) => (
@@ -373,7 +389,8 @@ export default function CreateReport() {
                             style={{ width: '100%', borderRadius: '0.5rem' }}
                           />
                         ) : null}
-                        {/* Remove button */}
+
+                        {/* Remove file button */}
                         <button
                           type="button"
                           onClick={() => handleRemoveFile(idx)}
@@ -408,9 +425,9 @@ export default function CreateReport() {
                   ))}
                 </div>
               )}
-
             </div>
 
+            {/* Form buttons */}
             <div style={{ display: 'flex', gap: '1rem' }} className="form-buttons-section">
               <Button type="submit" className="flex-1" disabled={isLoading}>
                 {isLoading ? 'Processing...' : (reportId ? 'UPDATE REPORT' : 'CREATE REPORT')}
