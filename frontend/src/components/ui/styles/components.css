@@ -15,8 +15,7 @@
 
 .btn:focus-visible {
   outline: none;
-  ring: 2px;
-  ring-offset: 2px;
+
 }
 
 .btn:disabled {
@@ -601,10 +600,7 @@
 
 .otp-slot.active {
   z-index: 10;
-  ring: 2px;
-  ring-color: var(--ring);
-  ring-offset: 2px;
-  ring-offset-color: var(--background);
+
 }
 
 .otp-caret {
@@ -761,7 +757,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   transition: 0.2s ease;
-  ring-offset: var(--background);
+  
 }
 
 .toast-action:hover {
@@ -799,8 +795,7 @@
 .toast-close:focus {
   opacity: 1;
   outline: none;
-  ring: 2px;
-  ring-color: var(--ring);
+
 }
 
 .toast-title {
