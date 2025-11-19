@@ -979,7 +979,7 @@
 }
 
 .link-primary {
-  color: hsl(var(--primary));
+  color: hsl(0, 0%, 100%); /* White */
   text-decoration: none;
   background: none;
   border: none;
@@ -987,6 +987,7 @@
   padding: 0;
   font-size: inherit;
 }
+
 
 .link-primary:hover {
   text-decoration: underline;
