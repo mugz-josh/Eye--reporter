@@ -12,7 +12,6 @@ import CreateReport from "./pages/CreateReport";
 import RedFlags from "./pages/RedFlags";
 import Interventions from "./pages/Interventions";
 import AdminDashboard from "./pages/AdminDashboard";
-
 import NotificationsPage from "./pages/Notifications";
 
 const queryClient = new QueryClient();
