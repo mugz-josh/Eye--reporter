@@ -43,8 +43,12 @@
   border-radius: 0.5rem;
   height: 40px;
 
+  /* Move the button up the same amount */
+  transform: translateY(-10px); /* same as previous buttons */
+  transition: transform 160ms ease, box-shadow 160ms ease; /* smooth movement */
   
 }
+
 
 .btn-default:hover,
 .btn-primary:hover {
@@ -84,10 +88,14 @@
 .btn-secondary {
   background-color: hsl(var(--secondary));
   color: hsl(var(--secondary-foreground));
-  border: 2px solid hsl(var(--border)); /* THICKER BORDER */
+  border: 2px solid hsl(var(--border));
   border-radius: 0.5rem;
   height: 40px;
   width: 120px;
+
+  /* Move button up the same as btn-primary */
+  transform: translateY(-10px); /* same as .btn-primary */
+  transition: transform 160ms ease, box-shadow 160ms ease; /* optional for smoothness */
 }
 
 
@@ -102,9 +110,13 @@
   height: 30px;
   border: 1px solid hsl(var(--border));
   border-radius: 0.5rem;
-    padding: 0 12px; /* ADD THIS */
-   
+  padding: 0 12px;
+
+  /* Move up the same as other buttons */
+  transform: translateY(-10px); 
+  transition: transform 160ms ease, box-shadow 160ms ease; /* smooth movement */
 }
+
 
 .btn-ghost:hover {
   background-color: hsl(var(--accent) / 0.1);
@@ -151,6 +163,10 @@
   height: 2.5rem;
   width: 2.5rem;
   padding: 0;
+
+  /* Move up the same as other buttons */
+  transform: translateY(-10px); 
+  transition: transform 160ms ease, box-shadow 160ms ease; /* optional for smooth movement */
 }
 
 
@@ -1095,13 +1111,17 @@
   border-radius: 0.5rem;
   color: hsl(var(--sidebar-foreground));
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.2s; /* include transform for smoothness */
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1rem;
   text-align: left;
+
+  /* Move nav-link slightly up */
+  transform: translateY(-10px); 
 }
+
 
 .nav-link:hover {
   background-color: hsl(var(--sidebar-accent));
@@ -1552,7 +1572,10 @@
 .hero-buttons .btn-primary {
   box-shadow: 0 12px 30px rgba(14,165,233,0.18);
   transition: transform 160ms ease, box-shadow 160ms ease;
+
+  transform: translateY(-10px); /* moves the button 10px UP */
 }
+
 
 .hero-buttons .btn-primary:hover {
   transform: translateY(-4px) scale(1.02);
@@ -1592,6 +1615,9 @@
   line-height: 1.2;
   margin: 1.5rem 0;
   color: hsl(var(--foreground));
+
+  /* Move up and left */
+  transform: translate(-130px, -92px); /* -50px left, -92px up */
 }
 
 .hero-description {
@@ -1599,7 +1625,11 @@
   color: hsl(var(--muted-foreground));
   margin: 1.5rem 0 2rem;
   line-height: 1.6;
+
+  transform: translate(-70px, -70px); /* X = -20px (left), Y = -70px (up) */
 }
+
+
 
 /* In light theme, force hero description to white for better contrast over the image as requested */
 [data-theme="light"] .hero-description {
@@ -1617,7 +1647,12 @@
   color: hsl(var(--accent));
   font-size: 0.875rem;
   font-weight: 600;
+
+  /* Add this to move the badge slightly upward */
+  position: relative;  /* allows us to shift it */
+  top: -125px;           /* negative value moves it up */
 }
+
 
 .hero-buttons {
   display: flex;
@@ -2003,6 +2038,13 @@
   padding-top: 2rem;
   border-top: 1px solid hsl(var(--border));
 }
+
+
+.header-logo {
+  transform: translateY(-10px); /* moves logo and text up 10px */
+  transition: transform 0.2s ease; /* optional, smooth movement */
+}
+
 
 
 

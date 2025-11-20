@@ -7,15 +7,14 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Shield, Activity, Users, Flag, FileText, CheckCircle, MapPin, TrendingUp } from "lucide-react";
 
 const Homepage: React.FC = () => {
-  const navigate = useNavigate(); 
-  // `useNavigate` gives us a function to programmatically change routes.
-  // Important: Unlike <Link>, this is used inside event handlers.
+  const navigate = useNavigate();
 
   const handleSignup = () => {
-    // Tricky part: we navigate to /login but pass state { mode: 'signup' }
-    // This state can be accessed in the Login component to show signup form instead of login form
+    // Navigate to auth page with signup mode
     navigate("/login", { state: { mode: 'signup' } });
   };
+
+  
 
   return (
     <div className="homepage">
@@ -33,9 +32,7 @@ const Homepage: React.FC = () => {
           </nav>
           <div className="header-actions">
             <ThemeToggle />
-            <button className="btn-ghost" onClick={() => navigate("/login", { state: { mode: 'login' } })}>
-              Login
-            </button>
+            <button className="btn-ghost" onClick={() => navigate("/login", { state: { mode: 'login' } })}>Login</button>
             <button className="btn-primary" onClick={handleSignup}>Get Started</button>
           </div>
         </div>
@@ -45,9 +42,11 @@ const Homepage: React.FC = () => {
       <section
         className="hero"
         style={{
-          backgroundImage: 'url(https://www.shutterstock.com/image-photo/corrupt-government-260nw-2526355811.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          minHeight:'70vh',
+          padding:'120px 0', // Needed to be at th top .
+          backgroundImage: 'url(https://stories.freepiklabs.com/api/vectors/people-watching-the-news/amico/render?color=C53F3FFF&background=complete&hide=freepik--Shadows--inject-15,freepik--Carpet--inject-15,freepik--Plant--inject-15)',
+          backgroundSize: 'contain',
+          backgroundPosition: 'right center',
           backgroundRepeat: 'no-repeat'
         }}
       >
@@ -59,20 +58,13 @@ const Homepage: React.FC = () => {
           </div>
           <h1 className="hero-title">Empower Your Voice, Drive Change in Your Community</h1>
           <p className="hero-description">
-            Report corruption and any other issues that would require government intervention directly to the authorities. Join thousands of citizens making Africa more transparent and accountable.
+            Report corruption and any other issues that would require government intervention directly to  the authorities. Join thousands of citizens making Africa more transparent and accountable.
           </p>
           <div className="hero-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
               Report an Issue
             </button>
-            <button
-              className="btn-secondary btn-lg"
-              onClick={() =>
-                // Tricky: scrollIntoView finds the element by ID and smoothly scrolls to it.
-                // The `?` prevents errors if element is null (optional chaining)
-                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
-              }
-            >
+            <button className="btn-secondary btn-lg" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
               Learn More
             </button>
           </div>
@@ -127,7 +119,6 @@ const Homepage: React.FC = () => {
         <h2 className="section-title">Simple, Transparent Process</h2>
         <p className="section-subtitle">From report to resolution in four easy steps</p>
         <div className="process-steps">
-          {/* Each step is structured similarly, nothing tricky here */}
           <div className="process-step">
             <div className="step-number">1</div>
             <h3 className="step-title">Create Account</h3>
@@ -150,6 +141,8 @@ const Homepage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      
 
       {/* Report Types Section */}
       <section id="features" className="report-types-section">
@@ -188,15 +181,14 @@ const Homepage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* CTA Mid Section */}
+{/* CTA Mid Section */}
       <section className="cta-mid-section">
         <div className="cta-mid-content">
           <h2 className="cta-mid-title">Ready to Make a Difference?</h2>
           <p className="cta-mid-description">
             Join thousands of citizens holding authorities accountable and improving government services. Your voice really matters!
           </p>
-          <div className="cta-final-buttons">
+           <div className="cta-final-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
               Create an Account
             </button>
@@ -206,6 +198,7 @@ const Homepage: React.FC = () => {
           </div>
         </div>
       </section>
+      
     </div>
   );
 };
