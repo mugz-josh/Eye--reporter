@@ -1659,6 +1659,22 @@
   position: relative;  
   top: -132px;          
   left: -20px; /* pushes it slightly to the left */
+  
+}
+.feature-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  padding-left: 3rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  margin-left: -20px; /* moves it slightly to the left */
 }
 
 
