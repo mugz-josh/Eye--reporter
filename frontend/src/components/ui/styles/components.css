@@ -49,6 +49,13 @@
   
 }
 
+.special-report-btn {
+  margin-left: -150px;
+}
+
+
+
+
 
 .btn-default:hover,
 .btn-primary:hover {
@@ -1621,7 +1628,7 @@
 }
 
 .hero-description {
-  font-size: 1.125rem;
+  font-size: 1.3rem;
   color: hsl(var(--muted-foreground));
   margin: 1.5rem 0 2rem;
   line-height: 1.6;
@@ -1633,7 +1640,8 @@
 
 /* In light theme, force hero description to white for better contrast over the image as requested */
 [data-theme="light"] .hero-description {
-  color: hsl(0 0% 100%) !important;
+  
+  color: hsl(0 0% 0%) !important; /* black */
 }
 
 .hero-badge {
@@ -1648,10 +1656,11 @@
   font-size: 0.875rem;
   font-weight: 600;
 
-  /* Add this to move the badge slightly upward */
-  position: relative;  /* allows us to shift it */
-  top: -125px;           /* negative value moves it up */
+  position: relative;  
+  top: -132px;          
+  left: -20px; /* pushes it slightly to the left */
 }
+
 
 
 .hero-buttons {
