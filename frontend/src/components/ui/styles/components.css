@@ -1386,7 +1386,7 @@
 }
 
 .text-primary-foreground {
-  color: hsl(var(--primary-foreground));
+  color: hsl(225, 50%, 15%); /* Dark navy */
 }
 
 .text-destructive-foreground {

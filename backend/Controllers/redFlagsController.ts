@@ -10,6 +10,7 @@ import {
 } from '../types';
 import { ResultSetHeader } from 'mysql2';
 import notificationController from './notificationController';
+import NotificationService from '../services/notificationService'; // ✅ NEW: Import email service
 import {
   sendError,
   sendSuccess,
@@ -438,7 +439,7 @@ export const redFlagsController = {
     }
   },
 
-  // Update red-flag status (Admin only)
+  // Update red-flag status (Admin only) - ✅ UPDATED WITH EMAIL NOTIFICATIONS
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -452,13 +453,6 @@ export const redFlagsController = {
         return;
       }
 
-
-
-    
-
-
-      
-
       const validStatuses = ['under-investigation', 'rejected', 'resolved'];
       if (!status || !validStatuses.includes(status)) {
         res.status(400).json({
@@ -468,13 +462,14 @@ export const redFlagsController = {
         return;
       }
 
-      // Fetch report to get owner and title
-      const [rows] = await pool.execute<RedFlagWithUser[]>('SELECT id, user_id, title FROM red_flags WHERE id = ?', [id]);
+      // Fetch report to get owner, title, and current status - ✅ UPDATED: Get status too
+      const [rows] = await pool.execute<RedFlagWithUser[]>('SELECT id, user_id, title, status FROM red_flags WHERE id = ?', [id]);
       if ((rows as any).length === 0) {
         res.status(404).json({ status: 404, error: 'Red-flag record not found' });
         return;
       }
       const report = (rows as any)[0];
+      const oldStatus = report.status; // ✅ NEW: Get old status before update
 
       const query = 'UPDATE red_flags SET status = ? WHERE id = ?';
       const [result] = await pool.execute<ResultSetHeader>(query, [status, id]);
@@ -487,7 +482,44 @@ export const redFlagsController = {
         return;
       }
 
-      // Create a notification for the report owner (best-effort)
+      // ✅ NEW: ADD EMAIL NOTIFICATIONS HERE
+      if (oldStatus !== status) {
+        try {
+          // Get user email
+          const [userRows] = await pool.execute<any[]>('SELECT email FROM users WHERE id = ?', [report.user_id]);
+          
+          if (userRows.length > 0 && userRows[0].email) {
+            // 1. Send to user
+            await NotificationService.sendStatusChangeEmail(
+              userRows[0].email,
+              oldStatus,
+              status,
+              {
+                name: report.title,
+                id: report.id.toString()
+              }
+            );
+
+            // 2. Also send copy to admin (YOU)
+            await NotificationService.sendStatusChangeEmail(
+              process.env.EMAIL_USER!,
+              oldStatus,
+              status,
+              {
+                name: `${report.title} (User: ${userRows[0].email})`,
+                id: report.id.toString()
+              }
+            );
+            
+            console.log(`✅ Email notifications sent to user and admin for status change: ${oldStatus} → ${status}`);
+          }
+        } catch (emailError) {
+          console.error('❌ Failed to send email notification:', emailError);
+          // Don't fail the request if email fails
+        }
+      }
+
+      // Create a notification for the report owner (best-effort) - ✅ EXISTING CODE STAYS
       try {
         await notificationController.createNotificationForUser({
           user_id: report.user_id,
@@ -505,7 +537,10 @@ export const redFlagsController = {
         status: 200,
         data: [{
           id: parseInt(id),
-          message: 'Updated red-flag record status'
+          message: 'Updated red-flag record status',
+          oldStatus: oldStatus, // ✅ NEW: Return old status in response
+          newStatus: status,    // ✅ NEW: Return new status in response
+          emailSent: oldStatus !== status // ✅ NEW: Indicate if email was sent
         }]
       });
     } catch (error) {
@@ -517,8 +552,7 @@ export const redFlagsController = {
     }
   },
 
-  
-  // 🚨 ADD THE NEW updateRedFlag FUNCTION HERE (AFTER updateStatus):
+  // Update entire red-flag report
   updateRedFlag: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -609,7 +643,7 @@ export const redFlagsController = {
         error: 'Server error during red-flag update'
       });
     }
-  } // ← NO COMMA HERE (last function)
+  }
 };
 
 export default redFlagsController;

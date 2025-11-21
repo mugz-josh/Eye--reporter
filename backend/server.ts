@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import routes from './routes/routes';
+import testEmailRoute from './routes/testEmail'; // ADD THIS IMPORT
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/v1', routes);
+app.use('/api/test', testEmailRoute); // ADD THIS LINE
 
 // Health check route
 app.get('/health', (req: Request, res: Response) => {

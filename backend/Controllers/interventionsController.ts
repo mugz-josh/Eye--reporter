@@ -1,10 +1,16 @@
 import { Response } from 'express';
 import pool from '../config/database';
-import {  AuthRequest,CreateRecordData,UpdateLocationData, UpdateCommentData,UpdateStatusData, 
+import {  
+  AuthRequest,
+  CreateRecordData,
+  UpdateLocationData, 
+  UpdateCommentData,
+  UpdateStatusData, 
   InterventionWithUser 
 } from '../types';
 import { ResultSetHeader } from 'mysql2';
 import notificationController from './notificationController';
+import NotificationService from '../services/notificationService'; // ✅ ADD THIS IMPORT
 import {
   sendError,
   sendSuccess,
@@ -433,7 +439,7 @@ export const interventionsController = {
     }
   },
 
-  // Update intervention status (Admin only)
+  // Update intervention status (Admin only) - ✅ UPDATED WITH EMAIL NOTIFICATIONS
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -456,13 +462,14 @@ export const interventionsController = {
         return;
       }
 
-      // Fetch report to get owner and title
-      const [rows] = await pool.execute<InterventionWithUser[]>('SELECT id, user_id, title FROM interventions WHERE id = ?', [id]);
+      // Fetch report to get owner, title, and current status
+      const [rows] = await pool.execute<InterventionWithUser[]>('SELECT id, user_id, title, status FROM interventions WHERE id = ?', [id]);
       if ((rows as any).length === 0) {
         res.status(404).json({ status: 404, error: 'Intervention record not found' });
         return;
       }
       const report = (rows as any)[0];
+      const oldStatus = report.status; // ✅ GET OLD STATUS BEFORE UPDATE
 
       const query = 'UPDATE interventions SET status = ? WHERE id = ?';
       const [result] = await pool.execute<ResultSetHeader>(query, [status, id]);
@@ -475,7 +482,44 @@ export const interventionsController = {
         return;
       }
 
-      // Create a notification for the report owner (best-effort)
+      // ✅ ADD EMAIL NOTIFICATIONS HERE
+      if (oldStatus !== status) {
+        try {
+          // Get user email
+          const [userRows] = await pool.execute<any[]>('SELECT email FROM users WHERE id = ?', [report.user_id]);
+          
+          if (userRows.length > 0 && userRows[0].email) {
+            // 1. Send to user
+            await NotificationService.sendStatusChangeEmail(
+              userRows[0].email,
+              oldStatus,
+              status,
+              {
+                name: report.title,
+                id: report.id.toString()
+              }
+            );
+
+            // 2. Also send copy to admin (YOU)
+            await NotificationService.sendStatusChangeEmail(
+              process.env.EMAIL_USER!,
+              oldStatus,
+              status,
+              {
+                name: `${report.title} (User: ${userRows[0].email})`,
+                id: report.id.toString()
+              }
+            );
+            
+            console.log(`✅ Email notifications sent to user and admin for status change: ${oldStatus} → ${status}`);
+          }
+        } catch (emailError) {
+          console.error('❌ Failed to send email notification:', emailError);
+          // Don't fail the request if email fails
+        }
+      }
+
+      // Create a notification for the report owner (best-effort) - ✅ YOUR EXISTING CODE STAYS
       try {
         await notificationController.createNotificationForUser({
           user_id: report.user_id,
@@ -493,7 +537,10 @@ export const interventionsController = {
         status: 200,
         data: [{
           id: parseInt(id),
-          message: 'Updated intervention record status'
+          message: 'Updated intervention record status',
+          oldStatus: oldStatus,
+          newStatus: status,
+          emailSent: oldStatus !== status // Indicate if email was sent
         }]
       });
     } catch (error) {
@@ -504,8 +551,6 @@ export const interventionsController = {
       });
     }
   },
-
-// Code that updates the Whole Report it was not there before it was just  not there
 
   // Update entire intervention report
   updateIntervention: async (req: AuthRequest, res: Response): Promise<void> => {
@@ -599,8 +644,6 @@ export const interventionsController = {
       });
     }
   }
-
-
 };
 
 export default interventionsController;
