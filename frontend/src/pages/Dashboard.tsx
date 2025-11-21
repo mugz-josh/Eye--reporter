@@ -1,15 +1,25 @@
-import { Flag, LogOut, Grid3x3, Plus, Menu, X } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Bell, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { NotificationBell } from "@/components/NotificationBell";
+import "./Dashboard.css";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const currentUser = storage.getCurrentUser();
-  const [stats, setStats] = useState({ redFlags: 0, interventions: 0, total: 0, draft: 0, underInvestigation: 0, resolved: 0, rejected: 0 });
+
+  const [stats, setStats] = useState({
+    redFlags: 0,
+    interventions: 0,
+    total: 0,
+    draft: 0,
+    underInvestigation: 0,
+    resolved: 0,
+    rejected: 0
+  });
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -17,7 +27,6 @@ export default function Dashboard() {
       navigate("/");
       return;
     }
-
     loadStats();
   }, []);
 
@@ -28,9 +37,14 @@ export default function Dashboard() {
         api.getInterventions()
       ]);
 
-      const redFlagsCount = (redFlagsRes.data || []).filter((r: any) => r.user_id.toString() === currentUser?.id).length;
-      const interventionsCount = (interventionsRes.data || []).filter((r: any) => r.user_id.toString() === currentUser?.id).length;
-      
+      const redFlagsCount = (redFlagsRes.data || []).filter(
+        (r: any) => r.user_id.toString() === currentUser?.id
+      ).length;
+
+      const interventionsCount = (interventionsRes.data || []).filter(
+        (r: any) => r.user_id.toString() === currentUser?.id
+      ).length;
+
       setStats({
         redFlags: redFlagsCount,
         interventions: interventionsCount,
@@ -52,83 +66,105 @@ export default function Dashboard() {
 
   return (
     <div className="page-dashboard">
-      <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+      {/* Mobile menu button */}
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
-      
-      <div className={`mobile-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
-      
-      <aside className={`page-aside ${sidebarOpen ? '' : 'mobile-hidden'}`}>
-        <div className="sidebar-brand">
-          <div className="brand-icon">
-            <Flag className="text-primary-foreground" size={20} />
-          </div>
-          <h1 className="sidebar-title">iReporter</h1>
+
+      {/* Mobile overlay */}
+      <div
+        className={`mobile-overlay ${sidebarOpen ? "show" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <aside className={`page-aside ${sidebarOpen ? "" : "mobile-hidden"}`}>
+        <div className="sidebar-header">
+          <h2>Dashboard</h2>
+          <ThemeToggle />
         </div>
 
-        <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
-          <Link to="/dashboard" className="nav-link nav-link-active">
-            <Grid3x3 size={20} />
-            <span>My reports</span>
+        <nav className="sidebar-nav">
+          <Link to="/create" className="sidebar-link">
+            <Plus size={18} /> Create Report
           </Link>
-
-          <Link to="/red-flags" className="nav-link">
-            <Flag size={20} />
-            <span>Red Flags</span>
+          <Link to="/red-flags" className="sidebar-link">
+            <Flag size={18} /> Red Flags
           </Link>
-
-          <Link to="/interventions" className="nav-link">
-            <Plus size={20} />
-            <span>Interventions</span>
+          <Link to="/interventions" className="sidebar-link">
+            <Grid3x3 size={18} /> Interventions
           </Link>
-
-          <button onClick={handleLogout} className="nav-link" style={{ width: '100%', textAlign: 'left' }}>
-            <LogOut size={20} />
-            <span>Logout</span>
-          </button>
+          <Link to="/notifications" className="sidebar-link">
+            <Bell size={18} /> Notifications
+          </Link>
         </nav>
 
-        <div style={{ marginTop: 'auto', padding: '1rem', borderTop: '1px solid hsl(var(--border))' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.875rem' }}>Theme</span>
-            <ThemeToggle />
-          </div>
-        </div>
+        <button className="logout-btn" onClick={handleLogout}>
+          <LogOut size={16} /> Logout
+        </button>
       </aside>
 
+      {/* Main content */}
       <main className="main-content">
-        <div className="page-header">
+        <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div className="page-subtitle">
-              <Grid3x3 size={20} />
-              <span>Overview</span>
-            </div>
-            <h2 className="text-2xl font-semibold">My Reports</h2>
+            <h1>Welcome, {currentUser?.name}</h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <NotificationBell />
-            <span>{currentUser?.name}</span>
-            <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
-              <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
+          {/* Logout button on top right of dashboard */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <button
+              className="logout-btn-header"
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.25rem",
+                padding: "0.25rem 0.5rem",
+                border: "none",
+                borderRadius: "0.25rem",
+                backgroundColor: "#f44336",
+                color: "#fff",
+                cursor: "pointer"
+              }}
+              title="Logout"
+            >
+              <LogOut size={18} /> Logout
+            </button>
+
+            <div
+              className="brand-icon"
+              style={{ width: "2.5rem", height: "2.5rem", borderRadius: "50%", backgroundColor: "#ccc", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              <span>{currentUser?.name.split(" ").map((n) => n[0]).join("")}</span>
             </div>
           </div>
         </div>
 
-        <div className="cards-grid" style={{ marginBottom: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: 'hsl(var(--primary))' }}>{stats.total}</div>
-            <div className="stat-label">Total Reports</div>
+        {/* Stats cards */}
+        <div
+          className="cards-grid"
+          style={{
+            marginTop: "2rem",
+            display: "grid",
+            gap: "1rem",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))"
+          }}
+        >
+          <div className="card">
+            <h3>Total Reports</h3>
+            <p>{stats.total}</p>
           </div>
-
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: 'hsl(var(--destructive))' }}>{stats.redFlags}</div>
-            <div className="stat-label">Red Flags</div>
+          <div className="card">
+            <h3>Red Flags</h3>
+            <p>{stats.redFlags}</p>
           </div>
-
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: 'hsl(var(--chart-2))' }}>{stats.interventions}</div>
-            <div className="stat-label">Interventions</div>
+          <div className="card">
+            <h3>Interventions</h3>
+            <p>{stats.interventions}</p>
           </div>
         </div>
       </main>

@@ -1,64 +1,73 @@
-import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { storage } from "@/utils/storage";
-import { useState, useEffect } from "react";
-import { Report, User } from "@/types/report";
-import { api } from "@/services/api";
-import { useToast } from "@/hooks/use-toast";
+import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu, Search } from "lucide-react"; // Importing icons from lucide-react
+import { Button } from "@/components/ui/button"; // Reusable Button component
+import { Input } from "@/components/ui/input"; // Reusable Input component
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Router helpers
+import { storage } from "@/utils/storage"; // Storage helper for local storage
+import { useState, useEffect } from "react"; // React hooks for state and lifecycle
+import { Report, User } from "@/types/report"; // TypeScript types for strong typing
+import { api } from "@/services/api"; // API service for server calls
+import { useToast } from "@/hooks/use-toast"; // Custom hook for toast notifications
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [reports, setReports] = useState<Report[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const currentUser = storage.getCurrentUser();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-  const FILE_BASE = (API_URL).replace(/\/api$/, '');
+  const navigate = useNavigate(); // Hook to programmatically navigate
+  const location = useLocation(); // Hook to get current URL path and state
 
+  const [reports, setReports] = useState<Report[]>([]); // Stores all reports
+  const [users, setUsers] = useState<User[]>([]); // Stores all users
+  const [selectedUser, setSelectedUser] = useState<User | null>(null); // Selected user for modal view
+  const currentUser = storage.getCurrentUser(); // Get the currently logged-in user
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Controls mobile sidebar visibility
+  const [loading, setLoading] = useState(true); // Loading state for reports
+  const [searchQuery, setSearchQuery] = useState(""); // Stores search input
+  const { toast } = useToast(); // Toast notifications
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'; // API base URL
+  const FILE_BASE = (API_URL).replace(/\/api$/, ''); // Base URL for uploaded media files
+
+  // useEffect to check admin access on mount
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'admin') {
+      // Redirect non-admins to home
       navigate("/");
       return;
     }
+    // Load all reports if user is admin
     loadReports();
   }, []);
 
+  // Async function to fetch all reports and normalize data
   const loadReports = async () => {
     try {
-      setLoading(true);
+      setLoading(true); // Start loading state
+
+      // Fetch red-flags and interventions in parallel
       const [redFlagsRes, interventionsRes] = await Promise.all([
         api.getRedFlags(),
         api.getInterventions()
       ]);
 
-      const allReports: Report[] = [];
+      const allReports: Report[] = []; // Array to hold all reports
 
+      // Normalize red-flag reports
       if (redFlagsRes.status === 200 && redFlagsRes.data) {
         const redFlags = redFlagsRes.data.map((item: any) => ({
-          id: item.id.toString(),
-          type: 'red-flag' as const,
+          id: item.id.toString(), // Convert ID to string
+          type: 'red-flag' as const, // Type is red-flag
           title: item.title,
           description: item.description,
-          latitude: parseFloat(item.latitude),
+          latitude: parseFloat(item.latitude), // Ensure numeric values
           longitude: parseFloat(item.longitude),
-          status: item.status.toUpperCase().replace('-', ' ') as Report['status'],
+          status: item.status.toUpperCase().replace('-', ' ') as Report['status'], // Normalize status format
           userId: item.user_id.toString(),
-          userName: `${item.first_name} ${item.last_name}`,
+          userName: `${item.first_name} ${item.last_name}`, // Combine first and last name
           createdAt: item.created_at,
           updatedAt: item.updated_at,
-          images: item.images || [],
-          videos: item.videos || []
+          images: item.images || [], // Default to empty array if no images
+          videos: item.videos || []  // Default to empty array if no videos
         }));
-        allReports.push(...redFlags);
+        allReports.push(...redFlags); // Add to combined reports array
       }
 
+      // Normalize intervention reports
       if (interventionsRes.status === 200 && interventionsRes.data) {
         const interventions = interventionsRes.data.map((item: any) => ({
           id: item.id.toString(),
@@ -78,42 +87,46 @@ export default function AdminDashboard() {
         allReports.push(...interventions);
       }
 
-      setReports(allReports);
-      setUsers(storage.getUsers());
+      setReports(allReports); // Update state with combined reports
+      setUsers(storage.getUsers()); // Load users from storage
     } catch (error) {
-      toast({ title: "Error", description: "Failed to load reports", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to load reports", variant: "destructive" }); // Show error toast
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading state
     }
   };
 
+  // Logout handler
   const handleLogout = () => {
-    storage.clearCurrentUser();
-    navigate("/");
+    storage.clearCurrentUser(); // Clear session
+    navigate("/"); // Redirect to home
   };
 
+  // Function to update report status
   const handleStatusChange = async (reportId: string, reportType: string, newStatus: Report['status']) => {
     try {
-      const apiStatus = newStatus.toLowerCase().replace(' ', '-');
-      
+      const apiStatus = newStatus.toLowerCase().replace(' ', '-'); // Convert status to API format
+
+      // Call API based on report type
       if (reportType === 'red-flag') {
         await api.updateRedFlagStatus(reportId, apiStatus);
       } else {
         await api.updateInterventionStatus(reportId, apiStatus);
       }
 
-      toast({ title: "Success", description: "Status updated successfully" });
-      loadReports();
+      toast({ title: "Success", description: "Status updated successfully" }); // Notify success
+      loadReports(); // Refresh reports after update
     } catch (error) {
-      toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to update status", variant: "destructive" }); // Notify failure
     }
   };
 
-  const isUsersPage = location.pathname === '/admin/users';
-  const getUserReports = (userId: string) => reports.filter(r => r.userId === userId);
+  const isUsersPage = location.pathname === '/admin/users'; // Determine which page is active
+  const getUserReports = (userId: string) => reports.filter(r => r.userId === userId); // Filter reports for a specific user
 
+  // Filter reports based on search query
   const filteredReports = reports.filter(report => {
-    if (!searchQuery) return true;
+    if (!searchQuery) return true; // Return all if no search
     const query = searchQuery.toLowerCase();
     return (
       report.id.toLowerCase().includes(query) ||
@@ -123,12 +136,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-admin">
+      {/* Mobile menu toggle */}
       <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
-      
+
+      {/* Mobile overlay */}
       <div className={`mobile-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
-      
+
+      {/* Sidebar */}
       <aside className={`page-aside ${sidebarOpen ? '' : 'mobile-hidden'}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
@@ -137,6 +153,7 @@ export default function AdminDashboard() {
           <h1 className="sidebar-title">iReporter Admin</h1>
         </div>
 
+        {/* Sidebar navigation */}
         <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
           <Link to="/admin" className={`nav-link ${!isUsersPage ? 'nav-link-active' : ''}`}>
             <Grid3x3 size={20} />
@@ -155,9 +172,11 @@ export default function AdminDashboard() {
         </nav>
       </aside>
 
+      {/* Main content */}
       <main className="main-content">
         {!isUsersPage ? (
           <>
+            {/* Page header */}
             <div className="page-header">
               <h2 className="text-2xl font-semibold">All Reports</h2>
               <div className="flex items-center gap-3">
@@ -166,6 +185,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Search input */}
             <div className="mb-6" style={{ position: 'relative', maxWidth: '500px' }}>
               <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
               <Input 
@@ -177,6 +197,7 @@ export default function AdminDashboard() {
               />
             </div>
 
+            {/* Statistics cards */}
             <div className="cards-grid mb-10" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
               <div className="stat-card">
                 <div className="stat-value" style={{ color: 'hsl(var(--primary))' }}>{reports.length}</div>
@@ -200,6 +221,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Loading state or reports */}
             {loading ? (
               <div className="text-center py-12">
                 <p className="muted-foreground">Loading reports...</p>
@@ -219,7 +241,8 @@ export default function AdminDashboard() {
                         <p><strong>By:</strong> {report.userName}</p>
                         <p><strong>Status:</strong> {report.status}</p>
                       </div>
-                      
+
+                      {/* Images */}
                       {report.images && report.images.length > 0 && (
                         <div className="space-y-2 mb-4">
                           {report.images.map((img: string, idx: number) => (
@@ -228,6 +251,7 @@ export default function AdminDashboard() {
                         </div>
                       )}
 
+                      {/* Videos */}
                       {report.videos && report.videos.length > 0 && (
                         <div className="space-y-2 mb-4">
                           {report.videos.map((vid: string, idx: number) => (
@@ -238,6 +262,7 @@ export default function AdminDashboard() {
                         </div>
                       )}
 
+                      {/* Status dropdown */}
                       <select value={report.status} onChange={(e) => handleStatusChange(report.id, report.type, e.target.value as Report['status'])} className="input mt-4">
                         <option value="DRAFT">Draft</option>
                         <option value="UNDER INVESTIGATION">Under Investigation</option>
@@ -252,6 +277,7 @@ export default function AdminDashboard() {
           </>
         ) : (
           <>
+            {/* Users page */}
             <div className="page-header">
               <h2 className="text-2xl font-semibold">Users</h2>
               <div className="flex items-center gap-3">
@@ -260,6 +286,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* User cards */}
             <div className="cards-grid">
               {users.map((user) => (
                 <div key={user.id} className="record-card">
@@ -279,6 +306,7 @@ export default function AdminDashboard() {
               ))}
             </div>
 
+            {/* Modal for selected user */}
             {selectedUser && (
               <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setSelectedUser(null)}>
                 <div className="bg-card" style={{ maxWidth: '40rem', width: '100%', borderRadius: '1rem', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
