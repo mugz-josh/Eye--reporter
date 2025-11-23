@@ -42,8 +42,8 @@ const Homepage: React.FC = () => {
       <section
         className="hero"
         style={{
-          backgroundImage: 'url(https://www.shutterstock.com/image-photo/corrupt-government-260nw-2526355811.jpg)',
-          backgroundSize: 'cover',
+          backgroundImage: 'url(https://stories.freepiklabs.com/api/vectors/people-watching-the-news/amico/render?color=263238FF&background=complete&hide=)',
+          backgroundSize: 'contain',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
         }}
