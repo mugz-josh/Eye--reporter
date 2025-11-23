@@ -4,7 +4,7 @@ import {  AuthRequest,CreateRecordData,UpdateLocationData, UpdateCommentData,Upd
   InterventionWithUser 
 } from '../types';
 import { ResultSetHeader } from 'mysql2';
-import notificationController from './notificationController';
+import EmailService from '../services/emailService';
 import {
   sendError,
   sendSuccess,
@@ -433,7 +433,7 @@ export const interventionsController = {
     }
   },
 
-  // Update intervention status (Admin only)
+  // Update intervention status (Admin only) - ✅ UPDATED THIS FUNCTION
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -456,8 +456,12 @@ export const interventionsController = {
         return;
       }
 
-      // Fetch report to get owner and title
-      const [rows] = await pool.execute<InterventionWithUser[]>('SELECT id, user_id, title FROM interventions WHERE id = ?', [id]);
+      // ✅ CHANGED: Fetch report to get owner, title, CURRENT STATUS, and user email
+      const [rows] = await pool.execute<InterventionWithUser[]>(
+        'SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = ?', 
+        [id]
+      );
+      
       if ((rows as any).length === 0) {
         res.status(404).json({ status: 404, error: 'Intervention record not found' });
         return;
@@ -475,18 +479,36 @@ export const interventionsController = {
         return;
       }
 
-      // Create a notification for the report owner (best-effort)
+      // ✅ FIXED: LOCAL NOTIFICATION (using direct database insert)
       try {
-        await notificationController.createNotificationForUser({
-          user_id: report.user_id,
-          title: 'Report status updated',
-          message: `Your intervention "${report.title}" status changed to "${status}"`,
-          type: 'info',
-          related_entity_type: 'intervention',
-          related_entity_id: parseInt(id, 10)
-        });
+        const notificationQuery = `
+          INSERT INTO notifications (user_id, title, message, type, related_entity_type, related_entity_id)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        await pool.execute(notificationQuery, [
+          report.user_id,
+          'Report status updated',
+          `Your intervention "${report.title}" status changed to "${status}"`,
+          'info',
+          'intervention',
+          parseInt(id, 10)
+        ]);
       } catch (nErr) {
         console.error('Failed to create notification after status change:', nErr);
+      }
+
+      // ✅ ADDED: EMAIL NOTIFICATION
+      try {
+        await EmailService.sendReportStatusNotification(
+          report.email, // User's email
+          'intervention', // Report type
+          report.title, // Report title
+          report.status, // OLD status (before update)
+          status // NEW status
+        );
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+        // Continue even if email fails
       }
 
       res.status(200).json({
@@ -504,8 +526,6 @@ export const interventionsController = {
       });
     }
   },
-
-// Code that updates the Whole Report it was not there before it was just  not there
 
   // Update entire intervention report
   updateIntervention: async (req: AuthRequest, res: Response): Promise<void> => {
@@ -599,8 +619,6 @@ export const interventionsController = {
       });
     }
   }
-
-
 };
 
 export default interventionsController;

@@ -1607,7 +1607,7 @@
 
 /* In light theme, force hero description to white for better contrast over the image as requested */
 [data-theme="light"] .hero-description {
-  color: hsl(0 0% 100%) !important;
+  color:black !important;
 }
 
 .hero-badge {
