@@ -983,15 +983,42 @@
   opacity: 0.9;
 }
 
+/* Default / fallback style (used in light mode) */
+/* Default / fallback style (used in light mode) */
+/* Default style for normal primary links */
 .link-primary {
-  color: hsl(var(--primary));
   text-decoration: none;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
   font-size: inherit;
+  color: hsl(var(--primary)); /* keeps its default color in light mode */
 }
+
+/* Normal primary links in dark mode */
+[data-theme="dark"] .link-primary {
+  color: hsl(0 0% 100%); /* white */
+}
+
+/* Sign Up link only */
+.link-signup {
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  color: hsl(var(--primary)); /* default in light mode */
+}
+
+/* Sign Up link in dark mode */
+[data-theme="dark"] .link-signup {
+  color: hsl(0 0% 100%); /* white */
+}
+
+
+
 
 .link-primary:hover {
   text-decoration: underline;
@@ -1618,10 +1645,23 @@
   background: hsl(var(--accent) / 0.1);
   border: 1px solid hsl(var(--accent) / 0.3);
   border-radius: 9999px;
-  color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground)); /* <-- use foreground variable */
   font-size: 0.875rem;
   font-weight: 600;
 }
+[data-theme="light"] {
+  --accent: 210 40% 97%;            /* background color for badges, etc. */
+  --accent-foreground: 0 0% 0%;     /* black text for light mode */
+  
+}
+
+
+/* ONLY border changes in light mode */
+[data-theme="light"] .hero-badge {
+  border-color: black; /* border becomes black */
+}
+
+
 
 .hero-buttons {
   display: flex;
