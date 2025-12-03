@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus, Menu, X } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
@@ -11,6 +11,9 @@ export default function Dashboard() {
   const currentUser = storage.getCurrentUser();
   const [stats, setStats] = useState({ redFlags: 0, interventions: 0, total: 0, draft: 0, underInvestigation: 0, resolved: 0, rejected: 0 });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({ first_name: '', last_name: '', email: '' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
@@ -48,6 +51,43 @@ export default function Dashboard() {
   const handleLogout = () => {
     storage.clearCurrentUser();
     navigate("/");
+  };
+
+  const handleEditProfile = () => {
+    if (currentUser) {
+      setProfileData({
+        first_name: currentUser.first_name || '',
+        last_name: currentUser.last_name || '',
+        email: currentUser.email || ''
+      });
+    }
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setLoading(true);
+      const res = await api.updateProfile(profileData);
+      if (res.status === 200 && res.data) {
+        // Update local storage with new user data
+        const updatedUser = { ...currentUser, ...profileData };
+        storage.setCurrentUser(updatedUser);
+        setIsEditingProfile(false);
+        // Reload stats or refresh page data if needed
+        loadStats();
+      } else {
+        alert('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Error updating profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingProfile(false);
   };
 
   return (

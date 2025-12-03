@@ -51,8 +51,11 @@ export interface Report {
 
 export interface User {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: 'user' | 'admin';
-  createdAt: string;
+  phone?: string;
+  is_admin: boolean;
+  created_at: string;
+  updated_at: string;
 }

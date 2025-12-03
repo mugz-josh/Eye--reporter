@@ -1,0 +1,3 @@
+- [ ] Edit NotificationBell.tsx to change button text color to black
+- [ ] Test the notification dropdown on Dashboard page
+- [x] Reorganize Notifications page into card-based layout for better spacing and classic look

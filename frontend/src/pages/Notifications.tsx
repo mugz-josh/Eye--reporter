@@ -48,44 +48,42 @@ export default function NotificationsPage() {
     <div className="page-notifications">
       <div className="page-header">
         <h2 className="text-2xl font-semibold">Notifications</h2>
-        <div>
+        <div className="button-group">
           <button className="btn" onClick={() => navigate('/dashboard')}>Back</button>
-          <button className="btn ml-2" onClick={markAll}>Mark all read</button>
+          <button className="btn" onClick={markAll}>Mark all read</button>
         </div>
       </div>
 
       <div className="mt-6">
         {loading ? (
-          <div>Loading...</div>
+          <div className="loading-state">Loading notifications...</div>
+        ) : notifications.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">🔔</div>
+            <h3>No notifications yet</h3>
+            <p>You'll see updates about your reports here.</p>
+          </div>
         ) : (
-          <div className="overflow-auto">
-            <table className="w-full table-auto border-collapse">
-              <thead>
-                <tr className="text-left">
-                  <th className="p-2">Title</th>
-                  <th className="p-2">Message</th>
-                  <th className="p-2">Related</th>
-                  <th className="p-2">Read</th>
-                  <th className="p-2">Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                {notifications.map((n) => (
-                  <tr key={n.id} className={`${n.is_read ? '' : 'bg-gray-50'}`}>
-                    <td className="p-2 align-top">{n.title || 'Update'}</td>
-                    <td className="p-2 align-top">{n.message}</td>
-                    <td className="p-2 align-top">{n.related_entity_type || ''} {n.related_entity_id ? `#${n.related_entity_id}` : ''}</td>
-                    <td className="p-2 align-top">{n.is_read ? 'Yes' : 'No'}</td>
-                    <td className="p-2 align-top">{new Date(n.created_at).toLocaleString()}</td>
-                  </tr>
-                ))}
-                {notifications.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="p-4 text-center text-muted-foreground">No notifications</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="notifications-list">
+            {notifications.map((n) => (
+              <div key={n.id} className={`notification-card ${!n.is_read ? 'unread' : ''}`}>
+                <div className="notification-header">
+                  <h4 className="notification-title">{n.title || 'Update'}</h4>
+                  {!n.is_read && <span className="unread-badge">New</span>}
+                </div>
+                <div className="notification-message">{n.message}</div>
+                <div className="notification-meta">
+                  {n.related_entity_type && (
+                    <span className="related-info">
+                      Related: {n.related_entity_type} {n.related_entity_id ? `#${n.related_entity_id}` : ''}
+                    </span>
+                  )}
+                  <span className="notification-date">
+                    {new Date(n.created_at).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

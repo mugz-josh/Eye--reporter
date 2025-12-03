@@ -58,6 +58,58 @@ const notificationController = {
       console.error('Error marking notifications as read:', err);
       res.status(500).json({ status: 500, error: 'Failed to mark notifications as read' });
     }
+  },
+
+  // Delete a specific notification
+  deleteNotification: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const notificationIdParam = req.params.id;
+
+      if (!userId) {
+        const response: ApiResponse = { status: 401, error: 'Authentication required' };
+        res.status(401).json(response);
+        return;
+      }
+
+      if (!notificationIdParam) {
+        const response: ApiResponse = { status: 400, error: 'Notification ID required' };
+        res.status(400).json(response);
+        return;
+      }
+
+      const notificationId = parseInt(notificationIdParam);
+      if (isNaN(notificationId)) {
+        const response: ApiResponse = { status: 400, error: 'Invalid notification ID' };
+        res.status(400).json(response);
+        return;
+      }
+
+      // Ensure the notification belongs to the user
+      const query = 'DELETE FROM notifications WHERE id = ? AND user_id = ?';
+      const [result] = await pool.execute(query, [notificationId, userId]) as any;
+
+      if (result.affectedRows === 0) {
+        res.status(404).json({ status: 404, error: 'Notification not found' });
+        return;
+      }
+
+      res.status(200).json({ status: 200, data: [{ message: 'Notification deleted successfully' }] });
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+      res.status(500).json({ status: 500, error: 'Failed to delete notification' });
+    }
+  },
+
+  // Delete old notifications (for scheduled cleanup)
+  deleteOldNotifications: async (daysOld: number = 30): Promise<void> => {
+    try {
+      const query = 'DELETE FROM notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)';
+      const [result] = await pool.execute(query, [daysOld]) as any;
+      console.log(`Deleted ${result.affectedRows} notifications older than ${daysOld} days`);
+    } catch (err) {
+      console.error('Error deleting old notifications:', err);
+    }
   }
 };
 

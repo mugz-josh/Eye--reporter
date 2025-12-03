@@ -203,9 +203,9 @@ export default function CreateReport() {
           <h2 className="text-3xl font-semibold">{reportId ? 'Edit' : 'Create'} Report</h2>
 
           <div className="flex items-center gap-3">
-            <span>{currentUser?.name}</span>
+            <span>{currentUser?.first_name} {currentUser?.last_name}</span>
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
-              <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
+              <span>{`${currentUser?.first_name?.[0] || ''}${currentUser?.last_name?.[0] || ''}`}</span>
             </div>
           </div>
         </div>

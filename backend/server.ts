@@ -2,7 +2,9 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+
 import routes from './routes/routes';
+import notificationController from './Controllers/notificationController';
 
 dotenv.config();
 
@@ -48,6 +50,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     error: 'Something went wrong!'
   });
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`iReporter server is running on port ${PORT}`);

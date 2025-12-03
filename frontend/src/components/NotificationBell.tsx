@@ -75,9 +75,9 @@ export function NotificationBell() {
               </div>
             ))}
           </div>
-          <div className="p-2 text-right">
-            <button className="text-xs text-primary-foreground" onClick={markAllAsRead}>Mark all read</button>
-            <button className="text-xs ml-4 text-primary-foreground" onClick={() => navigate('/notifications')}>View all</button>
+          <div className="p-2 flex justify-center space-x-4">
+            <button className="text-xs text-black hover:text-blue-600 transition-colors" onClick={markAllAsRead}>Mark all read</button>
+            <button className="text-xs text-black hover:text-blue-600 transition-colors" onClick={() => navigate('/notifications')}>View all</button>
           </div>
         </div>
       )}

@@ -147,6 +147,80 @@ export const authController = {
     } catch (error) {
       sendError(res, 500, 'Server error while fetching profile', error);
     }
+  },
+
+  // 🟣 Update user profile
+  updateProfile: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { first_name, last_name, email, phone }: { first_name?: string; last_name?: string; email?: string; phone?: string } = req.body;
+
+      // Validate authentication
+      const authCheck = validateUserAuth(userId);
+      if (!authCheck.valid) {
+        return sendError(res, 401, authCheck.error || 'Authentication required');
+      }
+
+      // Validate input
+      if (!first_name && !last_name && !email && phone === undefined) {
+        return sendError(res, 400, 'At least one field must be provided for update');
+      }
+
+      // Check if email is already taken by another user
+      if (email) {
+        const [existingUsers]: any = await pool.execute(
+          'SELECT id FROM users WHERE email = ? AND id != ?',
+          [email, userId]
+        );
+        if (existingUsers.length > 0) {
+          return sendError(res, 400, 'Email is already in use by another user');
+        }
+      }
+
+      // Build update query dynamically
+      const updates: string[] = [];
+      const values: any[] = [];
+
+      if (first_name) {
+        updates.push('first_name = ?');
+        values.push(first_name);
+      }
+      if (last_name) {
+        updates.push('last_name = ?');
+        values.push(last_name);
+      }
+      if (email) {
+        updates.push('email = ?');
+        values.push(email);
+      }
+      if (phone !== undefined) {
+        updates.push('phone = ?');
+        values.push(phone || null);
+      }
+
+      updates.push('updated_at = NOW()');
+      values.push(userId);
+
+      const query = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
+
+      await pool.execute(query, values);
+
+      // Fetch updated user
+      const [results]: any = await pool.execute(
+        'SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users WHERE id = ?',
+        [userId]
+      );
+
+      if (results.length === 0) {
+        return sendError(res, 404, 'User not found after update');
+      }
+
+      const user = formatUser(results[0]);
+      sendSuccess(res, 200, user);
+
+    } catch (error) {
+      sendError(res, 500, 'Server error while updating profile', error);
+    }
   }
 };
 

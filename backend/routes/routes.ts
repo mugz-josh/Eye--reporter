@@ -14,6 +14,7 @@ router.post('/auth/login', authController.login);
 
 // Protected user routes
 router.get('/auth/profile', auth.verifyToken, authController.getProfile);
+router.patch('/auth/profile', auth.verifyToken, authController.updateProfile);
 
 // Red-flag routes with file upload support
 router.get('/red-flags', auth.verifyToken, redFlagsController.getAllRedFlags);

@@ -4,10 +4,10 @@
 
 .page-notifications {
   padding: 2rem;
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
-  background: none; /* Remove white background from entire page */
-  color: hsl(var(--foreground), 1); /* Ensures text is visible */
+  background: none;
+  color: hsl(var(--foreground));
 }
 
 /* ---------- Header ---------- */
@@ -16,112 +16,170 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 /* ---------- Buttons ---------- */
 .page-notifications .btn {
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  background-color: hsl(var(--primary)); /* Visible background */
-  color: hsl(var(--primary-foreground)); /* Text visible */
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
   border: none;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-  background-color: hsl(var(--primary)) !important;
-color: hsl(var(--primary-foreground)) !important;
-.page-notifications .btn:hover {
-  background-color: hsl(var(--primary) / 0.85); /* Slightly lighter/darker on hover */
-}
-
+  transition: background-color 0.2s ease;
+  font-weight: 500;
 }
 
 .page-notifications .btn:hover {
-  background-color: hsl(var(--primary) / 0.85);
+  background-color: hsl(var(--primary) / 0.9);
 }
 
-/* Add spacing between buttons */
-.page-notifications .btn + .btn {
-  margin-left: 0.5rem;
+/* ---------- Button Group ---------- */
+.button-group {
+  display: flex;
+  gap: 1rem;
 }
 
-/* ---------- Table Container ---------- */
-.notifications-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  background: hsl(var(--card)); /* Keep table distinct */
+/* ---------- Loading State ---------- */
+.loading-state {
+  text-align: center;
+  padding: 3rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 1.1rem;
+}
+
+/* ---------- Empty State ---------- */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--foreground));
+}
+
+.empty-state p {
+  font-size: 1rem;
+}
+
+/* ---------- Notifications List ---------- */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ---------- Notification Card ---------- */
+.notification-card {
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: 0.75rem;
-  overflow: hidden;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* ---------- Table Header ---------- */
-.notifications-table thead {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary) / 0.12),
-    transparent
-  );
+.notification-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: hsl(var(--primary) / 0.3);
 }
 
-/* ---------- Table Cells ---------- */
-.notifications-table th,
-.notifications-table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid hsl(var(--border));
-  vertical-align: top;
-  color: hsl(var(--foreground)); /* Ensure text visible */
+.notification-card.unread {
+  border-left: 4px solid hsl(var(--primary));
+  background: linear-gradient(90deg, hsl(var(--primary) / 0.05), transparent);
 }
 
-/* ---------- Hover Effect ---------- */
-.notifications-table tbody tr:hover {
-  background: hsl(var(--accent) / 0.06);
+/* ---------- Notification Header ---------- */
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
 }
 
-/* ---------- Unread Row Highlight ---------- */
-.notification-unread {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary) / 0.06),
-    transparent
-  );
+.notification-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin: 0;
 }
 
-/* ---------- Notification Badge ---------- */
-.notification-badge {
-  display: inline-block;
+.unread-badge {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: hsl(var(--primary-foreground));
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary)),
-    hsl(var(--primary) / 0.9)
-  );
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-/* ---------- Empty State ---------- */
-.notifications-empty {
-  padding: 2rem;
-  text-align: center;
+/* ---------- Notification Message ---------- */
+.notification-message {
+  color: hsl(var(--foreground));
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+/* ---------- Notification Meta ---------- */
+.notification-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
   color: hsl(var(--muted-foreground));
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.related-info {
+  font-weight: 500;
+  color: hsl(var(--primary));
+}
+
+.notification-date {
+  font-style: italic;
 }
 
 /* ---------- Responsive Design ---------- */
 @media (max-width: 768px) {
-  .notifications-table th:nth-child(3),
-  .notifications-table td:nth-child(3) {
-    display: none;
+  .page-notifications {
+    padding: 1rem;
   }
 
-  /* Buttons stacking on small screens */
+  .page-notifications .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
   .page-notifications .page-header > div {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     gap: 0.5rem;
+  }
+
+  .notification-card {
+    padding: 1rem;
+  }
+
+  .notification-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 }
