@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { storage } from '@/utils/storage';
 
-interface User {
+// ✅ User interface with guaranteed name & role
+export interface User {
   id: string;
   first_name: string;
   last_name: string;
@@ -10,6 +11,9 @@ interface User {
   is_admin: boolean;
   created_at: string;
   updated_at: string;
+
+  name: string; // always present
+  role: 'admin' | 'user'; // always present
 }
 
 interface UserContextType {
@@ -34,16 +38,31 @@ interface UserProviderProps {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUserState] = useState<User | null>(null);
 
+  // Load user from storage on mount
   useEffect(() => {
     const currentUser = storage.getCurrentUser();
-    setUserState(currentUser);
+    if (currentUser) {
+      const userWithExtras: User = {
+        ...currentUser,
+        name: `${currentUser.first_name} ${currentUser.last_name}`,
+        role: currentUser.is_admin ? 'admin' : 'user',
+      };
+      setUserState(userWithExtras);
+    }
   }, []);
 
+  // Set or clear user
   const setUser = (newUser: User | null) => {
-    setUserState(newUser);
     if (newUser) {
-      storage.setCurrentUser(newUser);
+      const userWithExtras: User = {
+        ...newUser,
+        name: `${newUser.first_name} ${newUser.last_name}`,
+        role: newUser.is_admin ? 'admin' : 'user',
+      };
+      setUserState(userWithExtras);
+      storage.setCurrentUser(userWithExtras);
     } else {
+      setUserState(null);
       storage.clearCurrentUser();
     }
   };

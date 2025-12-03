@@ -7,7 +7,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { api, authHelper } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/utils/storage";
-import type { User } from "@/types/report";
+import { useUser } from "@/contexts/UserContext";
+import type { User } from "@/contexts/UserContext"; // ✅ use the User type from UserContext
 
 export default function Auth() {
   const [showLogin, setShowLogin] = useState(false);
@@ -27,6 +28,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const location = useLocation();
+  const { setUser } = useUser();
 
   useEffect(() => {
     try {
@@ -41,47 +43,57 @@ export default function Auth() {
     }
   }, [location.search, (location as any).state]);
 
-  const fetchAndStoreProfile = async () => {
+  // ✅ Fixed: added name and role properties
+  const fetchAndStoreProfile = async (): Promise<User | null> => {
     try {
       const resp = await api.getProfile();
-      const raw: any = (resp as any)?.data?.[0] ?? (resp as any)?.data ?? (resp as any)?.user ?? null;
+      const raw: any = resp?.data?.[0] ?? resp?.data ?? null; // no resp.user
+
       if (raw) {
         const mapped: User = {
           id: String(raw.id || raw.user_id || raw.uuid || ""),
-          name:
-            [raw.first_name, raw.last_name].filter(Boolean).join(" ") ||
-            raw.name ||
-            raw.full_name ||
-            raw.username ||
-            raw.email ||
-            "User",
+          first_name: raw.first_name || "",
+          last_name: raw.last_name || "",
           email: raw.email || "",
-          role: (raw.is_admin || raw.isAdmin || raw.role === 'admin') ? 'admin' : 'user',
-          createdAt: raw.created_at || raw.createdAt || new Date().toISOString(),
+          phone: raw.phone || undefined,
+          is_admin: raw.is_admin || raw.isAdmin || false,
+          created_at: raw.created_at || raw.createdAt || new Date().toISOString(),
+          updated_at: raw.updated_at || raw.updatedAt || new Date().toISOString(),
+          name: `${raw.first_name || ""} ${raw.last_name || ""}`, // ✅ added
+          role: raw.is_admin || raw.isAdmin ? "admin" : "user",   // ✅ added
         };
         storage.setCurrentUser(mapped);
+        setUser(mapped);
+        return mapped;
       }
     } catch {
       // ignore
     }
+    return null;
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignupLoading(true);
     try {
-      const response = await api.register({ first_name: firstName, last_name: lastName, email: signupEmail, password: signupPassword } as any);
+      const response = await api.register({
+        first_name: firstName,
+        last_name: lastName,
+        email: signupEmail,
+        password: signupPassword,
+      } as any);
+
       if (response.status >= 400) {
         toast({ title: "Error", description: response.message || "Registration failed", variant: "destructive" });
         return;
       }
+
       const token = response?.data?.[0]?.token;
       if (token) {
         authHelper.setToken(token);
-        await fetchAndStoreProfile();
+        const user = await fetchAndStoreProfile();
         toast({ title: "Success", description: "Account created successfully!" });
-        const u = storage.getCurrentUser();
-        if (u?.role === 'admin') navigate('/admin');
+        if (user?.is_admin) navigate('/admin');
         else navigate('/dashboard');
       }
     } catch (err) {
@@ -100,13 +112,13 @@ export default function Auth() {
         toast({ title: "Error", description: response.message || "Login failed", variant: "destructive" });
         return;
       }
+
       const token = response?.data?.[0]?.token;
       if (token) {
         authHelper.setToken(token);
-        await fetchAndStoreProfile();
+        const user = await fetchAndStoreProfile();
         toast({ title: "Success", description: "Logged in successfully!" });
-        const u = storage.getCurrentUser();
-        if (u?.role === 'admin') navigate('/admin');
+        if (user?.is_admin) navigate('/admin');
         else navigate('/dashboard');
       }
     } catch (err) {

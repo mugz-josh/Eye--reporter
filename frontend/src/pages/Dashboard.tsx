@@ -1,14 +1,14 @@
 import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
+import { useUser } from "@/contexts/UserContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const currentUser = storage.getCurrentUser();
+  const { user: currentUser, setUser } = useUser();
   const [stats, setStats] = useState({ redFlags: 0, interventions: 0, total: 0, draft: 0, underInvestigation: 0, resolved: 0, rejected: 0 });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -49,7 +49,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    storage.clearCurrentUser();
+    setUser(null);
     navigate("/");
   };
 
@@ -69,9 +69,9 @@ export default function Dashboard() {
       setLoading(true);
       const res = await api.updateProfile(profileData);
       if (res.status === 200 && res.data) {
-        // Update local storage with new user data
+        // Update user context with new user data
         const updatedUser = { ...currentUser, ...profileData };
-        storage.setCurrentUser(updatedUser);
+        setUser(updatedUser);
         setIsEditingProfile(false);
         // Reload stats or refresh page data if needed
         loadStats();
@@ -192,7 +192,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="cards-grid" style={{ marginBottom: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+        <div className="cards-grid" style={{ marginBottom: '2rem' }}>
           <div className="stat-card">
             <div className="stat-value" style={{ color: 'hsl(var(--primary))' }}>{stats.total}</div>
             <div className="stat-label">Total Reports</div>

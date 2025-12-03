@@ -1,17 +1,17 @@
-import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X, MapPin } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Edit, Trash2, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { storage } from "@/utils/storage";
 import { useState, useEffect } from "react";
 import { Report } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
+import { useUser } from "@/contexts/UserContext"; // <-- use context
 
 export default function Interventions() {
   const navigate = useNavigate();
+  const { user: currentUser, setUser } = useUser();
   const [reports, setReports] = useState<Report[]>([]);
-  const currentUser = storage.getCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState({ resolved: 0, unresolved: 0, rejected: 0 });
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ export default function Interventions() {
       return;
     }
     loadReports();
-  }, []);
+  }, [currentUser]);
 
   const loadReports = async () => {
     try {
@@ -69,7 +69,7 @@ export default function Interventions() {
   };
 
   const handleLogout = () => {
-    storage.clearCurrentUser();
+    setUser(null);
     navigate("/");
   };
 
@@ -121,6 +121,9 @@ export default function Interventions() {
     }
   };
 
+  const displayName = currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : '';
+  const initials = `${currentUser?.first_name?.[0] || ''}${currentUser?.last_name?.[0] || ''}`;
+
   return (
     <div className="page-dashboard">
       <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -171,9 +174,9 @@ export default function Interventions() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span>{currentUser?.name}</span>
+            <span>{displayName}</span>
             <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
-              <span>{currentUser?.name.split(' ').map(n => n[0]).join('')}</span>
+              <span>{initials}</span>
             </div>
           </div>
         </div>
@@ -249,25 +252,25 @@ export default function Interventions() {
                   )}
 
                   <div className="flex gap-2 mt-4">
-  <Button 
-    size="sm" 
-    variant="outline"
-    onClick={() => handleEdit(report.id, report.status)}
-    disabled={report.status !== 'DRAFT'}
-  >
-    <Edit size={16} />
-    Edit Report
-  </Button>
-  <Button 
-    size="sm" 
-    variant="destructive"
-    onClick={() => handleDelete(report.id, report.status)}
-    disabled={report.status !== 'DRAFT'}
-  >
-    <Trash2 size={16} />
-    Delete
-  </Button>
-</div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleEdit(report.id, report.status)}
+                      disabled={report.status !== 'DRAFT'}
+                    >
+                      <Edit size={16} />
+                      Edit Report
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => handleDelete(report.id, report.status)}
+                      disabled={report.status !== 'DRAFT'}
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </Button>
+                  </div>
 
                 </div>
               </div>
