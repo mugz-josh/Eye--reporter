@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ redFlags: 0, interventions: 0, total: 0, draft: 0, underInvestigation: 0, resolved: 0, rejected: 0 });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileData, setProfileData] = useState({ first_name: '', last_name: '', email: '' });
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +62,7 @@ export default function Dashboard() {
         email: currentUser.email || ''
       });
     }
-    setIsEditingProfile(true);
+    setShowProfileModal(true);
   };
 
   const handleSaveProfile = async () => {
@@ -72,7 +73,7 @@ export default function Dashboard() {
         // Update user context with new user data
         const updatedUser = { ...currentUser, ...profileData };
         setUser(updatedUser);
-        setIsEditingProfile(false);
+        setShowProfileModal(false);
         // Reload stats or refresh page data if needed
         loadStats();
       } else {
@@ -87,7 +88,7 @@ export default function Dashboard() {
   };
 
   const handleCancelEdit = () => {
-    setIsEditingProfile(false);
+    setShowProfileModal(false);
   };
 
   return (
@@ -148,48 +149,62 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-3">
             <NotificationBell />
-            {isEditingProfile ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input
-                  type="text"
-                  value={profileData.first_name}
-                  onChange={(e) => setProfileData({...profileData, first_name: e.target.value})}
-                  style={{ padding: '0.25rem 0.5rem', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', fontSize: '0.875rem', width: '100px' }}
-                  placeholder="First Name"
-                />
-                <input
-                  type="text"
-                  value={profileData.last_name}
-                  onChange={(e) => setProfileData({...profileData, last_name: e.target.value})}
-                  style={{ padding: '0.25rem 0.5rem', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', fontSize: '0.875rem', width: '100px' }}
-                  placeholder="Last Name"
-                />
-                <input
-                  type="email"
-                  value={profileData.email}
-                  onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                  style={{ padding: '0.25rem 0.5rem', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', fontSize: '0.875rem', width: '120px' }}
-                  placeholder="Email"
-                />
-                <button onClick={handleSaveProfile} style={{ padding: '0.25rem 0.5rem', background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.75rem' }} disabled={loading}>
-                  {loading ? 'Saving...' : 'Save'}
-                </button>
-                <button onClick={handleCancelEdit} style={{ padding: '0.25rem 0.5rem', background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.75rem' }}>
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <>
-                <span>{currentUser?.first_name} {currentUser?.last_name}</span>
-                <button onClick={handleEditProfile} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: '0.25rem', borderRadius: '0.25rem' }} title="Edit Profile">
-                  <Edit size={16} />
-                </button>
-                <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
-                  <span>{`${currentUser?.first_name?.[0] || ''}${currentUser?.last_name?.[0] || ''}`}</span>
-                </div>
-              </>
-            )}
+            <span>{currentUser?.first_name} {currentUser?.last_name}</span>
+            <button onClick={handleEditProfile} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: '0.25rem', borderRadius: '0.25rem' }} title="Edit Profile">
+              <Edit size={16} />
+            </button>
+            <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
+              <span>{`${currentUser?.first_name?.[0] || ''}${currentUser?.last_name?.[0] || ''}`}</span>
+            </div>
           </div>
+
+          {showProfileModal && (
+            <div className="profile-edit-modal" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+              <div className="profile-edit-content" style={{ background: 'hsl(var(--background))', padding: '2rem', borderRadius: '0.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', margin: '1rem' }}>
+                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: '600', color: 'hsl(var(--foreground))' }}>Edit Profile</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--primary))' }}>First Name</label>
+                    <input
+                      type="text"
+                      value={profileData.first_name}
+                      onChange={(e) => setProfileData({...profileData, first_name: e.target.value})}
+                      style={{ width: '100%', padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '0.375rem', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', fontSize: '0.875rem' }}
+                      placeholder="Enter first name"
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--primary))' }}>Last Name</label>
+                    <input
+                      type="text"
+                      value={profileData.last_name}
+                      onChange={(e) => setProfileData({...profileData, last_name: e.target.value})}
+                      style={{ width: '100%', padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '0.375rem', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', fontSize: '0.875rem' }}
+                      placeholder="Enter last name"
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--primary))' }}>Email</label>
+                    <input
+                      type="email"
+                      value={profileData.email}
+                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                      style={{ width: '100%', padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '0.375rem', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', fontSize: '0.875rem' }}
+                      placeholder="Enter email"
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+                  <button onClick={handleCancelEdit} style={{ padding: '0.5rem 1rem', background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))', border: 'none', borderRadius: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                    Cancel
+                  </button>
+                  <button onClick={handleSaveProfile} style={{ padding: '0.5rem 1rem', background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', border: 'none', borderRadius: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }} disabled={loading}>
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="cards-grid" style={{ marginBottom: '2rem' }}>
