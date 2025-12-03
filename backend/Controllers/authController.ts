@@ -221,6 +221,40 @@ export const authController = {
     } catch (error) {
       sendError(res, 500, 'Server error while updating profile', error);
     }
+  },
+
+  // 🟣 Get all users (admin only)
+  getUsers: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+
+      // Validate authentication
+      const authCheck = validateUserAuth(userId);
+      if (!authCheck.valid) {
+        return sendError(res, 401, authCheck.error || 'Authentication required');
+      }
+
+      // Check if user is admin
+      const [userResults]: any = await pool.execute(
+        'SELECT is_admin FROM users WHERE id = ?',
+        [userId]
+      );
+
+      if (userResults.length === 0 || !userResults[0].is_admin) {
+        return sendError(res, 403, 'Admin access required');
+      }
+
+      // Get all users
+      const [results]: any = await pool.execute(
+        'SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users ORDER BY created_at DESC'
+      );
+
+      const users = results.map(formatUser);
+      sendSuccess(res, 200, users);
+
+    } catch (error) {
+      sendError(res, 500, 'Server error while fetching users', error);
+    }
   }
 };
 

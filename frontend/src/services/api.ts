@@ -38,6 +38,10 @@ export const api = {
     return fetchPatch('/v1/auth/profile', profileData);
   },
 
+  getUsers: async (): Promise<ApiResponse<User>> => {
+    return fetchGet('/v1/auth/users');
+  },
+
   // Red Flags endpoints
   getRedFlags: async (): Promise<ApiResponse<any>> => {
     return fetchGet('/v1/red-flags');

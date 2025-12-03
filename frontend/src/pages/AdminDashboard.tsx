@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const location = useLocation();
   const [reports, setReports] = useState<Report[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [realUsers, setRealUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const currentUser = storage.getCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,7 +24,7 @@ export default function AdminDashboard() {
   const FILE_BASE = (API_URL).replace(/\/api$/, '');
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !currentUser.is_admin) {
       navigate("/");
       return;
     }
@@ -79,7 +80,12 @@ export default function AdminDashboard() {
       }
 
       setReports(allReports);
-      setUsers(storage.getUsers());
+      const mockUsers = storage.getUsers().map(user => ({
+        ...user,
+        name: `${user.first_name} ${user.last_name}`,
+        role: user.is_admin ? 'admin' : 'user'
+      }));
+      setUsers(mockUsers);
     } catch (error) {
       toast({ title: "Error", description: "Failed to load reports", variant: "destructive" });
     } finally {
@@ -95,7 +101,7 @@ export default function AdminDashboard() {
   const handleStatusChange = async (reportId: string, reportType: string, newStatus: Report['status']) => {
     try {
       const apiStatus = newStatus.toLowerCase().replace(' ', '-');
-      
+
       if (reportType === 'red-flag') {
         await api.updateRedFlagStatus(reportId, apiStatus);
       } else {
@@ -109,12 +115,32 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadRealUsers = async () => {
+    try {
+      const response = await api.getUsers();
+      if (response.status === 200 && response.data) {
+        const formattedUsers = response.data.map((user: any) => ({
+          ...user,
+          name: `${user.first_name} ${user.last_name}`,
+          role: user.is_admin ? 'admin' : 'user'
+        }));
+        setRealUsers(formattedUsers);
+        toast({ title: "Success", description: "Real users loaded successfully" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to load real users", variant: "destructive" });
+    }
+  };
+
   const isUsersPage = location.pathname === '/admin/users';
   const getUserReports = (userId: string) => reports.filter(r => r.userId === userId);
 
   const filteredReports = reports.filter(report => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
+    if (!isNaN(Number(query))) {
+      return report.id === query;
+    }
     return (
       report.id.toLowerCase().includes(query) ||
       report.userName.toLowerCase().includes(query)
@@ -260,14 +286,21 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            <div className="mb-6">
+              <Button onClick={loadRealUsers} variant="outline">
+                Load Real Users
+              </Button>
+            </div>
+
             <div className="cards-grid">
-              {users.map((user) => (
+              {(realUsers.length > 0 ? realUsers : users).map((user) => (
                 <div key={user.id} className="record-card">
                   <div className="record-body">
                     <h4 className="text-lg font-semibold mb-2">{user.name}</h4>
                     <div className="space-y-2 text-sm muted-foreground mb-4">
                       <p><strong>User ID:</strong> {user.id}</p>
                       <p><strong>Email:</strong> {user.email}</p>
+                      <p><strong>Role:</strong> {user.role}</p>
                       <p><strong>Reports:</strong> {getUserReports(user.id).length}</p>
                     </div>
                     <Button size="sm" variant="outline" className="w-full" onClick={() => setSelectedUser(user)}>
