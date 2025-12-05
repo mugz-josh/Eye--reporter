@@ -57,10 +57,12 @@ export default function Auth() {
           email: raw.email || "",
           phone: raw.phone || undefined,
           is_admin: raw.is_admin || raw.isAdmin || false,
-          created_at: raw.created_at || raw.createdAt || new Date().toISOString(),
-          updated_at: raw.updated_at || raw.updatedAt || new Date().toISOString(),
+          created_at:
+            raw.created_at || raw.createdAt || new Date().toISOString(),
+          updated_at:
+            raw.updated_at || raw.updatedAt || new Date().toISOString(),
           name: `${raw.first_name || ""} ${raw.last_name || ""}`, // ✅ added
-          role: raw.is_admin || raw.isAdmin ? "admin" : "user",   // ✅ added
+          role: raw.is_admin || raw.isAdmin ? "admin" : "user", // ✅ added
         };
         storage.setCurrentUser(mapped);
         setUser(mapped);
@@ -84,7 +86,11 @@ export default function Auth() {
       } as any);
 
       if (response.status >= 400) {
-        toast({ title: "Error", description: response.message || "Registration failed", variant: "destructive" });
+        toast({
+          title: "Error",
+          description: response.message || "Registration failed",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -92,12 +98,19 @@ export default function Auth() {
       if (token) {
         authHelper.setToken(token);
         const user = await fetchAndStoreProfile();
-        toast({ title: "Success", description: "Account created successfully!" });
-        if (user?.is_admin) navigate('/admin');
-        else navigate('/dashboard');
+        toast({
+          title: "Success",
+          description: "Account created successfully!",
+        });
+        if (user?.is_admin) navigate("/admin");
+        else navigate("/dashboard");
       }
     } catch (err) {
-      toast({ title: "Error", description: "Registration failed", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Registration failed",
+        variant: "destructive",
+      });
     } finally {
       setSignupLoading(false);
     }
@@ -109,7 +122,11 @@ export default function Auth() {
     try {
       const response = await api.login(loginEmail, loginPassword);
       if (response.status >= 400) {
-        toast({ title: "Error", description: response.message || "Login failed", variant: "destructive" });
+        toast({
+          title: "Error",
+          description: response.message || "Login failed",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -118,11 +135,15 @@ export default function Auth() {
         authHelper.setToken(token);
         const user = await fetchAndStoreProfile();
         toast({ title: "Success", description: "Logged in successfully!" });
-        if (user?.is_admin) navigate('/admin');
-        else navigate('/dashboard');
+        if (user?.is_admin) navigate("/admin");
+        else navigate("/dashboard");
       }
     } catch (err) {
-      toast({ title: "Error", description: "Login failed", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Login failed",
+        variant: "destructive",
+      });
     } finally {
       setLoginLoading(false);
     }
@@ -144,19 +165,49 @@ export default function Auth() {
               <h2 className="auth-title">Login</h2>
               <form className="auth-form" onSubmit={handleLogin}>
                 <div>
-                  <Label htmlFor="login-email" className="muted-foreground">Email</Label>
-                  <Input id="login-email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required className="input-with-margin" />
+                  <Label htmlFor="login-email" className="muted-foreground">
+                    Email
+                  </Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    required
+                    className="input-with-margin"
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="login-password" className="muted-foreground">Password</Label>
-                  <Input id="login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className="input-with-margin" />
+                  <Label htmlFor="login-password" className="muted-foreground">
+                    Password
+                  </Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                    className="input-with-margin"
+                  />
                 </div>
                 <div className="signup-actions">
-                  <Button type="submit" className="btn-full" disabled={loginLoading}>{loginLoading ? 'Signing In...' : 'LOGIN'}</Button>
+                  <Button
+                    type="submit"
+                    className="btn-full"
+                    disabled={loginLoading}
+                  >
+                    {loginLoading ? "Signing In..." : "LOGIN"}
+                  </Button>
                 </div>
               </form>
               <div className="text-center" style={{ marginTop: 12 }}>
-                <button type="button" className="link-primary" onClick={() => setShowLogin(false)}>Don't have an account? Sign Up</button>
+                <button
+                  type="button"
+                  className="link-primary"
+                  onClick={() => setShowLogin(false)}
+                >
+                  Don't have an account? Sign Up
+                </button>
               </div>
             </div>
           ) : (
@@ -164,27 +215,73 @@ export default function Auth() {
               <h2 className="auth-title">Sign Up</h2>
               <form className="auth-form" onSubmit={handleSignup}>
                 <div>
-                  <Label htmlFor="firstname" className="muted-foreground">First Name</Label>
-                  <Input id="firstname" value={firstName} onChange={(e) => setFirstName(e.target.value)} required className="input-with-margin" />
+                  <Label htmlFor="firstname" className="muted-foreground">
+                    First Name
+                  </Label>
+                  <Input
+                    id="firstname"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                    className="input-with-margin"
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="lastname" className="muted-foreground">Last Name</Label>
-                  <Input id="lastname" value={lastName} onChange={(e) => setLastName(e.target.value)} required className="input-with-margin" />
+                  <Label htmlFor="lastname" className="muted-foreground">
+                    Last Name
+                  </Label>
+                  <Input
+                    id="lastname"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                    className="input-with-margin"
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="signup-email" className="muted-foreground">Email</Label>
-                  <Input id="signup-email" type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required className="input-with-margin" />
+                  <Label htmlFor="signup-email" className="muted-foreground">
+                    Email
+                  </Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    required
+                    className="input-with-margin"
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="signup-password" className="muted-foreground">Password</Label>
-                  <Input id="signup-password" type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required className="input-with-margin" />
+                  <Label htmlFor="signup-password" className="muted-foreground">
+                    Password
+                  </Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    value={signupPassword}
+                    onChange={(e) => setSignupPassword(e.target.value)}
+                    required
+                    className="input-with-margin"
+                  />
                 </div>
                 <div className="signup-actions">
-                  <Button type="submit" className="btn-full" disabled={signupLoading}>{signupLoading ? 'Creating Account...' : 'SIGN UP'}</Button>
+                  <Button
+                    type="submit"
+                    className="btn-full"
+                    disabled={signupLoading}
+                  >
+                    {signupLoading ? "Creating Account..." : "SIGN UP"}
+                  </Button>
                 </div>
               </form>
               <div className="text-center" style={{ marginTop: 12 }}>
-                <button type="button" className="link-primary" onClick={() => setShowLogin(true)}>Already have an account? Login</button>
+                <button
+                  type="button"
+                  className="link-primary"
+                  onClick={() => setShowLogin(true)}
+                >
+                  Already have an account? Login
+                </button>
               </div>
             </div>
           )}

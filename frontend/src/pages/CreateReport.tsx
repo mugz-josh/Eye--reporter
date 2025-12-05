@@ -15,11 +15,16 @@ export default function CreateReport() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const reportId = searchParams.get('id');
-  const typeParam = searchParams.get('type') as 'red-flag' | 'intervention' | null;
-  
+  const reportId = searchParams.get("id");
+  const typeParam = searchParams.get("type") as
+    | "red-flag"
+    | "intervention"
+    | null;
+
   const currentUser = storage.getCurrentUser();
-  const [reportType, setReportType] = useState<"red-flag" | "intervention">(typeParam || "red-flag");
+  const [reportType, setReportType] = useState<"red-flag" | "intervention">(
+    typeParam || "red-flag"
+  );
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [latitude, setLatitude] = useState(0.3476);
@@ -38,17 +43,29 @@ export default function CreateReport() {
       // fetch the report from the API instead of local storage
       (async () => {
         try {
-          const resp = reportType === 'red-flag' ? await api.getRedFlag(reportId) : await api.getIntervention(reportId);
-          if (resp && resp.status === 200 && resp.data && resp.data.length > 0) {
+          const resp =
+            reportType === "red-flag"
+              ? await api.getRedFlag(reportId)
+              : await api.getIntervention(reportId);
+          if (
+            resp &&
+            resp.status === 200 &&
+            resp.data &&
+            resp.data.length > 0
+          ) {
             const item = resp.data[0];
             // set form fields from API
             setTitle(item.title || "");
             setDescription(item.description || "");
             setLatitude(item.latitude ? parseFloat(item.latitude) : latitude);
-            setLongitude(item.longitude ? parseFloat(item.longitude) : longitude);
+            setLongitude(
+              item.longitude ? parseFloat(item.longitude) : longitude
+            );
 
             // build a preview URL for first media (if any)
-            const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
+            const API_BASE = (
+              import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+            ).replace(/\/api$/, "");
             if (item.images && item.images.length > 0) {
               setImagePreview(`${API_BASE}/uploads/${item.images[0]}`);
             } else if (item.videos && item.videos.length > 0) {
@@ -56,7 +73,7 @@ export default function CreateReport() {
             }
           }
         } catch (err) {
-          console.error('Failed to load report', err);
+          console.error("Failed to load report", err);
         }
       })();
     }
@@ -76,7 +93,7 @@ export default function CreateReport() {
     setFiles(selected);
 
     // preview first image (if any)
-    const firstImage = selected.find(f => f.type.startsWith('image/'));
+    const firstImage = selected.find((f) => f.type.startsWith("image/"));
     if (firstImage) {
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result as string);
@@ -85,7 +102,7 @@ export default function CreateReport() {
     }
 
     // if no image, but there is a video, set a placeholder preview (will not show thumbnail)
-    const firstVideo = selected.find(f => f.type.startsWith('video/'));
+    const firstVideo = selected.find((f) => f.type.startsWith("video/"));
     if (firstVideo) {
       // create object URL for video preview
       const url = URL.createObjectURL(firstVideo);
@@ -101,69 +118,87 @@ export default function CreateReport() {
     handleImageChange(updated);
   };
 
-  
   const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // DEBUG: See what's happening
-  console.log('🔄 SUBMITTING - reportId:', reportId, 'files count:', files.length, 'type:', reportType);
-  
-  if (!title || !description) {
-    toast({
-      title: "Error",
-      description: "Please fill in all required fields",
-      variant: "destructive"
-    });
-    return;
-  }
+    e.preventDefault();
 
-  // Prepare payload for backend
-  const payload = {
-    title,
-    description,
-    latitude,
-    longitude
-  };
+    // DEBUG: See what's happening
+    console.log(
+      "🔄 SUBMITTING - reportId:",
+      reportId,
+      "files count:",
+      files.length,
+      "type:",
+      reportType
+    );
 
-  setIsLoading(true);
-  (async () => {
-    try {
-      let resp: any;
-      
-      // FIX: Include files for BOTH create and update
-      if (reportType === 'red-flag') {
-        resp = reportId 
-          ? await api.updateRedFlag(reportId, payload, files)
-          : await api.createRedFlag(payload, files);
-      } else {
-        resp = reportId 
-          ? await api.updateIntervention(reportId, payload, files)
-          : await api.createIntervention(payload, files);
-      }
-
-      console.log('✅ API Response:', resp);
-      
-      if (resp?.status === 201 || resp?.status === 200) {
-        toast({
-          title: reportId ? "Report updated" : "Report created",
-          description: `Your ${reportType} has been ${reportId ? 'updated' : 'submitted'} successfully.`,
-        });
-
-        setTimeout(() => {
-          setIsLoading(false);
-          navigate(reportType === 'red-flag' ? '/red-flags' : '/interventions');
-        }, 800);
-      } else {
-        setIsLoading(false);
-        toast({ title: 'Error', description: resp?.message || 'Failed to save report', variant: 'destructive' });
-      }
-    } catch (err) {
-      setIsLoading(false);
-      console.error('Create report error', err);
-      toast({ title: 'Error', description: 'Server error while creating report', variant: 'destructive' });
+    if (!title || !description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
     }
-  })();
-};
+
+    // Prepare payload for backend
+    const payload = {
+      title,
+      description,
+      latitude,
+      longitude,
+    };
+
+    setIsLoading(true);
+    (async () => {
+      try {
+        let resp: any;
+
+        // FIX: Include files for BOTH create and update
+        if (reportType === "red-flag") {
+          resp = reportId
+            ? await api.updateRedFlag(reportId, payload, files)
+            : await api.createRedFlag(payload, files);
+        } else {
+          resp = reportId
+            ? await api.updateIntervention(reportId, payload, files)
+            : await api.createIntervention(payload, files);
+        }
+
+        console.log("✅ API Response:", resp);
+
+        if (resp?.status === 201 || resp?.status === 200) {
+          toast({
+            title: reportId ? "Report updated" : "Report created",
+            description: `Your ${reportType} has been ${
+              reportId ? "updated" : "submitted"
+            } successfully.`,
+          });
+
+          setTimeout(() => {
+            setIsLoading(false);
+            navigate(
+              reportType === "red-flag" ? "/red-flags" : "/interventions"
+            );
+          }, 800);
+        } else {
+          setIsLoading(false);
+          toast({
+            title: "Error",
+            description: resp?.message || "Failed to save report",
+            variant: "destructive",
+          });
+        }
+      } catch (err) {
+        setIsLoading(false);
+        console.error("Create report error", err);
+        toast({
+          title: "Error",
+          description: "Server error while creating report",
+          variant: "destructive",
+        });
+      }
+    })();
+  };
 
   return (
     <div className="page-create">
@@ -175,7 +210,7 @@ export default function CreateReport() {
           <h1 className="sidebar-title">iReporter</h1>
         </div>
 
-        <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
+        <nav className="sidebar-nav" style={{ marginTop: "2rem" }}>
           <Link to="/dashboard" className="nav-link">
             <Grid3x3 size={20} />
             <span>Dashboard</span>
@@ -191,7 +226,11 @@ export default function CreateReport() {
             <span>Interventions</span>
           </Link>
 
-          <button onClick={handleLogout} className="nav-link" style={{ width: '100%', textAlign: 'left' }}>
+          <button
+            onClick={handleLogout}
+            className="nav-link"
+            style={{ width: "100%", textAlign: "left" }}
+          >
             <LogOut size={20} />
             <span>Logout</span>
           </button>
@@ -200,43 +239,84 @@ export default function CreateReport() {
 
       <main className="main-content">
         <div className="page-header">
-          <h2 className="text-3xl font-semibold">{reportId ? 'Edit' : 'Create'} Report</h2>
+          <h2 className="text-3xl font-semibold">
+            {reportId ? "Edit" : "Create"} Report
+          </h2>
 
           <div className="flex items-center gap-3">
-            <span>{currentUser?.first_name} {currentUser?.last_name}</span>
-            <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}>
-              <span>{`${currentUser?.first_name?.[0] || ''}${currentUser?.last_name?.[0] || ''}`}</span>
+            <span>
+              {currentUser?.first_name} {currentUser?.last_name}
+            </span>
+            <div
+              className="brand-icon"
+              style={{ width: "2.5rem", height: "2.5rem" }}
+            >
+              <span>{`${currentUser?.first_name?.[0] || ""}${
+                currentUser?.last_name?.[0] || ""
+              }`}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-card record-card" style={{ borderRadius: '1rem', padding: '2rem', maxWidth: '50rem' }}>
+        <div
+          className="bg-card record-card"
+          style={{ borderRadius: "1rem", padding: "2rem", maxWidth: "50rem" }}
+        >
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="record-type-selector">
               <Label className="muted-foreground mb-3 block">Type</Label>
               {typeParam ? (
-                <div className={`record-type ${reportType === "red-flag" ? 'badge-destructive' : 'badge-secondary'}`}
-                  style={{ 
-                    borderRadius: '1rem', 
-                    padding: '1.25rem', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    gap: '0.75rem', 
-                    border: '2px solid hsl(var(--primary))',
-                    cursor: 'default'
+                <div
+                  className={`record-type ${
+                    reportType === "red-flag"
+                      ? "badge-destructive"
+                      : "badge-secondary"
+                  }`}
+                  style={{
+                    borderRadius: "1rem",
+                    padding: "1.25rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    border: "2px solid hsl(var(--primary))",
+                    cursor: "default",
                   }}
                 >
-                  {reportType === "red-flag" ? <Flag size={24} /> : <Plus size={24} />}
-                  <span className="font-medium">{reportType === "red-flag" ? "Red Flag" : "Intervention"}</span>
+                  {reportType === "red-flag" ? (
+                    <Flag size={24} />
+                  ) : (
+                    <Plus size={24} />
+                  )}
+                  <span className="font-medium">
+                    {reportType === "red-flag" ? "Red Flag" : "Intervention"}
+                  </span>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "1rem",
+                  }}
+                >
                   <button
                     type="button"
                     onClick={() => setReportType("red-flag")}
-                    className={`record-type ${reportType === "red-flag" ? 'badge-destructive' : 'badge-secondary'}`}
-                    style={{ borderRadius: '1rem', padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', border: '2px solid transparent' }}
+                    className={`record-type ${
+                      reportType === "red-flag"
+                        ? "badge-destructive"
+                        : "badge-secondary"
+                    }`}
+                    style={{
+                      borderRadius: "1rem",
+                      padding: "1.25rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      border: "2px solid transparent",
+                    }}
                   >
                     <Flag size={24} />
                     <span className="font-medium">Red Flag</span>
@@ -245,15 +325,22 @@ export default function CreateReport() {
                   <button
                     type="button"
                     onClick={() => setReportType("intervention")}
-                    className={`record-type ${reportType === "intervention" ? 'badge-secondary' : 'badge-secondary'}`}
-                    style={{ 
-                      borderRadius: '1rem', 
-                      padding: '1.25rem', 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center', 
-                      gap: '0.75rem', 
-                      border: reportType === "intervention" ? '2px solid hsl(var(--primary))' : '2px solid transparent'
+                    className={`record-type ${
+                      reportType === "intervention"
+                        ? "badge-secondary"
+                        : "badge-secondary"
+                    }`}
+                    style={{
+                      borderRadius: "1rem",
+                      padding: "1.25rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      border:
+                        reportType === "intervention"
+                          ? "2px solid hsl(var(--primary))"
+                          : "2px solid transparent",
                     }}
                   >
                     <Plus size={24} />
@@ -264,10 +351,12 @@ export default function CreateReport() {
             </div>
 
             <div>
-              <Label htmlFor="title" className="muted-foreground">Title *</Label>
-              <Input 
-                id="title" 
-                placeholder="Enter title" 
+              <Label htmlFor="title" className="muted-foreground">
+                Title *
+              </Label>
+              <Input
+                id="title"
+                placeholder="Enter title"
                 className="input-with-margin"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -276,10 +365,12 @@ export default function CreateReport() {
             </div>
 
             <div>
-              <Label htmlFor="description" className="muted-foreground">Description *</Label>
-              <Textarea 
-                id="description" 
-                placeholder="Enter description" 
+              <Label htmlFor="description" className="muted-foreground">
+                Description *
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Enter description"
                 className="input-with-margin"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -288,18 +379,30 @@ export default function CreateReport() {
             </div>
 
             <div>
-              <MapPicker 
+              <MapPicker
                 latitude={latitude}
                 longitude={longitude}
                 onLocationChange={handleLocationChange}
               />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1rem",
+                  marginTop: "1rem",
+                }}
+              >
                 <div>
-                  <Label htmlFor="latitude" className="text-xs muted-foreground">Latitude</Label>
-                  <Input 
-                    id="latitude" 
-                    type="number" 
-                    step="any" 
+                  <Label
+                    htmlFor="latitude"
+                    className="text-xs muted-foreground"
+                  >
+                    Latitude
+                  </Label>
+                  <Input
+                    id="latitude"
+                    type="number"
+                    step="any"
                     value={latitude}
                     onChange={(e) => setLatitude(parseFloat(e.target.value))}
                     className="input-with-margin"
@@ -307,11 +410,16 @@ export default function CreateReport() {
                 </div>
 
                 <div>
-                  <Label htmlFor="longitude" className="text-xs muted-foreground">Longitude</Label>
-                  <Input 
-                    id="longitude" 
-                    type="number" 
-                    step="any" 
+                  <Label
+                    htmlFor="longitude"
+                    className="text-xs muted-foreground"
+                  >
+                    Longitude
+                  </Label>
+                  <Input
+                    id="longitude"
+                    type="number"
+                    step="any"
                     value={longitude}
                     onChange={(e) => setLongitude(parseFloat(e.target.value))}
                     className="input-with-margin"
@@ -321,16 +429,31 @@ export default function CreateReport() {
             </div>
 
             <div>
-              <Label className="muted-foreground">Upload Media (Max 2 files)</Label>
-              <div style={{ marginBottom: '0.5rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                {files.length > 0 && <span>{files.length}/2 file{files.length !== 1 ? 's' : ''} selected</span>}
+              <Label className="muted-foreground">
+                Upload Media (Max 2 files)
+              </Label>
+              <div
+                style={{
+                  marginBottom: "0.5rem",
+                  fontSize: "0.875rem",
+                  color: "hsl(var(--muted-foreground))",
+                }}
+              >
+                {files.length > 0 && (
+                  <span>
+                    {files.length}/2 file{files.length !== 1 ? "s" : ""}{" "}
+                    selected
+                  </span>
+                )}
               </div>
               <Input
                 type="file"
                 accept="image/*,video/*"
                 multiple
                 onChange={(e) => {
-                  const selected = e.target.files ? Array.from(e.target.files) : [];
+                  const selected = e.target.files
+                    ? Array.from(e.target.files)
+                    : [];
                   if (selected.length === 0) return;
 
                   // Merge newly selected files with existing ones (avoid exact duplicates)
@@ -338,39 +461,59 @@ export default function CreateReport() {
                   const merged: File[] = [...existing];
 
                   selected.forEach((f) => {
-                    const exists = merged.some((m) => m.name === f.name && m.size === f.size);
+                    const exists = merged.some(
+                      (m) => m.name === f.name && m.size === f.size
+                    );
                     if (!exists) merged.push(f);
                   });
 
                   if (merged.length > 2) {
-                    toast({ title: "Warning", description: "Maximum 2 files allowed", variant: "destructive" });
+                    toast({
+                      title: "Warning",
+                      description: "Maximum 2 files allowed",
+                      variant: "destructive",
+                    });
                     // clear file input so user can re-select
-                    (e.currentTarget as HTMLInputElement).value = '';
+                    (e.currentTarget as HTMLInputElement).value = "";
                     return;
                   }
 
                   handleImageChange(merged);
                   // clear file input to allow selecting the same file again later if needed
-                  (e.currentTarget as HTMLInputElement).value = '';
+                  (e.currentTarget as HTMLInputElement).value = "";
                 }}
                 className="input-with-margin"
               />
               {files.length > 0 && (
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "1rem",
+                    marginTop: "1rem",
+                    flexWrap: "wrap",
+                  }}
+                >
                   {files.map((file, idx) => (
-                    <div key={idx} style={{ flex: '1 1 calc(50% - 0.5rem)', minWidth: '200px', position: 'relative' }}>
-                      <div style={{ position: 'relative' }}>
-                        {file.type.startsWith('video/') ? (
+                    <div
+                      key={idx}
+                      style={{
+                        flex: "1 1 calc(50% - 0.5rem)",
+                        minWidth: "200px",
+                        position: "relative",
+                      }}
+                    >
+                      <div style={{ position: "relative" }}>
+                        {file.type.startsWith("video/") ? (
                           <video
                             src={URL.createObjectURL(file)}
                             controls
-                            style={{ width: '100%', borderRadius: '0.5rem' }}
+                            style={{ width: "100%", borderRadius: "0.5rem" }}
                           />
-                        ) : file.type.startsWith('image/') ? (
+                        ) : file.type.startsWith("image/") ? (
                           <img
                             src={URL.createObjectURL(file)}
                             alt={`Preview ${idx + 1}`}
-                            style={{ width: '100%', borderRadius: '0.5rem' }}
+                            style={{ width: "100%", borderRadius: "0.5rem" }}
                           />
                         ) : null}
                         {/* Remove button */}
@@ -378,44 +521,68 @@ export default function CreateReport() {
                           type="button"
                           onClick={() => handleRemoveFile(idx)}
                           style={{
-                            position: 'absolute',
-                            top: '0.5rem',
-                            right: '0.5rem',
-                            background: 'rgba(0, 0, 0, 0.6)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '2rem',
-                            height: '2rem',
-                            cursor: 'pointer',
-                            fontSize: '1.2rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'background 0.2s'
+                            position: "absolute",
+                            top: "0.5rem",
+                            right: "0.5rem",
+                            background: "rgba(0, 0, 0, 0.6)",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "50%",
+                            width: "2rem",
+                            height: "2rem",
+                            cursor: "pointer",
+                            fontSize: "1.2rem",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "background 0.2s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)')}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)')}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background =
+                              "rgba(0, 0, 0, 0.8)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background =
+                              "rgba(0, 0, 0, 0.6)")
+                          }
                           title="Remove file"
                         >
                           ✕
                         </button>
                       </div>
-                      <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', wordBreak: 'break-word' }}>
+                      <div
+                        style={{
+                          marginTop: "0.5rem",
+                          fontSize: "0.75rem",
+                          color: "hsl(var(--muted-foreground))",
+                          wordBreak: "break-word",
+                        }}
+                      >
                         {file.name}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem' }} className="form-buttons-section">
+            <div
+              style={{ display: "flex", gap: "1rem" }}
+              className="form-buttons-section"
+            >
               <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? 'Processing...' : (reportId ? 'UPDATE REPORT' : 'CREATE REPORT')}
+                {isLoading
+                  ? "Processing..."
+                  : reportId
+                  ? "UPDATE REPORT"
+                  : "CREATE REPORT"}
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
             </div>

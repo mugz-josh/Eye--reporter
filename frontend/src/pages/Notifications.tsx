@@ -49,8 +49,12 @@ export default function NotificationsPage() {
       <div className="page-header">
         <h2 className="text-2xl font-semibold">Notifications</h2>
         <div className="button-group">
-          <button className="btn" onClick={() => navigate('/dashboard')}>Back</button>
-          <button className="btn" onClick={markAll}>Mark all read</button>
+          <button className="btn" onClick={() => navigate("/dashboard")}>
+            Back
+          </button>
+          <button className="btn" onClick={markAll}>
+            Mark all read
+          </button>
         </div>
       </div>
 
@@ -66,16 +70,20 @@ export default function NotificationsPage() {
         ) : (
           <div className="notifications-list">
             {notifications.map((n) => (
-              <div key={n.id} className={`notification-card ${!n.is_read ? 'unread' : ''}`}>
+              <div
+                key={n.id}
+                className={`notification-card ${!n.is_read ? "unread" : ""}`}
+              >
                 <div className="notification-header">
-                  <h4 className="notification-title">{n.title || 'Update'}</h4>
+                  <h4 className="notification-title">{n.title || "Update"}</h4>
                   {!n.is_read && <span className="unread-badge">New</span>}
                 </div>
                 <div className="notification-message">{n.message}</div>
                 <div className="notification-meta">
                   {n.related_entity_type && (
                     <span className="related-info">
-                      Related: {n.related_entity_type} {n.related_entity_id ? `#${n.related_entity_id}` : ''}
+                      Related: {n.related_entity_type}{" "}
+                      {n.related_entity_id ? `#${n.related_entity_id}` : ""}
                     </span>
                   )}
                   <span className="notification-date">

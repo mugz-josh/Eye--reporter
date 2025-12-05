@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { storage } from '@/utils/storage';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { storage } from "@/utils/storage";
 
 // ✅ User interface with guaranteed name & role
 export interface User {
@@ -13,7 +19,7 @@ export interface User {
   updated_at: string;
 
   name: string; // always present
-  role: 'admin' | 'user'; // always present
+  role: "admin" | "user"; // always present
 }
 
 interface UserContextType {
@@ -26,7 +32,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };
@@ -45,19 +51,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const userWithExtras: User = {
         ...currentUser,
         name: `${currentUser.first_name} ${currentUser.last_name}`,
-        role: currentUser.is_admin ? 'admin' : 'user',
+        role: currentUser.is_admin ? "admin" : "user",
       };
       setUserState(userWithExtras);
     }
   }, []);
 
-  // Set or clear user
   const setUser = (newUser: User | null) => {
     if (newUser) {
       const userWithExtras: User = {
         ...newUser,
         name: `${newUser.first_name} ${newUser.last_name}`,
-        role: newUser.is_admin ? 'admin' : 'user',
+        role: newUser.is_admin ? "admin" : "user",
       };
       setUserState(userWithExtras);
       storage.setCurrentUser(userWithExtras);

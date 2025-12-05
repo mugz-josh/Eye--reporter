@@ -1,4 +1,4 @@
-import { Report, User } from '@/types/report';
+import { Report, User } from "@/types/report";
 import {
   getAuthHeaders,
   getJsonHeaders,
@@ -9,9 +9,9 @@ import {
   fetchDelete,
   fetchPostFormData,
   fetchPutFormData,
-} from './apiHelpers';
+} from "./apiHelpers";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 interface ApiResponse<T> {
   status: number;
@@ -23,39 +23,48 @@ interface ApiResponse<T> {
 export const api = {
   // Auth endpoints
   login: async (email: string, password: string): Promise<ApiResponse<any>> => {
-    return fetchPost('/v1/auth/login', { email, password });
+    return fetchPost("/v1/auth/login", { email, password });
   },
 
   register: async (userData: Partial<User>): Promise<ApiResponse<any>> => {
-    return fetchPost('/v1/auth/signup', userData);
+    return fetchPost("/v1/auth/signup", userData);
   },
 
   getProfile: async (): Promise<ApiResponse<User>> => {
-    return fetchGet('/v1/auth/profile');
+    return fetchGet("/v1/auth/profile");
   },
 
-  updateProfile: async (profileData: Partial<User>): Promise<ApiResponse<User>> => {
-    return fetchPatch('/v1/auth/profile', profileData);
+  updateProfile: async (
+    profileData: Partial<User>
+  ): Promise<ApiResponse<User>> => {
+    return fetchPatch("/v1/auth/profile", profileData);
   },
 
   getUsers: async (): Promise<ApiResponse<User>> => {
-    return fetchGet('/v1/auth/users');
+    return fetchGet("/v1/auth/users");
   },
 
   // Red Flags endpoints
   getRedFlags: async (): Promise<ApiResponse<any>> => {
-    return fetchGet('/v1/red-flags');
+    return fetchGet("/v1/red-flags");
   },
 
   getRedFlag: async (id: string): Promise<ApiResponse<any>> => {
     return fetchGet(`/v1/red-flags/${id}`);
   },
 
-  createRedFlag: async (redFlagData: any, files: File[] = []): Promise<ApiResponse<any>> => {
-    return fetchPostFormData('/v1/red-flags', redFlagData, files);
+  createRedFlag: async (
+    redFlagData: any,
+    files: File[] = []
+  ): Promise<ApiResponse<any>> => {
+    return fetchPostFormData("/v1/red-flags", redFlagData, files);
   },
 
-  updateRedFlag: async (id: string, redFlagData: any, files: File[] = []): Promise<ApiResponse<any>> => {
+  updateRedFlag: async (
+    id: string,
+    redFlagData: any,
+    files: File[] = []
+  ): Promise<ApiResponse<any>> => {
     if (files.length > 0) {
       return fetchPutFormData(`/v1/red-flags/${id}`, redFlagData, files);
     } else {
@@ -63,11 +72,18 @@ export const api = {
     }
   },
 
-  updateRedFlagLocation: async (id: string, latitude: number, longitude: number): Promise<ApiResponse<any>> => {
+  updateRedFlagLocation: async (
+    id: string,
+    latitude: number,
+    longitude: number
+  ): Promise<ApiResponse<any>> => {
     return fetchPatch(`/v1/red-flags/${id}/location`, { latitude, longitude });
   },
 
-  updateRedFlagStatus: async (id: string, status: string): Promise<ApiResponse<any>> => {
+  updateRedFlagStatus: async (
+    id: string,
+    status: string
+  ): Promise<ApiResponse<any>> => {
     return fetchPatch(`/v1/red-flags/${id}/status`, { status });
   },
 
@@ -77,30 +93,51 @@ export const api = {
 
   // Interventions endpoints
   getInterventions: async (): Promise<ApiResponse<any>> => {
-    return fetchGet('/v1/interventions');
+    return fetchGet("/v1/interventions");
   },
 
   getIntervention: async (id: string): Promise<ApiResponse<any>> => {
     return fetchGet(`/v1/interventions/${id}`);
   },
 
-  createIntervention: async (interventionData: any, files: File[] = []): Promise<ApiResponse<any>> => {
-    return fetchPostFormData('/v1/interventions', interventionData, files);
+  createIntervention: async (
+    interventionData: any,
+    files: File[] = []
+  ): Promise<ApiResponse<any>> => {
+    return fetchPostFormData("/v1/interventions", interventionData, files);
   },
 
-  updateIntervention: async (id: string, interventionData: any, files: File[] = []): Promise<ApiResponse<any>> => {
+  updateIntervention: async (
+    id: string,
+    interventionData: any,
+    files: File[] = []
+  ): Promise<ApiResponse<any>> => {
     if (files.length > 0) {
-      return fetchPutFormData(`/v1/interventions/${id}`, interventionData, files);
+      return fetchPutFormData(
+        `/v1/interventions/${id}`,
+        interventionData,
+        files
+      );
     } else {
       return fetchPut(`/v1/interventions/${id}`, interventionData);
     }
   },
 
-  updateInterventionLocation: async (id: string, latitude: number, longitude: number): Promise<ApiResponse<any>> => {
-    return fetchPatch(`/v1/interventions/${id}/location`, { latitude, longitude });
+  updateInterventionLocation: async (
+    id: string,
+    latitude: number,
+    longitude: number
+  ): Promise<ApiResponse<any>> => {
+    return fetchPatch(`/v1/interventions/${id}/location`, {
+      latitude,
+      longitude,
+    });
   },
 
-  updateInterventionStatus: async (id: string, status: string): Promise<ApiResponse<any>> => {
+  updateInterventionStatus: async (
+    id: string,
+    status: string
+  ): Promise<ApiResponse<any>> => {
     return fetchPatch(`/v1/interventions/${id}/status`, { status });
   },
 
@@ -110,29 +147,29 @@ export const api = {
 
   // Notifications
   getNotifications: async (): Promise<ApiResponse<any>> => {
-    return fetchGet('/v1/notifications');
+    return fetchGet("/v1/notifications");
   },
 
   markAllNotificationsRead: async (): Promise<ApiResponse<any>> => {
-    return fetchPut('/v1/notifications/read', {});
-  }
+    return fetchPut("/v1/notifications/read", {});
+  },
 };
 
 // Auth helper functions
 export const authHelper = {
   setToken: (token: string) => {
-    localStorage.setItem('token', token);
+    localStorage.setItem("token", token);
   },
 
   getToken: (): string | null => {
-    return localStorage.getItem('token');
+    return localStorage.getItem("token");
   },
 
   removeToken: () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
   },
 
   isAuthenticated: (): boolean => {
-    return !!localStorage.getItem('token');
-  }
+    return !!localStorage.getItem("token");
+  },
 };

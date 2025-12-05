@@ -21,7 +21,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <UserProvider> {/* <-- WRAP APP IN UserProvider */}
+      <UserProvider>
+        {" "}
+        {/* <-- WRAP APP IN UserProvider */}
         <TooltipProvider>
           <Toaster />
           <Sonner />
