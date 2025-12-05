@@ -1,5 +1,5 @@
-import { Request } from 'express';
-import { RowDataPacket } from 'mysql2';
+import { Request } from "express";
+import { RowDataPacket } from "mysql2";
 
 export interface User {
   id: number;
@@ -21,7 +21,7 @@ export interface RedFlagDB extends RowDataPacket {
   description: string;
   latitude: number;
   longitude: number;
-  status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
+  status: "draft" | "under-investigation" | "rejected" | "resolved";
   images: string | null; // JSON string or null in database
   videos: string | null; // JSON string or null in database
   created_at: Date;
@@ -36,7 +36,7 @@ export interface RedFlag {
   description: string;
   latitude: number;
   longitude: number;
-  status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
+  status: "draft" | "under-investigation" | "rejected" | "resolved";
   images: string[]; // Array of image file paths
   videos: string[]; // Array of video file paths
   created_at: Date;
@@ -50,7 +50,7 @@ export interface InterventionDB extends RowDataPacket {
   description: string;
   latitude: number;
   longitude: number;
-  status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
+  status: "draft" | "under-investigation" | "rejected" | "resolved";
   images: string | null; // JSON string or null in database
   videos: string | null; // JSON string or null in database
   created_at: Date;
@@ -64,7 +64,7 @@ export interface Intervention {
   description: string;
   latitude: number;
   longitude: number;
-  status: 'draft' | 'under-investigation' | 'rejected' | 'resolved';
+  status: "draft" | "under-investigation" | "rejected" | "resolved";
   images: string[]; // Array of image file paths
   videos: string[]; // Array of video file paths
   created_at: Date;
@@ -122,19 +122,19 @@ export interface UpdateCommentData {
 }
 
 export interface UpdateStatusData {
-  status: 'under-investigation' | 'rejected' | 'resolved';
+  status: "under-investigation" | "rejected" | "resolved";
 }
 
 export interface ApiResponse<T = any> {
   status: number;
   data?: T[];
   error?: string;
-message?: string;
+  message?: string;
 }
 
 export interface AuthResponse {
   token: string;
-  user: Omit<User, 'password'>;
+  user: Omit<User, "password">;
 }
 
 export interface RecordResponse {
@@ -142,7 +142,6 @@ export interface RecordResponse {
   message: string;
 }
 
-// File upload types
 export interface UploadedFile {
   fieldname: string;
   originalname: string;
@@ -153,5 +152,3 @@ export interface UploadedFile {
   path: string;
   size: number;
 }
-
-
