@@ -909,11 +909,11 @@
   width: 3rem;
   height: 3rem;
   border-radius: 0.5rem;
-  background-color: hsl(var(--primary));
+  background-color: hsl(var(--destructive));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: hsl(var(--primary-foreground));
+  color: hsl(var(--destructive-foreground));
   font-weight: 700;
   font-size: 1.25rem;
 }
@@ -2046,6 +2046,15 @@
   margin-top: 3rem !important;
   padding-top: 2rem;
   border-top: 1px solid hsl(var(--border));
+}
+
+/* User name background for real database names */
+.user-name-bg {
+  background-color: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  display: inline-block;
 }
 
 

@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu, Search } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu, Search, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Report, User } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -41,38 +42,40 @@ export default function AdminDashboard() {
 
       const allReports: Report[] = [];
 
-      if (redFlagsRes.status === 200 && redFlagsRes.data) {
+      // FIX: Add Array.isArray() check to prevent TypeScript error
+      if (redFlagsRes.status === 200 && redFlagsRes.data && Array.isArray(redFlagsRes.data)) {
         const redFlags = redFlagsRes.data.map((item: any) => ({
-          id: item.id.toString(),
+          id: item.id?.toString() || '',
           type: 'red-flag' as const,
-          title: item.title,
-          description: item.description,
-          latitude: parseFloat(item.latitude),
-          longitude: parseFloat(item.longitude),
-          status: item.status.toUpperCase().replace('-', ' ') as Report['status'],
-          userId: item.user_id.toString(),
-          userName: `${item.first_name} ${item.last_name}`,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
+          title: item.title || '',
+          description: item.description || '',
+          latitude: parseFloat(item.latitude) || 0,
+          longitude: parseFloat(item.longitude) || 0,
+          status: (item.status?.toUpperCase().replace('-', ' ') || 'DRAFT') as Report['status'],
+          userId: item.user_id?.toString() || '',
+          userName: `${item.first_name || ''} ${item.last_name || ''}`.trim(),
+          createdAt: item.created_at || '',
+          updatedAt: item.updated_at || '',
           images: item.images || [],
           videos: item.videos || []
         }));
         allReports.push(...redFlags);
       }
 
-      if (interventionsRes.status === 200 && interventionsRes.data) {
+      // FIX: Add Array.isArray() check here too
+      if (interventionsRes.status === 200 && interventionsRes.data && Array.isArray(interventionsRes.data)) {
         const interventions = interventionsRes.data.map((item: any) => ({
-          id: item.id.toString(),
+          id: item.id?.toString() || '',
           type: 'intervention' as const,
-          title: item.title,
-          description: item.description,
-          latitude: parseFloat(item.latitude),
-          longitude: parseFloat(item.longitude),
-          status: item.status.toUpperCase().replace('-', ' ') as Report['status'],
-          userId: item.user_id.toString(),
-          userName: `${item.first_name} ${item.last_name}`,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
+          title: item.title || '',
+          description: item.description || '',
+          latitude: parseFloat(item.latitude) || 0,
+          longitude: parseFloat(item.longitude) || 0,
+          status: (item.status?.toUpperCase().replace('-', ' ') || 'DRAFT') as Report['status'],
+          userId: item.user_id?.toString() || '',
+          userName: `${item.first_name || ''} ${item.last_name || ''}`.trim(),
+          createdAt: item.created_at || '',
+          updatedAt: item.updated_at || '',
           images: item.images || [],
           videos: item.videos || []
         }));
@@ -118,21 +121,22 @@ export default function AdminDashboard() {
   const loadRealUsers = async () => {
     try {
       const response = await api.getUsers();
-      if (response.status === 200 && response.data) {
+      if (response.status === 200 && response.data && Array.isArray(response.data)) {
         const formattedUsers = response.data.map((user: any) => ({
           ...user,
           name: `${user.first_name} ${user.last_name}`,
           role: user.is_admin ? 'admin' : 'user'
         }));
         setRealUsers(formattedUsers);
-        toast({ title: "Success", description: "Real users loaded successfully" });
+        toast({ title: "Success", description: " Users loaded successfully" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to load real users", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to load  Users", variant: "destructive" });
     }
   };
 
   const isUsersPage = location.pathname === '/admin/users';
+  const isAnalyticsPage = location.pathname === '/admin/analytics';
   const getUserReports = (userId: string) => reports.filter(r => r.userId === userId);
 
   const filteredReports = reports.filter(report => {
@@ -164,9 +168,14 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
-          <Link to="/admin" className={`nav-link ${!isUsersPage ? 'nav-link-active' : ''}`}>
+          <Link to="/admin" className={`nav-link ${!isUsersPage && !isAnalyticsPage ? 'nav-link-active' : ''}`}>
             <Grid3x3 size={20} />
             <span>All Reports</span>
+          </Link>
+
+          <Link to="/admin/analytics" className={`nav-link ${isAnalyticsPage ? 'nav-link-active' : ''}`}>
+            <BarChart3 size={20} />
+            <span>Analytics</span>
           </Link>
 
           <Link to="/admin/users" className={`nav-link ${isUsersPage ? 'nav-link-active' : ''}`}>
@@ -182,7 +191,7 @@ export default function AdminDashboard() {
       </aside>
 
       <main className="main-content">
-        {!isUsersPage ? (
+        {!isUsersPage && !isAnalyticsPage ? (
           <>
             <div className="page-header">
               <h2 className="text-2xl font-semibold">All Reports</h2>
@@ -194,9 +203,9 @@ export default function AdminDashboard() {
 
             <div className="mb-6" style={{ position: 'relative', maxWidth: '500px' }}>
               <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
-              <Input 
-                type="text" 
-                placeholder="Search by Report ID or User Name..." 
+              <Input
+                type="text"
+                placeholder="Search by Report ID or User Name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ paddingLeft: '3rem' }}
@@ -245,7 +254,7 @@ export default function AdminDashboard() {
                         <p><strong>By:</strong> {report.userName}</p>
                         <p><strong>Status:</strong> {report.status}</p>
                       </div>
-                      
+
                       {report.images && report.images.length > 0 && (
                         <div className="space-y-2 mb-4">
                           {report.images.map((img: string, idx: number) => (
@@ -276,7 +285,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </>
-        ) : (
+        ) : isUsersPage ? (
           <>
             <div className="page-header">
               <h2 className="text-2xl font-semibold">Users</h2>
@@ -301,6 +310,7 @@ export default function AdminDashboard() {
                       <p><strong>User ID:</strong> {user.id}</p>
                       <p><strong>Email:</strong> {user.email}</p>
                       <p><strong>Role:</strong> {user.role}</p>
+
                       <p><strong>Reports:</strong> {getUserReports(user.id).length}</p>
                     </div>
                     <Button size="sm" variant="outline" className="w-full" onClick={() => setSelectedUser(user)}>
@@ -335,7 +345,110 @@ export default function AdminDashboard() {
               </div>
             )}
           </>
-        )}
+        ) : isAnalyticsPage ? (
+          <>
+            <div className="page-header">
+              <h2 className="text-2xl font-semibold">Analytics</h2>
+              <div className="flex items-center gap-3">
+                <span>Admin</span>
+                <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}><span>AD</span></div>
+              </div>
+            </div>
+
+            <div className="cards-grid mb-10" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--primary))' }}>{reports.length}</div>
+                <div className="stat-label">Total Reports</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--muted-foreground))' }}>{reports.filter(r => r.status === 'DRAFT').length}</div>
+                <div className="stat-label">Draft</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--chart-2))' }}>{reports.filter(r => r.status === 'UNDER INVESTIGATION').length}</div>
+                <div className="stat-label">Under Investigation</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{reports.filter(r => r.status === 'RESOLVED').length}</div>
+                <div className="stat-label">Resolved</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value" style={{ color: 'hsl(var(--destructive))' }}>{reports.filter(r => r.status === 'REJECTED').length}</div>
+                <div className="stat-label">Rejected</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="bg-card p-6 rounded-lg border">
+                <h3 className="text-lg font-semibold mb-4">Reports by Status</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Draft', value: reports.filter(r => r.status === 'DRAFT').length },
+                        { name: 'Under Investigation', value: reports.filter(r => r.status === 'UNDER INVESTIGATION').length },
+                        { name: 'Resolved', value: reports.filter(r => r.status === 'RESOLVED').length },
+                        { name: 'Rejected', value: reports.filter(r => r.status === 'REJECTED').length }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      dataKey="value"
+                    >
+                      <Cell fill="hsl(var(--muted-foreground))" />
+                      <Cell fill="hsl(var(--chart-2))" />
+                      <Cell fill="hsl(142, 76%, 36%)" />
+                      <Cell fill="hsl(var(--destructive))" />
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-card p-6 rounded-lg border">
+                <h3 className="text-lg font-semibold mb-4">Reports by Type</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={[
+                    { name: 'Red Flags', value: reports.filter(r => r.type === 'red-flag').length },
+                    { name: 'Interventions', value: reports.filter(r => r.type === 'intervention').length }
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-card p-6 rounded-lg border">
+              <h3 className="text-lg font-semibold mb-4">Reports Over Time</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={
+                  reports.reduce((acc: any[], report) => {
+                    const date = new Date(report.createdAt).toLocaleDateString();
+                    const existing = acc.find(item => item.date === date);
+                    if (existing) {
+                      existing.value += 1;
+                    } else {
+                      acc.push({ date, value: 1 });
+                    }
+                    return acc;
+                  }, []).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                }>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        ) : null}
       </main>
     </div>
   );
