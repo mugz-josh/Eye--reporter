@@ -4,9 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { UserProvider } from "@/contexts/UserContext"; // <-- ADDED
+import { UserProvider } from "@/contexts/UserContext";
 
-import Homepage from "./pages/Homepage"; // <- landing page
+import Homepage from "./pages/Homepage";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import CreateReport from "./pages/CreateReport";
@@ -15,23 +15,17 @@ import Interventions from "./pages/Interventions";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/Notifications";
-
 const queryClient = new QueryClient();
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <UserProvider>
-        {" "}
-        {/* <-- WRAP APP IN UserProvider */}
         <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Make Homepage the landing page */}
               <Route path="/" element={<Homepage />} />
-              {/* Login page */}
               <Route path="/login" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/red-flags" element={<RedFlags />} />
@@ -48,5 +42,4 @@ const App = () => (
     </ThemeProvider>
   </QueryClientProvider>
 );
-
 export default App;
