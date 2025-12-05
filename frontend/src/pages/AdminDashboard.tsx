@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu, Search, BarChart3 } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Users, Eye, X, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { Report, User } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -136,7 +136,6 @@ export default function AdminDashboard() {
   };
 
   const isUsersPage = location.pathname === '/admin/users';
-  const isAnalyticsPage = location.pathname === '/admin/analytics';
   const getUserReports = (userId: string) => reports.filter(r => r.userId === userId);
 
   const filteredReports = reports.filter(report => {
@@ -168,14 +167,9 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="sidebar-nav" style={{ marginTop: '2rem' }}>
-          <Link to="/admin" className={`nav-link ${!isUsersPage && !isAnalyticsPage ? 'nav-link-active' : ''}`}>
+          <Link to="/admin" className={`nav-link ${!isUsersPage ? 'nav-link-active' : ''}`}>
             <Grid3x3 size={20} />
             <span>All Reports</span>
-          </Link>
-
-          <Link to="/admin/analytics" className={`nav-link ${isAnalyticsPage ? 'nav-link-active' : ''}`}>
-            <BarChart3 size={20} />
-            <span>Analytics</span>
           </Link>
 
           <Link to="/admin/users" className={`nav-link ${isUsersPage ? 'nav-link-active' : ''}`}>
@@ -191,7 +185,7 @@ export default function AdminDashboard() {
       </aside>
 
       <main className="main-content">
-        {!isUsersPage && !isAnalyticsPage ? (
+        {!isUsersPage ? (
           <>
             <div className="page-header">
               <h2 className="text-2xl font-semibold">All Reports</h2>
@@ -344,109 +338,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )}
-          </>
-        ) : isAnalyticsPage ? (
-          <>
-            <div className="page-header">
-              <h2 className="text-2xl font-semibold">Analytics</h2>
-              <div className="flex items-center gap-3">
-                <span>Admin</span>
-                <div className="brand-icon" style={{ width: '2.5rem', height: '2.5rem' }}><span>AD</span></div>
-              </div>
-            </div>
-
-            <div className="cards-grid mb-10" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-              <div className="stat-card">
-                <div className="stat-value" style={{ color: 'hsl(var(--primary))' }}>{reports.length}</div>
-                <div className="stat-label">Total Reports</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value" style={{ color: 'hsl(var(--muted-foreground))' }}>{reports.filter(r => r.status === 'DRAFT').length}</div>
-                <div className="stat-label">Draft</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value" style={{ color: 'hsl(var(--chart-2))' }}>{reports.filter(r => r.status === 'UNDER INVESTIGATION').length}</div>
-                <div className="stat-label">Under Investigation</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value" style={{ color: 'hsl(142, 76%, 36%)' }}>{reports.filter(r => r.status === 'RESOLVED').length}</div>
-                <div className="stat-label">Resolved</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value" style={{ color: 'hsl(var(--destructive))' }}>{reports.filter(r => r.status === 'REJECTED').length}</div>
-                <div className="stat-label">Rejected</div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-lg font-semibold mb-4">Reports by Status</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: 'Draft', value: reports.filter(r => r.status === 'DRAFT').length },
-                        { name: 'Under Investigation', value: reports.filter(r => r.status === 'UNDER INVESTIGATION').length },
-                        { name: 'Resolved', value: reports.filter(r => r.status === 'RESOLVED').length },
-                        { name: 'Rejected', value: reports.filter(r => r.status === 'REJECTED').length }
-                      ]}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={(entry) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      dataKey="value"
-                    >
-                      <Cell fill="hsl(var(--muted-foreground))" />
-                      <Cell fill="hsl(var(--chart-2))" />
-                      <Cell fill="hsl(142, 76%, 36%)" />
-                      <Cell fill="hsl(var(--destructive))" />
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-lg font-semibold mb-4">Reports by Type</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={[
-                    { name: 'Red Flags', value: reports.filter(r => r.type === 'red-flag').length },
-                    { name: 'Interventions', value: reports.filter(r => r.type === 'intervention').length }
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-lg font-semibold mb-4">Reports Over Time</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={
-                  reports.reduce((acc: any[], report) => {
-                    const date = new Date(report.createdAt).toLocaleDateString();
-                    const existing = acc.find(item => item.date === date);
-                    if (existing) {
-                      existing.value += 1;
-                    } else {
-                      acc.push({ date, value: 1 });
-                    }
-                    return acc;
-                  }, []).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                }>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
           </>
         ) : null}
       </main>
