@@ -1,4 +1,4 @@
-// utils/emailHelpers.ts
+
 export const getPriorityLevel = (status: string): string => {
   switch (status) {
     case "under-investigation": return "HIGH PRIORITY";
@@ -27,9 +27,7 @@ export const getStatusEmoji = (status: string): string => {
   }
 };
 
-export const getStatusIcon = getStatusEmoji; // Alias for admin template
-
-// Random ID generators
+export const getStatusIcon = getStatusEmoji; 
 export const generateReportId = (): string => 
   `#${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
@@ -45,14 +43,14 @@ export const generateTrackingId = (): string =>
 export const generateNotificationId = (): string => 
   `NT-${Date.now().toString(36).toUpperCase()}`;
 
-// Email subject generators
+
 export const getUserSubject = (reportType: string): string => 
   `Update: Your ${reportType} Report Status`;
 
 export const getAdminSubject = (reportType: string): string =>
   `[Admin Notice] ${reportType} Report Status Updated`;
 
-// Lucide icon SVGs for email templates
+
 export const getLucideIcon = (iconName: string): string => {
   const icons: { [key: string]: string } = {
     clipboard: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>`,
