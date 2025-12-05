@@ -1,11 +1,11 @@
 // src/createTables.ts
 
 // 1. Load dotenv FIRST to ensure process.env is populated
-import * as dotenv from 'dotenv';
-dotenv.config(); 
+import * as dotenv from "dotenv";
+dotenv.config();
 
 // 2. Import the pool AFTER the environment variables are loaded
-import pool from '../config/database'; 
+import pool from "../config/database";
 
 async function createTables() {
   try {
@@ -25,7 +25,7 @@ async function createTables() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       );
     `);
-    console.log('✅ Interventions table created successfully!');
+    console.log("✅ Interventions table created successfully!");
 
     // Create red_flags table
     await pool.query(`
@@ -43,7 +43,7 @@ async function createTables() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       );
     `);
-    console.log('✅ Red_flags table created successfully!');
+    console.log("✅ Red_flags table created successfully!");
 
     // Create notifications table
     await pool.query(`
@@ -59,7 +59,7 @@ async function createTables() {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log('✅ Notifications table created successfully!');
+    console.log("✅ Notifications table created successfully!");
 
     // Create users table
     await pool.query(`
@@ -75,10 +75,9 @@ async function createTables() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       );
     `);
-    console.log('✅ Users table created successfully!');
-
+    console.log("✅ Users table created successfully!");
   } catch (err) {
-    console.error('❌ Error creating tables:', err);
+    console.error("❌ Error creating tables:", err);
   } finally {
     // Ensure the pool connection is closed
     pool.end();

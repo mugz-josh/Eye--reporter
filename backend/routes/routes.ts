@@ -5,19 +5,14 @@ import interventionsController from '../Controllers/interventionsController';
 import auth from '../middleware/auth';
 import notificationController from '../Controllers/notificationController';
 import upload from '../config/multer';
-
 const router = express.Router();
-
-// Public auth routes
 router.post('/auth/signup', authController.signup);
 router.post('/auth/login', authController.login);
 
-// Protected user routes
 router.get('/auth/profile', auth.verifyToken, authController.getProfile);
 router.patch('/auth/profile', auth.verifyToken, authController.updateProfile);
 router.get('/auth/users', auth.verifyToken, auth.isAdmin, authController.getUsers);
 
-// Red-flag routes with file upload support
 router.get('/red-flags', auth.verifyToken, redFlagsController.getAllRedFlags);
 router.get('/red-flags/:id', auth.verifyToken, redFlagsController.getRedFlag);
 router.post('/red-flags', auth.verifyToken, upload.array('media', 2), redFlagsController.createRedFlag);
@@ -26,15 +21,11 @@ router.patch('/red-flags/:id/comment', auth.verifyToken, auth.checkRecordOwnersh
 router.post('/red-flags/:id/media', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.addMedia);
 router.delete('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), redFlagsController.deleteRedFlag);
 router.patch('/red-flags/:id/status', auth.verifyToken, auth.isAdmin, redFlagsController.updateStatus);
+router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag)
 
-// Notifications
 router.get('/notifications', auth.verifyToken, notificationController.getUserNotifications);
 router.put('/notifications/read', auth.verifyToken, notificationController.markAllAsRead);
 
-// Red-flag update route with file upload support
-router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);
-
-// Intervention routes with file upload support
 router.get('/interventions', auth.verifyToken, interventionsController.getAllInterventions);
 router.get('/interventions/:id', auth.verifyToken, interventionsController.getIntervention);
 router.post('/interventions', auth.verifyToken, upload.array('media', 2), interventionsController.createIntervention);
@@ -43,8 +34,6 @@ router.patch('/interventions/:id/comment', auth.verifyToken, auth.checkRecordOwn
 router.post('/interventions/:id/media', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.addMedia);
 router.delete('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), interventionsController.deleteIntervention);
 router.patch('/interventions/:id/status', auth.verifyToken, auth.isAdmin, interventionsController.updateStatus);
-
-// Intervention update route with file upload support
 router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.array('media', 2), interventionsController.updateIntervention);
 
 export default router;

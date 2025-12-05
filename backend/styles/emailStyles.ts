@@ -1,5 +1,4 @@
-// styles/emailStyles.ts
-import { emailConstants } from './emailConstants';
+import { emailConstants } from "./emailConstants";
 
 const style = emailConstants;
 
@@ -27,7 +26,7 @@ export const getBaseStyles = () => `
     box-shadow: ${style.shadows.lg};
   }
   
-  /* Header */
+
   .header {
     background: linear-gradient(135deg, ${style.colors.primary} 0%, #1a2530 100%);
     padding: ${style.spacing.xxl} ${style.spacing.xl};
@@ -83,12 +82,12 @@ export const getBaseStyles = () => `
     font-weight: 400;
   }
   
-  /* Content Area */
+  
   .content {
     padding: ${style.spacing.xxl};
   }
   
-  /* Modern Table */
+  
   .data-table {
     width: 100%;
     border-collapse: separate;
@@ -138,7 +137,7 @@ export const getBaseStyles = () => `
     min-width: 140px;
   }
   
-  /* Status Panel */
+
   .status-panel {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -197,7 +196,7 @@ export const getBaseStyles = () => `
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
   }
   
-  /* Priority Badge */
+  
   .priority-badge {
     display: inline-flex;
     align-items: center;
@@ -224,7 +223,7 @@ export const getBaseStyles = () => `
     color: white;
   }
   
-  /* Action Cards */
+  
   .action-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -265,7 +264,7 @@ export const getBaseStyles = () => `
     margin-bottom: ${style.spacing.md};
   }
   
-  /* Buttons */
+  
   .btn {
     display: inline-flex;
     align-items: center;
@@ -303,7 +302,7 @@ export const getBaseStyles = () => `
     background: ${style.colors.white};
   }
   
-  /* Footer */
+  
   .footer {
     background: linear-gradient(135deg, #2c3e50 0%, #1a2530 100%);
     padding: ${style.spacing.xxl} ${style.spacing.xl};
@@ -336,8 +335,7 @@ export const getBaseStyles = () => `
     margin-top: ${style.spacing.xl};
     line-height: 1.5;
   }
-  
-  /* Alert Box */
+
   .alert {
     padding: ${style.spacing.xl};
     border-radius: 12px;
@@ -356,7 +354,7 @@ export const getBaseStyles = () => `
     background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.1) 100%);
   }
   
-  /* Mobile Responsive */
+  
   @media (max-width: ${style.breakpoints.tablet}) {
     .content {
       padding: ${style.spacing.xl};
@@ -404,7 +402,7 @@ export const getBaseStyles = () => `
     }
   }
   
-  /* Progress Bar */
+
   .progress-container {
     margin: ${style.spacing.xl} 0;
     background: ${style.colors.lightGray};
@@ -446,7 +444,7 @@ export const getBaseStyles = () => `
     font-weight: 500;
   }
 
-  /* Trust Indicators */
+  
   .trust-indicators {
     display: flex;
     justify-content: center;
@@ -470,7 +468,7 @@ export const getBaseStyles = () => `
     box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
   }
 
-  /* Section Separators */
+  
   .section-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, ${style.colors.lightGray}, transparent);
@@ -490,7 +488,7 @@ export const getBaseStyles = () => `
     border-radius: 2px;
   }
 
-  /* Timeline Visualization */
+  
   .timeline {
     position: relative;
     margin: ${style.spacing.xl} 0;
@@ -571,7 +569,7 @@ export const getBaseStyles = () => `
     margin-top: ${style.spacing.sm};
   }
 
-  /* Enhanced Buttons */
+
   .btn-group {
     display: flex;
     gap: ${style.spacing.md};
@@ -607,7 +605,7 @@ export const getBaseStyles = () => `
     box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
   }
 
-  /* Typography Improvements */
+  
   .heading-primary {
     font-size: 24px;
     font-weight: 700;

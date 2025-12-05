@@ -12,11 +12,12 @@ export const emailConstants = {
     gray: "#95a5a6",
     lightGray: "#ecf0f1",
     white: "#ffffff",
-    background: "#f5f7fa"
+    background: "#f5f7fa",
   },
   fonts: {
-    primary: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    mono: "'SF Mono', 'Roboto Mono', Consolas, monospace"
+    primary:
+      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    mono: "'SF Mono', 'Roboto Mono', Consolas, monospace",
   },
   spacing: {
     xs: "8px",
@@ -24,16 +25,16 @@ export const emailConstants = {
     md: "16px",
     lg: "24px",
     xl: "32px",
-    xxl: "48px"
+    xxl: "48px",
   },
   breakpoints: {
     mobile: "600px",
-    tablet: "768px"
+    tablet: "768px",
   },
   shadows: {
     sm: "0 2px 4px rgba(0,0,0,0.05)",
     md: "0 4px 12px rgba(0,0,0,0.08)",
-    lg: "0 8px 24px rgba(0,0,0,0.12)"
+    lg: "0 8px 24px rgba(0,0,0,0.12)",
   },
   urls: {
     logo: "https://cdn.vectorstock.com/i/1000v/80/63/reporter-mascot-logo-design-vector-45838063.jpg",
@@ -49,6 +50,6 @@ export const emailConstants = {
     auditLogs: "https://ireporter.com/admin/audit-logs",
     reportDetails: "https://ireporter.com/admin/reports",
     analytics: "https://ireporter.com/admin/analytics",
-    settings: "https://ireporter.com/admin/settings"
-  }
+    settings: "https://ireporter.com/admin/settings",
+  },
 };

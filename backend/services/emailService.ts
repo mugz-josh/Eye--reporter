@@ -1,5 +1,5 @@
-import transporter from '../utils/email';
-import { emailConstants, getBaseStyles } from '../styles/emailStyles';
+import transporter from "../utils/email";
+import { emailConstants, getBaseStyles } from "../styles/emailStyles";
 import {
   getPriorityLevel,
   getPriorityClass,
@@ -12,8 +12,8 @@ import {
   generateNotificationId,
   getUserSubject,
   getAdminSubject,
-  getLucideIcon
-} from '../utils/emailHelper';
+  getLucideIcon,
+} from "../utils/emailHelper";
 
 class EmailService {
   static async sendReportStatusNotification(
@@ -25,11 +25,13 @@ class EmailService {
   ): Promise<void> {
     try {
       const userEmailString = Array.isArray(userEmail)
-        ? userEmail.join(', ')
+        ? userEmail.join(", ")
         : userEmail;
 
-      const adminEmail = process.env.ADMIN_EMAIL || 'joshua.mugisha.upti@gmail.com';
-      const reportTypeDisplay = reportType === 'redflag' ? 'Red Flag' : 'Intervention';
+      const adminEmail =
+        process.env.ADMIN_EMAIL || "joshua.mugisha.upti@gmail.com";
+      const reportTypeDisplay =
+        reportType === "redflag" ? "Red Flag" : "Intervention";
 
       const userMailOptions = {
         from: `iReporter System <${process.env.EMAIL_USER}>`,
@@ -41,7 +43,7 @@ class EmailService {
           reportTitle,
           oldStatus,
           newStatus
-        )
+        ),
       };
 
       const adminMailOptions = {
@@ -54,24 +56,22 @@ class EmailService {
           reportTitle,
           oldStatus,
           newStatus
-        )
+        ),
       };
 
       await Promise.all([
         transporter.sendMail(userMailOptions),
-        transporter.sendMail(adminMailOptions)
+        transporter.sendMail(adminMailOptions),
       ]);
 
-      console.log('Emails sent successfully.');
+      console.log("Emails sent successfully.");
     } catch (error) {
-      console.error('Email sending error:', error);
+      console.error("Email sending error:", error);
       throw error;
     }
   }
 
-  // ================================================================
-  // USER EMAIL TEMPLATE
-  // ================================================================
+  
   private static createUserEmailTemplate(
     userEmail: string,
     reportType: string,
@@ -110,9 +110,9 @@ class EmailService {
     <div class="content">
       <!-- Trust Indicators -->
       <div class="trust-indicators">
-        <div class="trust-badge">${getLucideIcon('shield')} Secure</div>
-        <div class="trust-badge">${getLucideIcon('lock')} Encrypted</div>
-        <div class="trust-badge">${getLucideIcon('check-circle')} Verified</div>
+        <div class="trust-badge">${getLucideIcon("shield")} Secure</div>
+        <div class="trust-badge">${getLucideIcon("lock")} Encrypted</div>
+        <div class="trust-badge">${getLucideIcon("check-circle")} Verified</div>
       </div>
 
       <!-- Progress Bar -->
@@ -123,7 +123,7 @@ class EmailService {
 
       <!-- Greeting -->
       <div class="mb-4">
-        <h2 class="heading-primary">Hello ${userEmail.split('@')[0]},</h2>
+        <h2 class="heading-primary">Hello ${userEmail.split("@")[0]},</h2>
         <p class="text-lead">Your report has been reviewed and its status has been updated. Here are the details:</p>
       </div>
       
@@ -139,7 +139,9 @@ class EmailService {
             <td class="label">Report Type</td>
             <td>
               <strong>${reportType}</strong>
-              <span class="priority-badge ${getPriorityClass(newStatus)}" style="margin-left: 12px;">
+              <span class="priority-badge ${getPriorityClass(
+                newStatus
+              )}" style="margin-left: 12px;">
                 ${getPriorityLevel(newStatus)}
               </span>
             </td>
@@ -154,20 +156,20 @@ class EmailService {
           </tr>
           <tr>
             <td class="label">Date Submitted</td>
-            <td>${new Date().toLocaleDateString('en-US', { 
-              weekday: 'long',
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            <td>${new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
             })}</td>
           </tr>
           <tr>
             <td class="label">Last Updated</td>
-            <td>${new Date().toLocaleDateString('en-US', { 
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
+            <td>${new Date().toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}</td>
           </tr>
         </tbody>
@@ -195,24 +197,30 @@ class EmailService {
       <h3 class="mb-2 text-primary">Recommended Actions</h3>
       <div class="action-grid">
         <div class="action-card primary">
-          <div class="action-icon">${getLucideIcon('eye')}</div>
+          <div class="action-icon">${getLucideIcon("eye")}</div>
           <div class="action-title">View Full Report</div>
           <div class="action-description">Access complete report details and history</div>
-          <a href="${style.urls.reports}" class="btn btn-primary">View Report</a>
+          <a href="${
+            style.urls.reports
+          }" class="btn btn-primary">View Report</a>
         </div>
 
         <div class="action-card secondary">
-          <div class="action-icon">${getLucideIcon('dashboard')}</div>
+          <div class="action-icon">${getLucideIcon("dashboard")}</div>
           <div class="action-title">Dashboard Overview</div>
           <div class="action-description">Monitor all your reports in one place</div>
-          <a href="${style.urls.dashboard}" class="btn btn-secondary">Go to Dashboard</a>
+          <a href="${
+            style.urls.dashboard
+          }" class="btn btn-secondary">Go to Dashboard</a>
         </div>
 
         <div class="action-card support">
-          <div class="action-icon">${getLucideIcon('headphones')}</div>
+          <div class="action-icon">${getLucideIcon("headphones")}</div>
           <div class="action-title">Need Help?</div>
           <div class="action-description">Our support team is here to assist you</div>
-          <a href="${style.urls.contact}" class="btn btn-outline">Contact Support</a>
+          <a href="${
+            style.urls.contact
+          }" class="btn btn-outline">Contact Support</a>
         </div>
       </div>
 
@@ -245,17 +253,21 @@ class EmailService {
           <tr>
             <td><strong>Resolution</strong></td>
             <td>Final resolution and closure</td>
-            <td>${newStatus === 'resolved' ? 'Completed' : 'Pending'}</td>
+            <td>${newStatus === "resolved" ? "Completed" : "Pending"}</td>
           </tr>
         </tbody>
       </table>
       
       <!-- Important Alert -->
       <div class="alert alert-warning">
-        <strong>⚠️ Important Notice:</strong>
+        <strong> Important Notice:</strong>
         <p class="mt-1">
           This is an automated notification. Please do not reply to this email. 
-          For inquiries, contact <a href="mailto:${style.urls.supportEmail}" style="color: ${style.colors.warning};">${style.urls.supportEmail}</a>.
+          For inquiries, contact <a href="mailto:${
+            style.urls.supportEmail
+          }" style="color: ${style.colors.warning};">${
+      style.urls.supportEmail
+    }</a>.
           Keep your Report ID for future reference.
         </p>
       </div>
@@ -265,7 +277,9 @@ class EmailService {
     <div class="footer">
       <div class="footer-links">
         <a href="${style.urls.helpCenter}" class="footer-link">Help Center</a>
-        <a href="${style.urls.privacyPolicy}" class="footer-link">Privacy Policy</a>
+        <a href="${
+          style.urls.privacyPolicy
+        }" class="footer-link">Privacy Policy</a>
         <a href="${style.urls.terms}" class="footer-link">Terms of Service</a>
         <a href="${style.urls.dashboard}" class="footer-link">Your Dashboard</a>
         <a href="${style.urls.reports}" class="footer-link">Report Portal</a>
@@ -284,9 +298,7 @@ class EmailService {
     `;
   }
 
-  // ================================================================
-  // ADMIN EMAIL TEMPLATE
-  // ================================================================
+  
   private static createAdminEmailTemplate(
     userEmail: string,
     reportType: string,
@@ -325,7 +337,9 @@ class EmailService {
     <div class="content">
       <!-- Critical Alert -->
       <div class="alert alert-warning">
-        <strong>${getLucideIcon('alert-triangle')} ADMINISTRATIVE ACTION REQUIRED:</strong>
+        <strong>${getLucideIcon(
+          "alert-triangle"
+        )} ADMINISTRATIVE ACTION REQUIRED:</strong>
         <p class="mt-1">A report status change has been processed. Verification and documentation required.</p>
       </div>
 
@@ -333,7 +347,9 @@ class EmailService {
       <div class="status-panel">
         <div class="status-card">
           <div class="status-label">Report Type</div>
-          <div class="status-value" style="background: ${style.colors.primary}; color: white;">
+          <div class="status-value" style="background: ${
+            style.colors.primary
+          }; color: white;">
             ${getStatusIcon(reportType)} ${reportType}
           </div>
         </div>
@@ -373,12 +389,12 @@ class EmailService {
           </tr>
           <tr>
             <td class="label">Timestamp</td>
-            <td>${new Date().toLocaleString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
+            <td>${new Date().toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
             })}</td>
             <td>UTC ${new Date().getTimezoneOffset() / -60}</td>
           </tr>
@@ -408,7 +424,10 @@ class EmailService {
               <span class="priority-badge">${oldStatus.toUpperCase()}</span>
               ${getStatusIcon(oldStatus)}
             </td>
-            <td>${new Date(Date.now() - 3600000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+            <td>${new Date(Date.now() - 3600000).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}</td>
             <td>—</td>
           </tr>
           <tr>
@@ -419,7 +438,10 @@ class EmailService {
               </span>
               ${getStatusIcon(newStatus)}
             </td>
-            <td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+            <td>${new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}</td>
             <td><span class="priority-badge priority-high">UPDATED</span></td>
           </tr>
         </tbody>
@@ -429,31 +451,39 @@ class EmailService {
       <h3 class="mb-2 text-primary">System Actions</h3>
       <div class="action-grid">
         <div class="action-card">
-          <div class="action-icon">${getLucideIcon('settings')}</div>
+          <div class="action-icon">${getLucideIcon("settings")}</div>
           <div class="action-title">Admin Panel</div>
           <div class="action-description">Access full administrative controls</div>
-          <a href="${style.urls.adminPanel}" class="btn btn-primary">Open Panel</a>
+          <a href="${
+            style.urls.adminPanel
+          }" class="btn btn-primary">Open Panel</a>
         </div>
 
         <div class="action-card">
-          <div class="action-icon">${getLucideIcon('clipboard')}</div>
+          <div class="action-icon">${getLucideIcon("clipboard")}</div>
           <div class="action-title">Report Details</div>
           <div class="action-description">View complete report information</div>
-          <a href="${style.urls.reportDetails}" class="btn btn-secondary">View Report</a>
+          <a href="${
+            style.urls.reportDetails
+          }" class="btn btn-secondary">View Report</a>
         </div>
 
         <div class="action-card">
-          <div class="action-icon">${getLucideIcon('bar-chart')}</div>
+          <div class="action-icon">${getLucideIcon("bar-chart")}</div>
           <div class="action-title">Audit Logs</div>
           <div class="action-description">Review system audit trail</div>
-          <a href="${style.urls.auditLogs}" class="btn btn-secondary">View Logs</a>
+          <a href="${
+            style.urls.auditLogs
+          }" class="btn btn-secondary">View Logs</a>
         </div>
 
         <div class="action-card">
-          <div class="action-icon">${getLucideIcon('user')}</div>
+          <div class="action-icon">${getLucideIcon("user")}</div>
           <div class="action-title">User Profile</div>
           <div class="action-description">Access user information</div>
-          <a href="${style.urls.userProfile}" class="btn btn-secondary">View User</a>
+          <a href="${
+            style.urls.userProfile
+          }" class="btn btn-secondary">View User</a>
         </div>
       </div>
 
@@ -473,25 +503,37 @@ class EmailService {
             <td>Database</td>
             <td><span class="priority-badge priority-low">UPDATED</span></td>
             <td>Report status updated in primary DB</td>
-            <td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+            <td>${new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}</td>
           </tr>
           <tr>
             <td>Notifications</td>
             <td><span class="priority-badge priority-low">SENT</span></td>
             <td>User notification dispatched</td>
-            <td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+            <td>${new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}</td>
           </tr>
           <tr>
             <td>Audit System</td>
             <td><span class="priority-badge priority-low">LOGGED</span></td>
             <td>Change recorded in audit trail</td>
-            <td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+            <td>${new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}</td>
           </tr>
           <tr>
             <td>Security</td>
             <td><span class="priority-badge priority-low">VERIFIED</span></td>
             <td>Security check passed</td>
-            <td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+            <td>${new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}</td>
           </tr>
         </tbody>
       </table>
@@ -537,7 +579,9 @@ class EmailService {
 
       <!-- Important Alert -->
       <div class="alert alert-info">
-        <strong>${getLucideIcon('clipboard-list')} Administrative Notes:</strong>
+        <strong>${getLucideIcon(
+          "clipboard-list"
+        )} Administrative Notes:</strong>
         <ul style="margin-left: 20px; margin-top: 8px;">
           <li>This action has been logged in the permanent audit trail</li>
           <li>The user (${userEmail}) has been notified automatically</li>
@@ -550,11 +594,15 @@ class EmailService {
     <!-- Footer -->
     <div class="footer">
       <div class="footer-links">
-        <a href="${style.urls.adminPanel}" class="footer-link">Admin Dashboard</a>
+        <a href="${
+          style.urls.adminPanel
+        }" class="footer-link">Admin Dashboard</a>
         <a href="${style.urls.analytics}" class="footer-link">Analytics</a>
         <a href="${style.urls.settings}" class="footer-link">Settings</a>
         <a href="${style.urls.auditLogs}" class="footer-link">Audit Logs</a>
-        <a href="${style.urls.userProfile}" class="footer-link">User Management</a>
+        <a href="${
+          style.urls.userProfile
+        }" class="footer-link">User Management</a>
       </div>
       <div class="footer-copyright">
         <p>© ${new Date().getFullYear()} iReporter Admin System v2.4.1</p>
@@ -562,7 +610,7 @@ class EmailService {
         <p style="opacity: 0.7; font-size: 11px; margin-top: 8px;">
           Notification ID: ${notificationId} •
           System: PROD-01 •
-          User: ${userEmail.split('@')[0]}
+          User: ${userEmail.split("@")[0]}
         </p>
       </div>
     </div>
