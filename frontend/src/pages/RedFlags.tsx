@@ -182,15 +182,13 @@ export default function RedFlags() {
       });
     }
   };
-
   const displayName = currentUser
     ? `${currentUser.first_name} ${currentUser.last_name}`
     : "";
   const initials = `${currentUser?.first_name?.[0] || ""}${
     currentUser?.last_name?.[0] || ""
   }`;
-
-  return (
+   return (
     <div className="page-dashboard">
       <button
         className="mobile-menu-btn"
@@ -198,36 +196,30 @@ export default function RedFlags() {
       >
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
-
       <div
         className={`mobile-overlay ${sidebarOpen ? "show" : ""}`}
         onClick={() => setSidebarOpen(false)}
       />
-
-      <aside className={`page-aside ${sidebarOpen ? "" : "mobile-hidden"}`}>
+       <aside className={`page-aside ${sidebarOpen ? "" : "mobile-hidden"}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
-            <Flag className="text-primary-foreground" size={20} />
+          <Flag className="text-primary-foreground" size={20} />
           </div>
           <h1 className="sidebar-title">iReporter</h1>
         </div>
-
         <nav className="sidebar-nav" style={{ marginTop: "2rem" }}>
           <Link to="/dashboard" className="nav-link">
             <Grid3x3 size={20} />
             <span>Dashboard</span>
           </Link>
-
           <Link to="/red-flags" className="nav-link nav-link-active">
             <Flag size={20} />
             <span>Red Flags</span>
           </Link>
-
           <Link to="/interventions" className="nav-link">
             <Plus size={20} />
             <span>Interventions</span>
           </Link>
-
           <button
             onClick={handleLogout}
             className="nav-link"
@@ -238,7 +230,6 @@ export default function RedFlags() {
           </button>
         </nav>
       </aside>
-
       <main className="main-content">
         <div className="page-header">
           <div>
@@ -247,9 +238,7 @@ export default function RedFlags() {
               <span>Red Flags</span>
             </div>
             <h2 className="text-2xl font-semibold">My Red Flags</h2>
-          </div>
-
-          <div className="flex items-center gap-3">
+          </div><div className="flex items-center gap-3">
             <span>{displayName}</span>
             <div
               className="brand-icon"
@@ -259,8 +248,7 @@ export default function RedFlags() {
             </div>
           </div>
         </div>
-
-        <div className="cards-grid mb-10">
+         <div className="cards-grid mb-10">
           <div className="stat-card">
             <div className="stat-value" style={{ color: "hsl(142, 76%, 36%)" }}>
               {stats.resolved}
@@ -283,7 +271,6 @@ export default function RedFlags() {
             <div className="stat-label">Rejected Red Flags</div>
           </div>
         </div>
-
         <Button
           onClick={() => navigate("/create?type=red-flag")}
           className="mb-6"
@@ -291,7 +278,6 @@ export default function RedFlags() {
           <Plus size={20} />
           Create Red Flag
         </Button>
-
         {loading ? (
           <div className="text-center py-12">
             <p className="muted-foreground">Loading red flags...</p>
@@ -311,42 +297,20 @@ export default function RedFlags() {
                   <span className="record-badge badge-destructive">
                     Red Flag
                   </span>
-
                   <h4 className="text-lg font-semibold mb-2">{report.title}</h4>
-
                   <div className="space-y-2 text-sm muted-foreground mb-4">
-                    <p>
-                      <strong>Report ID:</strong> {report.id}
-                    </p>
-                    <p>
-                      <strong>Description:</strong>
-                    </p>
+                    <p> <strong>Report ID:</strong> {report.id}</p>
+                    <p><strong>Description:</strong></p>
                     <p>{report.description}</p>
-                    <p>
-                      <strong>Status:</strong>
-                    </p>
-                    <p
-                      className={
-                        report.status === "RESOLVED"
-                          ? "status-resolved"
-                          : "status-other"
-                      }
-                    >
-                      {report.status}
-                    </p>
-                    <p>
-                      <strong>Location:</strong>
-                    </p>
-                    <p>
-                      Lat: {report.latitude.toFixed(6)}, Lon:{" "}
-                      {report.longitude.toFixed(6)}
-                    </p>
-                    <p className="text-xs">
-                      Created: {new Date(report.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
+                    <p><strong>Status:</strong></p>
+                    <p className={report.status === "RESOLVED"? "status-resolved": "status-other"} > {report.status}</p>
+                    <p><strong>Location:</strong></p>
+                    <p>Lat: {report.latitude.toFixed(6)}, Lon:{" "}{report.longitude.toFixed(6)}</p>
+                    <p className="text-xs">Created: {new Date(report.createdAt).toLocaleDateString()}</p>
+                    </div>
 
-                  {report.images && report.images.length > 0 && (
+            
+            {report.images && report.images.length > 0 && (
                     <div className="space-y-2 mb-4">
                       {report.images.map((img: string, idx: number) => (
                         <img
