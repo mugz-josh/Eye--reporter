@@ -21,7 +21,7 @@ import {
 } from "../utils/controllerHelpers";
 
 export const interventionsController = {
-  // Get all interventions (filtered by user unless admin)
+  
   getAllInterventions: async (
     req: AuthRequest,
     res: Response
@@ -30,7 +30,7 @@ export const interventionsController = {
       const userId = req.user?.id;
       const isAdmin = req.user?.isAdmin;
 
-      // Admin sees all reports, regular users see only their own
+    
       const query = isAdmin
         ? `
           SELECT i.*, u.first_name, u.last_name, u.email 
@@ -51,7 +51,7 @@ export const interventionsController = {
         isAdmin ? [] : [userId]
       );
 
-      // Use helper to parse JSON fields
+      
       const interventionsWithParsedMedia = parseMedia(results);
 
       sendSuccess(res, 200, interventionsWithParsedMedia);
@@ -60,7 +60,7 @@ export const interventionsController = {
     }
   },
 
-  // Get single intervention
+  
   getIntervention: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -91,7 +91,7 @@ export const interventionsController = {
       }
 
       const intervention = results[0];
-      // Parse JSON fields for images and videos
+      
       const interventionWithParsedMedia = {
         ...intervention,
         images: intervention?.images ? JSON.parse(intervention.images) : [],
@@ -111,7 +111,7 @@ export const interventionsController = {
     }
   },
 
-  // Create intervention with optional media
+  
   createIntervention: async (
     req: AuthRequest,
     res: Response
@@ -129,7 +129,7 @@ export const interventionsController = {
         return;
       }
 
-      // Validate required fields
+      
       const validation = validateCreateRecord(
         title,
         description,
@@ -141,13 +141,13 @@ export const interventionsController = {
         return;
       }
 
-      // Process media files
+
       const media =
         files && files.length > 0
           ? processMediaFiles(files)
           : { images: [], videos: [] };
 
-      // Create intervention record
+      
       const query = `
         INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -173,7 +173,7 @@ export const interventionsController = {
     }
   },
 
-  // Add media to existing intervention
+  
   addMedia: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -195,7 +195,7 @@ export const interventionsController = {
         return;
       }
 
-      // Check if intervention exists and user owns it
+      
       const checkQuery =
         "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
@@ -213,7 +213,7 @@ export const interventionsController = {
 
       const intervention = checkResults[0];
 
-      // Check ownership
+      
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -222,7 +222,7 @@ export const interventionsController = {
         return;
       }
 
-      // Check if record can be modified
+      
       if (intervention?.status !== "draft") {
         res.status(403).json({
           status: 403,
@@ -232,7 +232,7 @@ export const interventionsController = {
         return;
       }
 
-      // Separate images and videos
+      
       const imageFiles = files.filter((file) =>
         file.mimetype.startsWith("image/")
       );
@@ -240,7 +240,7 @@ export const interventionsController = {
         file.mimetype.startsWith("video/")
       );
 
-      // Parse existing media
+      
       const existingImages = intervention.images
         ? JSON.parse(intervention.images)
         : [];
@@ -248,14 +248,14 @@ export const interventionsController = {
         ? JSON.parse(intervention.videos)
         : [];
 
-      // Add new files
+  
       const newImages = imageFiles.map((file) => file.filename);
       const newVideos = videoFiles.map((file) => file.filename);
 
       const updatedImages = [...existingImages, ...newImages];
       const updatedVideos = [...existingVideos, ...newVideos];
 
-      // Update the record
+    
       const updateQuery =
         "UPDATE interventions SET images = ?, videos = ? WHERE id = ?";
       await pool.execute(updateQuery, [
@@ -282,7 +282,7 @@ export const interventionsController = {
     }
   },
 
-  // Update intervention location
+  
   updateLocation: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -296,7 +296,7 @@ export const interventionsController = {
         return;
       }
 
-      // Check if record can be modified
+      
       const checkQuery =
         "SELECT user_id, status FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
@@ -314,7 +314,7 @@ export const interventionsController = {
 
       const record = checkResults[0];
 
-      // Check ownership
+      
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -354,7 +354,7 @@ export const interventionsController = {
     }
   },
 
-  // Update intervention comment/description
+  
   updateComment: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -368,7 +368,7 @@ export const interventionsController = {
         return;
       }
 
-      // Check if record can be modified
+      
       const checkQuery =
         "SELECT user_id, status FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
@@ -386,7 +386,7 @@ export const interventionsController = {
 
       const record = checkResults[0];
 
-      // Check ownership
+      
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -426,7 +426,7 @@ export const interventionsController = {
     }
   },
 
-  // Delete intervention
+  
   deleteIntervention: async (
     req: AuthRequest,
     res: Response
@@ -442,7 +442,7 @@ export const interventionsController = {
         return;
       }
 
-      // Check if record can be deleted
+      
       const checkQuery =
         "SELECT user_id, status FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
@@ -460,7 +460,7 @@ export const interventionsController = {
 
       const record = checkResults[0];
 
-      // Check ownership
+      
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -499,7 +499,7 @@ export const interventionsController = {
     }
   },
 
-  // Update intervention status (Admin only) - ✅ UPDATED THIS FUNCTION
+  
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
