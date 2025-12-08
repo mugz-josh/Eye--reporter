@@ -59,7 +59,7 @@ createNotificationForUser: async (payload: {
     }
   },
 
-  // Mark all notifications for the user as read
+  
   markAllAsRead: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
@@ -90,7 +90,7 @@ createNotificationForUser: async (payload: {
     }
   },
 
-  // Delete a specific notification
+  
   deleteNotification: async (
     req: AuthRequest,
     res: Response
@@ -127,7 +127,7 @@ createNotificationForUser: async (payload: {
         return;
       }
 
-      // Ensure the notification belongs to the user
+      
       const query = "DELETE FROM notifications WHERE id = ? AND user_id = ?";
       const [result] = (await pool.execute(query, [
         notificationId,

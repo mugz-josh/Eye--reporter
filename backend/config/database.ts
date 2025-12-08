@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise"; // Change to promise-based import
+import mysql from "mysql2/promise"; 
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -13,7 +13,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Verify connection with async/await
+
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();

@@ -1,8 +1,3 @@
-/**
- * Toast Notification Helper - Eliminate repeated toast patterns
- * REPLACES: toast({ title: "...", description: "...", variant: "..." }) repeated 20+ times
- */
-
 interface ToastConfig {
   title: string;
   description: string;

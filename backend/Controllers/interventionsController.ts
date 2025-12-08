@@ -122,7 +122,7 @@ export const interventionsController = {
       const userId = req.user?.id;
       const files = req.files as Express.Multer.File[];
 
-      // Validate user auth
+      
       const authCheck = validateUserAuth(userId);
       if (!authCheck.valid) {
         sendError(res, 401, authCheck.error!);
@@ -523,7 +523,7 @@ export const interventionsController = {
         return;
       }
 
-      // ✅ CHANGED: Fetch report to get owner, title, CURRENT STATUS, and user email
+      
       const [rows] = await pool.execute<InterventionWithUser[]>(
         "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = ?",
         [id]
@@ -567,18 +567,17 @@ export const interventionsController = {
         );
       }
 
-      // ✅ ADDED: EMAIL NOTIFICATION
-      try {
+   try {
         await EmailService.sendReportStatusNotification(
-          report.email, // User's email
-          "intervention", // Report type
-          report.title, // Report title
-          report.status, // OLD status (before update)
-          status // NEW status
+          report.email,
+          "intervention", 
+          report.title, 
+          report.status, 
+          status 
         );
       } catch (emailError) {
         console.error("Failed to send email notification:", emailError);
-        // Continue even if email fails
+        
       }
 
       res.status(200).json({
@@ -599,7 +598,7 @@ export const interventionsController = {
     }
   },
 
-  // Update entire intervention report
+  
   updateIntervention: async (
     req: AuthRequest,
     res: Response
@@ -618,7 +617,7 @@ export const interventionsController = {
         return;
       }
 
-      // Check if intervention exists and user owns it
+
       const checkQuery =
         "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
@@ -636,7 +635,7 @@ export const interventionsController = {
 
       const intervention = checkResults[0];
 
-      // Check ownership
+    
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -645,7 +644,7 @@ export const interventionsController = {
         return;
       }
 
-      // Check if record can be modified
+      
       if (intervention?.status !== "draft") {
         res.status(403).json({
           status: 403,
@@ -655,7 +654,7 @@ export const interventionsController = {
         return;
       }
 
-      // Handle file updates if new files are uploaded
+    
       let updatedImages = intervention.images
         ? JSON.parse(intervention.images)
         : [];
@@ -664,7 +663,7 @@ export const interventionsController = {
         : [];
 
       if (files && files.length > 0) {
-        // Replace existing media with new files
+        
         const imageFiles = files.filter((file) =>
           file.mimetype.startsWith("image/")
         );
@@ -676,7 +675,7 @@ export const interventionsController = {
         updatedVideos = videoFiles.map((file) => file.filename);
       }
 
-      // Update the record
+      
       const updateQuery = `
         UPDATE interventions 
         SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ? 

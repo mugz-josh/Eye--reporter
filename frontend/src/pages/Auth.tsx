@@ -8,19 +8,17 @@ import { api, authHelper } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/utils/storage";
 import { useUser } from "@/contexts/UserContext";
-import type { User } from "@/contexts/UserContext"; // ✅ use the User type from UserContext
+import type { User } from "@/contexts/UserContext"; 
 
 export default function Auth() {
   const [showLogin, setShowLogin] = useState(false);
 
-  // Sign up state
+  
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupLoading, setSignupLoading] = useState(false);
-
-  // Login state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
@@ -39,15 +37,15 @@ export default function Auth() {
         setShowLogin(true);
       }
     } catch (e) {
-      // ignore
+      
     }
   }, [location.search, (location as any).state]);
 
-  // ✅ Fixed: added name and role properties
+  
   const fetchAndStoreProfile = async (): Promise<User | null> => {
     try {
       const resp = await api.getProfile();
-      const raw: any = resp?.data?.[0] ?? resp?.data ?? null; // no resp.user
+      const raw: any = resp?.data?.[0] ?? resp?.data ?? null; 
 
       if (raw) {
         const mapped: User = {
@@ -61,15 +59,15 @@ export default function Auth() {
             raw.created_at || raw.createdAt || new Date().toISOString(),
           updated_at:
             raw.updated_at || raw.updatedAt || new Date().toISOString(),
-          name: `${raw.first_name || ""} ${raw.last_name || ""}`, // ✅ added
-          role: raw.is_admin || raw.isAdmin ? "admin" : "user", // ✅ added
+          name: `${raw.first_name || ""} ${raw.last_name || ""}`, 
+          role: raw.is_admin || raw.isAdmin ? "admin" : "user", 
         };
         storage.setCurrentUser(mapped);
         setUser(mapped);
         return mapped;
       }
     } catch {
-      // ignore
+      
     }
     return null;
   };

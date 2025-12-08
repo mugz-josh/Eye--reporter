@@ -15,7 +15,7 @@ import { Report } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
-import { useUser } from "@/contexts/UserContext"; // <-- use context
+import { useUser } from "@/contexts/UserContext"; 
 
 export default function Interventions() {
   const navigate = useNavigate();
@@ -52,8 +52,7 @@ export default function Interventions() {
       const response = await api.getInterventions();
 
       if (response.status === 200 && response.data) {
-        // Map backend data to frontend Report type
-        const mappedReports = response.data.map((item: any) => ({
+      const mappedReports = response.data.map((item: any) => ({
           id: item.id.toString(),
           type: "intervention" as const,
           title: item.title,
@@ -71,11 +70,8 @@ export default function Interventions() {
           videos: item.videos || [],
         }));
 
-        // Backend already filters by user, no need to filter again
-        setReports(mappedReports);
-
-        // Calculate stats
-        const resolved = mappedReports.filter(
+     setReports(mappedReports);
+      const resolved = mappedReports.filter(
           (r: Report) => r.status === "RESOLVED"
         ).length;
         const unresolved = mappedReports.filter(

@@ -31,7 +31,7 @@ export function NotificationBell() {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  // Only show unread notifications in the dropdown (hide read ones)
+  
   const unreadNotifications = notifications.filter((n) => !n.is_read);
 
   const markAllAsRead = async () => {

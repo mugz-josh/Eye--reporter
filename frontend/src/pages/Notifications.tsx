@@ -37,7 +37,7 @@ export default function NotificationsPage() {
   const markAll = async () => {
     try {
       await api.markAllNotificationsRead();
-      // Refresh list
+      
       await load();
     } catch (err) {
       console.error("Failed to mark all read:", err);

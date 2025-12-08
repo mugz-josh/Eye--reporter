@@ -2,8 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../components/ui/styles/components.css";
 import { ThemeToggle } from "@/components/ThemeToggle";
-
-// Import icons from lucide-react
 import {
   Shield,
   Activity,
@@ -16,16 +14,13 @@ import {
 } from "lucide-react";
 
 const Homepage: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleSignup = () => {
-    // Navigate to auth page with signup mode
-    navigate("/login", { state: { mode: "signup" } });
+ const navigate = useNavigate();
+const handleSignup = () => {
+ navigate("/login", { state: { mode: "signup" } });
   };
 
   return (
     <div className="homepage">
-      {/* Navigation Header */}
       <header className="homepage-header">
         <div className="header-container">
           <div
@@ -61,7 +56,7 @@ const Homepage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      
       <section
         className="hero"
         style={{
@@ -118,7 +113,7 @@ const Homepage: React.FC = () => {
         </div>
       </section>
 
-      {/* Impact Statistics Section */}
+      
       <section id="impact" className="stats-section">
         <h2 className="section-title">Making Real Impact Across Africa</h2>
         <p className="section-subtitle">
@@ -164,7 +159,7 @@ const Homepage: React.FC = () => {
         </div>
       </section>
 
-      {/* Process Section */}
+      
       <section id="how-it-works" className="process-section">
         <h2 className="section-title">Simple, Transparent Process</h2>
         <p className="section-subtitle">
@@ -202,7 +197,7 @@ const Homepage: React.FC = () => {
         </div>
       </section>
 
-      {/* Report Types Section */}
+      
       <section id="features" className="report-types-section">
         <h2 className="section-title">Two Ways to Make a Difference</h2>
         <p className="section-subtitle">
@@ -257,7 +252,7 @@ const Homepage: React.FC = () => {
           </div>
         </div>
       </section>
-      {/* CTA Mid Section */}
+    
       <section className="cta-mid-section">
         <div className="cta-mid-content">
           <h2 className="cta-mid-title">Ready to Make a Difference?</h2>

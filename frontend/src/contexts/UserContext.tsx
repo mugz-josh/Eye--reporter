@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { storage } from "@/utils/storage";
 
-// ✅ User interface with guaranteed name & role
 export interface User {
   id: string;
   first_name: string;
@@ -18,8 +17,8 @@ export interface User {
   created_at: string;
   updated_at: string;
 
-  name: string; // always present
-  role: "admin" | "user"; // always present
+  name: string; 
+  role: "admin" | "user"; 
 }
 
 interface UserContextType {
@@ -44,7 +43,6 @@ interface UserProviderProps {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUserState] = useState<User | null>(null);
 
-  // Load user from storage on mount
   useEffect(() => {
     const currentUser = storage.getCurrentUser();
     if (currentUser) {

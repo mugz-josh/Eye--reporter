@@ -49,8 +49,7 @@ export default function AdminDashboard() {
       ]);
 
       const allReports: Report[] = [];
-
-      // FIX: Add Array.isArray() check to prevent TypeScript error
+      
       if (
         redFlagsRes.status === 200 &&
         redFlagsRes.data &&
@@ -74,9 +73,7 @@ export default function AdminDashboard() {
         }));
         allReports.push(...redFlags);
       }
-
-      // FIX: Add Array.isArray() check here too
-      if (
+     if (
         interventionsRes.status === 200 &&
         interventionsRes.data &&
         Array.isArray(interventionsRes.data)

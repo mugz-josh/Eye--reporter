@@ -543,7 +543,7 @@ export const redFlagsController = {
     }
   },
 
-  // Update entire red-flag report
+
   updateRedFlag: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;

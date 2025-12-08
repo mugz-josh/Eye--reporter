@@ -9,8 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
 import { storage } from "@/utils/storage";
 import { api } from "@/services/api";
-import { Report } from "@/types/report";
-
+ 
 export default function CreateReport() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,14 +32,14 @@ export default function CreateReport() {
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     if (!currentUser) {
       navigate("/");
       return;
     }
 
     if (reportId) {
-      // fetch the report from the API instead of local storage
+      
       (async () => {
         try {
           const resp =
@@ -54,7 +53,7 @@ export default function CreateReport() {
             resp.data.length > 0
           ) {
             const item = resp.data[0];
-            // set form fields from API
+            
             setTitle(item.title || "");
             setDescription(item.description || "");
             setLatitude(item.latitude ? parseFloat(item.latitude) : latitude);
@@ -62,7 +61,7 @@ export default function CreateReport() {
               item.longitude ? parseFloat(item.longitude) : longitude
             );
 
-            // build a preview URL for first media (if any)
+            
             const API_BASE = (
               import.meta.env.VITE_API_URL || "http://localhost:3000/api"
             ).replace(/\/api$/, "");
@@ -92,7 +91,7 @@ export default function CreateReport() {
   const handleImageChange = (selected: File[]) => {
     setFiles(selected);
 
-    // preview first image (if any)
+    
     const firstImage = selected.find((f) => f.type.startsWith("image/"));
     if (firstImage) {
       const reader = new FileReader();
@@ -101,10 +100,10 @@ export default function CreateReport() {
       return;
     }
 
-    // if no image, but there is a video, set a placeholder preview (will not show thumbnail)
+    
     const firstVideo = selected.find((f) => f.type.startsWith("video/"));
     if (firstVideo) {
-      // create object URL for video preview
+    
       const url = URL.createObjectURL(firstVideo);
       setImagePreview(url);
       return;
@@ -121,7 +120,7 @@ export default function CreateReport() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // DEBUG: See what's happening
+    
     console.log(
       "🔄 SUBMITTING - reportId:",
       reportId,
@@ -140,7 +139,7 @@ export default function CreateReport() {
       return;
     }
 
-    // Prepare payload for backend
+    
     const payload = {
       title,
       description,
@@ -153,7 +152,7 @@ export default function CreateReport() {
       try {
         let resp: any;
 
-        // FIX: Include files for BOTH create and update
+        
         if (reportType === "red-flag") {
           resp = reportId
             ? await api.updateRedFlag(reportId, payload, files)
@@ -456,7 +455,7 @@ export default function CreateReport() {
                     : [];
                   if (selected.length === 0) return;
 
-                  // Merge newly selected files with existing ones (avoid exact duplicates)
+                  
                   const existing = files || [];
                   const merged: File[] = [...existing];
 
@@ -473,13 +472,13 @@ export default function CreateReport() {
                       description: "Maximum 2 files allowed",
                       variant: "destructive",
                     });
-                    // clear file input so user can re-select
+                    
                     (e.currentTarget as HTMLInputElement).value = "";
                     return;
                   }
 
                   handleImageChange(merged);
-                  // clear file input to allow selecting the same file again later if needed
+                  
                   (e.currentTarget as HTMLInputElement).value = "";
                 }}
                 className="input-with-margin"
@@ -516,7 +515,7 @@ export default function CreateReport() {
                             style={{ width: "100%", borderRadius: "0.5rem" }}
                           />
                         ) : null}
-                        {/* Remove button */}
+                        
                         <button
                           type="button"
                           onClick={() => handleRemoveFile(idx)}

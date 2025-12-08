@@ -21,7 +21,6 @@ interface ApiResponse<T> {
 }
 
 export const api = {
-  // Auth endpoints
   login: async (email: string, password: string): Promise<ApiResponse<any>> => {
     return fetchPost("/v1/auth/login", { email, password });
   },
@@ -44,22 +43,20 @@ export const api = {
     return fetchGet("/v1/auth/users");
   },
 
-  // Red Flags endpoints
-  getRedFlags: async (): Promise<ApiResponse<any>> => {
+   getRedFlags: async (): Promise<ApiResponse<any>> => {
     return fetchGet("/v1/red-flags");
   },
-
-  getRedFlag: async (id: string): Promise<ApiResponse<any>> => {
+ getRedFlag: async (id: string): Promise<ApiResponse<any>> => {
     return fetchGet(`/v1/red-flags/${id}`);
   },
 
-  createRedFlag: async (
+ createRedFlag: async (
     redFlagData: any,
     files: File[] = []
   ): Promise<ApiResponse<any>> => {
     return fetchPostFormData("/v1/red-flags", redFlagData, files);
   },
-
+    
   updateRedFlag: async (
     id: string,
     redFlagData: any,
@@ -91,15 +88,13 @@ export const api = {
     return fetchDelete(`/v1/red-flags/${id}`);
   },
 
-  // Interventions endpoints
   getInterventions: async (): Promise<ApiResponse<any>> => {
     return fetchGet("/v1/interventions");
   },
-
+   
   getIntervention: async (id: string): Promise<ApiResponse<any>> => {
     return fetchGet(`/v1/interventions/${id}`);
   },
-
   createIntervention: async (
     interventionData: any,
     files: File[] = []
@@ -145,7 +140,6 @@ export const api = {
     return fetchDelete(`/v1/interventions/${id}`);
   },
 
-  // Notifications
   getNotifications: async (): Promise<ApiResponse<any>> => {
     return fetchGet("/v1/notifications");
   },
@@ -155,7 +149,7 @@ export const api = {
   },
 };
 
-// Auth helper functions
+
 export const authHelper = {
   setToken: (token: string) => {
     localStorage.setItem("token", token);

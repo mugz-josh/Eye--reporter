@@ -15,7 +15,7 @@ import { Report } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
-import { useUser } from "@/contexts/UserContext"; // <-- use context
+import { useUser } from "@/contexts/UserContext"; 
 
 export default function RedFlags() {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export default function RedFlags() {
       const response = await api.getRedFlags();
 
       if (response.status === 200 && response.data) {
-        // Map backend data to frontend Report type
+        
         const mappedReports = response.data.map((item: any) => ({
           id: item.id.toString(),
           type: "red-flag" as const,
@@ -71,10 +71,10 @@ export default function RedFlags() {
           videos: item.videos || [],
         }));
 
-        // Backend already filters by user, no need to filter again
+        
         setReports(mappedReports);
 
-        // Calculate stats
+        
         const resolved = mappedReports.filter(
           (r: Report) => r.status === "RESOLVED"
         ).length;
@@ -309,8 +309,7 @@ export default function RedFlags() {
                     <p className="text-xs">Created: {new Date(report.createdAt).toLocaleDateString()}</p>
                     </div>
 
-            
-            {report.images && report.images.length > 0 && (
+                  {report.images && report.images.length > 0 && (
                     <div className="space-y-2 mb-4">
                       {report.images.map((img: string, idx: number) => (
                         <img

@@ -86,11 +86,10 @@ export default function Dashboard() {
       setLoading(true);
       const res = await api.updateProfile(profileData);
       if (res.status === 200 && res.data) {
-        // Update user context with new user data
-        const updatedUser = { ...currentUser, ...profileData };
+        
+       const updatedUser = { ...currentUser, ...profileData };
         setUser(updatedUser);
         setShowProfileModal(false);
-        // Reload stats or refresh page data if needed
         loadStats();
       } else {
         alert("Failed to update profile");
