@@ -225,20 +225,18 @@ export const authController = {
         return sendError(res, 404, "User not found after update");
       }
 
-      const user = formatUser(results[0]);
+    const user = formatUser(results[0]);
       sendSuccess(res, 200, user);
     } catch (error) {
       sendError(res, 500, "Server error while updating profile", error);
     }
   },
 
-  
-  getUsers: async (req: AuthRequest, res: Response): Promise<void> => {
+   getUsers: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
 
-      
-      const authCheck = validateUserAuth(userId);
+    const authCheck = validateUserAuth(userId);
       if (!authCheck.valid) {
         return sendError(
           res,
@@ -247,8 +245,7 @@ export const authController = {
         );
       }
 
-      
-      const [userResults]: any = await pool.execute(
+    const [userResults]: any = await pool.execute(
         "SELECT is_admin FROM users WHERE id = ?",
         [userId]
       );
@@ -257,12 +254,11 @@ export const authController = {
         return sendError(res, 403, "Admin access required");
       }
 
-      
-      const [results]: any = await pool.execute(
+    const [results]: any = await pool.execute(
         "SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users ORDER BY created_at DESC"
       );
 
-      const users = results.map(formatUser);
+   const users = results.map(formatUser);
       sendSuccess(res, 200, users);
     } catch (error) {
       sendError(res, 500, "Server error while fetching users", error);
