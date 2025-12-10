@@ -266,7 +266,7 @@ export default function Auth() {
                   <Button
                     type="submit"
                     className="btn-full"
-   s                 disabled={signupLoading}
+                  disabled={signupLoading}
                   >
                     {signupLoading ? "Creating Account..." : "SIGN UP"}
                   </Button>
