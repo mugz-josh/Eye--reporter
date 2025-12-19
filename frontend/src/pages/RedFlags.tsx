@@ -1,12 +1,19 @@
 import {
   Flag,
-  LogOut,
-  Grid3x3,
-  Plus,
   Edit,
   Trash2,
-  Menu,
-  X,
+  Home,
+  ChevronRight,
+  Clock,
+  User,
+  CheckCircle,
+  Clock as ClockIcon,
+  XCircle,
+  TrendingUp,
+  Download,
+  FileText,
+  FileSpreadsheet,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,7 +22,8 @@ import { Report } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
-import { useUser } from "@/contexts/UserContext"; 
+import { useUser } from "@/contexts/UserContext";
+import Sidebar from "@/components/Sidebar";
 
 export default function RedFlags() {
   const navigate = useNavigate();
@@ -35,6 +43,8 @@ export default function RedFlags() {
     open: boolean;
   } | null>(null);
   const { toast } = useToast();
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
   const FILE_BASE = API_URL.replace(/\/api$/, "");
 
@@ -49,45 +59,63 @@ export default function RedFlags() {
   const loadReports = async () => {
     try {
       setLoading(true);
+      console.log('Loading red flags...');
       const response = await api.getRedFlags();
+      console.log('Red Flags API response:', response);
 
       if (response.status === 200 && response.data) {
-        
-        const mappedReports = response.data.map((item: any) => ({
-          id: item.id.toString(),
-          type: "red-flag" as const,
-          title: item.title,
-          description: item.description,
-          latitude: parseFloat(item.latitude),
-          longitude: parseFloat(item.longitude),
-          status: item.status
-            .toUpperCase()
-            .replace("-", " ") as Report["status"],
-          userId: item.user_id.toString(),
-          userName: `${item.first_name} ${item.last_name}`,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
-          images: item.images || [],
-          videos: item.videos || [],
-        }));
+        console.log('Red Flags data:', response.data);
+        try {
+          const mappedReports = response.data.map((item: any) => ({
+            id: item.id.toString(),
+            type: "red-flag" as const,
+            title: item.title,
+            description: item.description,
+            latitude: parseFloat(item.latitude),
+            longitude: parseFloat(item.longitude),
+            status: item.status
+              .toUpperCase()
+              .replace("-", " ") as Report["status"],
+            userId: item.user_id.toString(),
+            userName: `${item.first_name} ${item.last_name}`,
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+            images: item.images || [],
+            videos: item.videos || [],
+          }));
 
-        
-        setReports(mappedReports);
+          console.log('Mapped red flags:', mappedReports);
+          setReports(mappedReports);
 
-        
-        const resolved = mappedReports.filter(
-          (r: Report) => r.status === "RESOLVED"
-        ).length;
-        const unresolved = mappedReports.filter(
-          (r: Report) =>
-            r.status === "DRAFT" || r.status === "UNDER INVESTIGATION"
-        ).length;
-        const rejected = mappedReports.filter(
-          (r: Report) => r.status === "REJECTED"
-        ).length;
-        setStats({ resolved, unresolved, rejected });
+          const resolved = mappedReports.filter(
+            (r: Report) => r.status === "RESOLVED"
+          ).length;
+          const unresolved = mappedReports.filter(
+            (r: Report) =>
+              r.status === "DRAFT" || r.status === "UNDER INVESTIGATION"
+          ).length;
+          const rejected = mappedReports.filter(
+            (r: Report) => r.status === "REJECTED"
+          ).length;
+          setStats({ resolved, unresolved, rejected });
+        } catch (mapError) {
+          console.error('Error mapping red flags data:', mapError);
+          toast({
+            title: "Error",
+            description: "Failed to process red flags data",
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.error('Invalid response:', response);
+        toast({
+          title: "Error",
+          description: "Invalid response from server",
+          variant: "destructive",
+        });
       }
     } catch (error) {
+      console.error('Error loading red flags:', error);
       toast({
         title: "Error",
         description: "Failed to load red flags",
@@ -97,6 +125,24 @@ export default function RedFlags() {
       setLoading(false);
     }
   };
+
+  // Filter and sort reports based on filters
+  const filteredReports = reports
+    .filter(report => {
+      const matchesStatus = statusFilter === "" || report.status === statusFilter;
+      return matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "oldest":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "status":
+          return a.status.localeCompare(b.status);
+        case "newest":
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
 
   const handleLogout = () => {
     setUser(null);
@@ -182,105 +228,380 @@ export default function RedFlags() {
       });
     }
   };
+
+  const exportToCSV = () => {
+    try {
+      const headers = [
+        "Report ID",
+        "Title",
+        "Description",
+        "Status",
+        "Latitude",
+        "Longitude",
+        "Created Date",
+        "Updated Date",
+        "User Name",
+        "Images Count",
+        "Videos Count"
+      ];
+
+      const csvData = filteredReports.map(report => [
+        report.id,
+        report.title,
+        report.description.replace(/"/g, '""'), // Escape quotes
+        report.status,
+        report.latitude,
+        report.longitude,
+        new Date(report.createdAt).toLocaleDateString(),
+        new Date(report.updatedAt).toLocaleDateString(),
+        report.userName,
+        report.images?.length || 0,
+        report.videos?.length || 0
+      ]);
+
+      const csvContent = [
+        headers.join(","),
+        ...csvData.map(row => row.map(field => `"${field}"`).join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `red-flags-report-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Success",
+        description: "CSV report exported successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export CSV",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const exportToPDF = async () => {
+    try {
+      // Create a simple HTML template for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Red Flags Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .stats { display: flex; justify-content: space-around; margin-bottom: 30px; }
+            .stat-card { background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center; }
+            .stat-value { font-size: 24px; font-weight: bold; color: #2563eb; }
+            .stat-label { color: #666; margin-top: 5px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .status-resolved { color: #16a34a; font-weight: bold; }
+            .status-other { color: #dc2626; font-weight: bold; }
+            .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>iReporter - Red Flags Report</h1>
+            <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            <p>Total Reports: ${filteredReports.length}</p>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-value">${stats.resolved}</div>
+              <div class="stat-label">Resolved</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${stats.unresolved}</div>
+              <div class="stat-label">Unresolved</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${stats.rejected}</div>
+              <div class="stat-label">Rejected</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Created</th>
+                <th>User</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredReports.map(report => `
+                <tr>
+                  <td>${report.id}</td>
+                  <td>${report.title}</td>
+                  <td>${report.description.substring(0, 100)}${report.description.length > 100 ? '...' : ''}</td>
+                  <td class="${report.status === 'RESOLVED' ? 'status-resolved' : 'status-other'}">${report.status}</td>
+                  <td>${report.latitude.toFixed(4)}, ${report.longitude.toFixed(4)}</td>
+                  <td>${new Date(report.createdAt).toLocaleDateString()}</td>
+                  <td>${report.userName}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Report generated by iReporter System</p>
+            <p>Confidential - For Internal Use Only</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create blob and download
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `red-flags-report-${new Date().toISOString().split('T')[0]}.html`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Success",
+        description: "PDF report exported successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export PDF",
+        variant: "destructive",
+      });
+    }
+  };
   const displayName = currentUser
     ? `${currentUser.first_name} ${currentUser.last_name}`
     : "";
   const initials = `${currentUser?.first_name?.[0] || ""}${
     currentUser?.last_name?.[0] || ""
   }`;
-   return (
-    <div className="page-dashboard">
-      <button
-        className="mobile-menu-btn"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-      >
-        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-      <div
-        className={`mobile-overlay ${sidebarOpen ? "show" : ""}`}
-        onClick={() => setSidebarOpen(false)}
+  return (
+    <div className="page-dashboard min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        onClose={() => setSidebarOpen(false)}
       />
-       <aside className={`page-aside ${sidebarOpen ? "" : "mobile-hidden"}`}>
-        <div className="sidebar-brand">
-          <div className="brand-icon">
-          <Flag className="text-primary-foreground" size={20} />
-          </div>
-          <h1 className="sidebar-title">iReporter</h1>
-        </div>
-        <nav className="sidebar-nav" style={{ marginTop: "2rem" }}>
-          <Link to="/dashboard" className="nav-link">
-            <Grid3x3 size={20} />
-            <span>Dashboard</span>
-          </Link>
-          <Link to="/red-flags" className="nav-link nav-link-active">
-            <Flag size={20} />
-            <span>Red Flags</span>
-          </Link>
-          <Link to="/interventions" className="nav-link">
-            <Plus size={20} />
-            <span>Interventions</span>
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="nav-link"
-            style={{ width: "100%", textAlign: "left" }}
-          >
-            <LogOut size={20} />
-            <span>Logout</span>
-          </button>
-        </nav>
-      </aside>
       <main className="main-content">
-        <div className="page-header">
-          <div>
-            <div className="page-subtitle">
-              <Flag size={20} />
-              <span>Red Flags</span>
-            </div>
-            <h2 className="text-2xl font-semibold">My Red Flags</h2>
-          </div><div className="flex items-center gap-3">
-            <span>{displayName}</span>
-            <div
-              className="brand-icon"
-              style={{ width: "2.5rem", height: "2.5rem" }}
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Link
+              to="/dashboard"
+              className="flex items-center hover:text-foreground transition-colors"
             >
-              <span>{initials}</span>
+              <Home size={16} className="mr-1" />
+              Dashboard
+            </Link>
+            <ChevronRight size={16} />
+            <span className="text-foreground font-medium">Red Flags</span>
+          </nav>
+        </div>
+
+        <div className="page-header">
+          <div className="flex-1">
+            {/* Personalized Greeting */}
+            <div className="mb-2">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Clock size={16} />
+                <span className="text-sm">
+                  {new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">
+                {(() => {
+                  const hour = new Date().getHours();
+                  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+                  return `${greeting}, ${currentUser?.first_name || 'User'}! 👋`;
+                })()}
+              </h1>
+            </div>
+
+            <div className="page-subtitle">
+              <Flag size={20} className="text-red-500" />
+              <span>Red Flags Management</span>
+            </div>
+            <h2 className="text-xl font-semibold text-muted-foreground">My Red Flags</h2>
+          </div>
+
+          {/* Enhanced User Profile Section */}
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <div className="text-sm font-medium text-foreground">{displayName}</div>
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                <User size={12} />
+                Citizen Reporter
+              </div>
+            </div>
+            <div
+              className="brand-icon relative"
+              style={{
+                width: "3rem",
+                height: "3rem",
+                overflow: "hidden",
+                borderRadius: "50%",
+                border: "2px solid hsl(var(--border))",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+              }}
+            >
+              {currentUser?.profile_picture ? (
+                <img
+                  src={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${currentUser.profile_picture}`}
+                  alt="Profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <span className="text-lg font-semibold text-primary">{initials}</span>
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full"></div>
             </div>
           </div>
         </div>
-         <div className="cards-grid mb-10">
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: "hsl(142, 76%, 36%)" }}>
-              {stats.resolved}
+        {/* Enhanced Stats Dashboard */}
+        <div className="mb-10">
+          <h3 className="text-lg font-semibold mb-6 text-foreground">Report Statistics</h3>
+          <div className="cards-grid">
+            {/* Resolved Stats Card */}
+            <div className="stat-card group hover:shadow-lg transition-all duration-300 border border-green-200 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+              <div className="flex items-center justify-between mb-3">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+                <div className="flex items-center text-green-600 text-sm font-medium">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  +12%
+                </div>
+              </div>
+              <div className="stat-value text-green-700 dark:text-green-300 text-3xl font-bold mb-1">
+                {stats.resolved}
+              </div>
+              <div className="stat-label text-green-800 dark:text-green-200 font-medium">Resolved Red Flags</div>
+              <div className="text-xs text-green-600 dark:text-green-400 mt-2">
+                Successfully addressed
+              </div>
             </div>
-            <div className="stat-label">Resolved Red Flags</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: "hsl(221, 83%, 53%)" }}>
-              {stats.unresolved}
+
+            {/* Unresolved Stats Card */}
+            <div className="stat-card group hover:shadow-lg transition-all duration-300 border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+              <div className="flex items-center justify-between mb-3">
+                <ClockIcon className="w-8 h-8 text-blue-600" />
+                <div className="flex items-center text-blue-600 text-sm font-medium">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  +5%
+                </div>
+              </div>
+              <div className="stat-value text-blue-700 dark:text-blue-300 text-3xl font-bold mb-1">
+                {stats.unresolved}
+              </div>
+              <div className="stat-label text-blue-800 dark:text-blue-200 font-medium">Unresolved Red Flags</div>
+              <div className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                Draft or Under Investigation
+              </div>
             </div>
-            <div className="stat-label">Unresolved Red Flags</div>
-            <div className="text-xs muted-foreground mt-1">
-              (Draft or Under Investigation)
+
+            {/* Rejected Stats Card */}
+            <div className="stat-card group hover:shadow-lg transition-all duration-300 border border-red-200 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900">
+              <div className="flex items-center justify-between mb-3">
+                <XCircle className="w-8 h-8 text-red-600" />
+                <div className="flex items-center text-red-600 text-sm font-medium">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  -3%
+                </div>
+              </div>
+              <div className="stat-value text-red-700 dark:text-red-300 text-3xl font-bold mb-1">
+                {stats.rejected}
+              </div>
+              <div className="stat-label text-red-800 dark:text-red-200 font-medium">Rejected Red Flags</div>
+              <div className="text-xs text-red-600 dark:text-red-400 mt-2">
+                Not approved for review
+              </div>
             </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: "hsl(0, 84%, 60%)" }}>
-              {stats.rejected}
-            </div>
-            <div className="stat-label">Rejected Red Flags</div>
           </div>
         </div>
+
+        {/* Filter Bar */}
+        <div className="bg-card border border-border rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex gap-2">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            >
+              <option value="">All Status</option>
+              <option value="DRAFT">Draft</option>
+              <option value="UNDER INVESTIGATION">Under Investigation</option>
+              <option value="RESOLVED">Resolved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="status">By Status</option>
+            </select>
+          </div>
+        </div>
+
         <Button
           onClick={() => navigate("/create?type=red-flag")}
-          className="mb-6"
+          className="mb-6 shadow-sm hover:shadow-md transition-shadow"
         >
-          <Plus size={20} />
+          <Plus size={20} className="mr-2" />
           Create Red Flag
         </Button>
         {loading ? (
-          <div className="text-center py-12">
-            <p className="muted-foreground">Loading red flags...</p>
+          <div className="space-y-6">
+            {/* Skeleton Loading Cards */}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="record-card animate-pulse">
+                <div className="record-body">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-6 bg-muted rounded w-24"></div>
+                    <div className="h-6 bg-muted rounded w-20"></div>
+                  </div>
+                  <div className="h-5 bg-muted rounded w-3/4 mb-3"></div>
+                  <div className="space-y-2 mb-4">
+                    <div className="h-4 bg-muted rounded w-full"></div>
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-8 bg-muted rounded w-24"></div>
+                    <div className="h-8 bg-muted rounded w-20"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : reports.length === 0 ? (
           <div className="text-center py-12">
@@ -291,64 +612,85 @@ export default function RedFlags() {
           </div>
         ) : (
           <div className="cards-grid">
-            {reports.map((report) => (
-              <div key={report.id} className="record-card">
+            {filteredReports.map((report) => (
+              <div key={report.id} className="record-card hover:shadow-lg transition-all duration-300 group">
                 <div className="record-body">
-                  <span className="record-badge badge-destructive">
-                    Red Flag
-                  </span>
-                  <h4 className="text-lg font-semibold mb-2">{report.title}</h4>
-                  <div className="space-y-2 text-sm muted-foreground mb-4">
-                    <p> <strong>Report ID:</strong> {report.id}</p>
-                    <p><strong>Description:</strong></p>
-                    <p>{report.description}</p>
-                    <p><strong>Status:</strong></p>
-                    <p className={report.status === "RESOLVED"? "status-resolved": "status-other"} > {report.status}</p>
-                    <p><strong>Location:</strong></p>
-                    <p>Lat: {report.latitude.toFixed(6)}, Lon:{" "}{report.longitude.toFixed(6)}</p>
-                    <p className="text-xs">Created: {new Date(report.createdAt).toLocaleDateString()}</p>
+                  {/* Header Section */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Flag className="w-5 h-5 text-red-500" />
+                      <span className="record-badge badge-destructive">Red Flag</span>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      report.status === "RESOLVED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
+                      report.status === "UNDER INVESTIGATION" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
+                      report.status === "REJECTED" ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" :
+                      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                    }`}>
+                      {report.status === "UNDER INVESTIGATION" ? "Under Review" : report.status}
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h4 className="text-lg font-semibold mb-3 text-foreground group-hover:text-primary transition-colors">
+                    {report.title}
+                  </h4>
+
+                  {/* Content Section */}
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-sm text-muted-foreground mb-1"><strong>Report ID:</strong> {report.id}</p>
+                      <p className="text-sm text-muted-foreground mb-2"><strong>Description:</strong></p>
+                      <p className="text-sm text-foreground line-clamp-2">{report.description}</p>
                     </div>
 
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>📍 Lat: {report.latitude.toFixed(4)}, Lon: {report.longitude.toFixed(4)}</span>
+                      <span>📅 {new Date(report.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Media Section */}
                   {report.images && report.images.length > 0 && (
-                    <div className="space-y-2 mb-4">
-                      {report.images.map((img: string, idx: number) => (
-                        <img
-                          key={idx}
-                          src={`${FILE_BASE}/uploads/${img}`}
-                          alt={`${report.title} ${idx + 1}`}
-                          className="record-image"
-                        />
-                      ))}
+                    <div className="mb-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        {report.images.slice(0, 2).map((img: string, idx: number) => (
+                          <img
+                            key={idx}
+                            src={`${FILE_BASE}/uploads/${img}`}
+                            alt={`${report.title} ${idx + 1}`}
+                            className="record-image rounded-lg border border-border"
+                          />
+                        ))}
+                        {report.images.length > 2 && (
+                          <div className="bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
+                            +{report.images.length - 2} more
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  {report.videos && report.videos.length > 0 && (
-                    <div className="space-y-2 mb-4">
-                      {report.videos.map((vid: string, idx: number) => (
-                        <video key={idx} controls className="record-image">
-                          <source src={`${FILE_BASE}/uploads/${vid}`} />
-                        </video>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex gap-2 mt-4">
+                  {/* Actions Section */}
+                  <div className="flex gap-2 pt-3 border-t border-border">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleEdit(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
+                      className="flex-1"
                     >
-                      <Edit size={16} />
-                      Edit Report
+                      <Edit size={14} className="mr-1" />
+                      Edit
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => handleDelete(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
+                      className="flex-1"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} className="mr-1" />
                       Delete
                     </Button>
                   </div>

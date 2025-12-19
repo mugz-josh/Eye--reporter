@@ -1,12 +1,12 @@
 import {
   Flag,
-  LogOut,
-  Grid3x3,
-  Plus,
   Edit,
   Trash2,
-  Menu,
-  X,
+  Home,
+  ChevronRight,
+  Clock,
+  User,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,7 +15,8 @@ import { Report } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
-import { useUser } from "@/contexts/UserContext"; 
+import { useUser } from "@/contexts/UserContext";
+import Sidebar from  "@/components/Sidebar";
 
 export default function Interventions() {
   const navigate = useNavigate();
@@ -49,41 +50,63 @@ export default function Interventions() {
   const loadReports = async () => {
     try {
       setLoading(true);
+      console.log('Loading interventions...');
       const response = await api.getInterventions();
+      console.log('Interventions API response:', response);
 
       if (response.status === 200 && response.data) {
-      const mappedReports = response.data.map((item: any) => ({
-          id: item.id.toString(),
-          type: "intervention" as const,
-          title: item.title,
-          description: item.description,
-          latitude: parseFloat(item.latitude),
-          longitude: parseFloat(item.longitude),
-          status: item.status
-            .toUpperCase()
-            .replace("-", " ") as Report["status"],
-          userId: item.user_id.toString(),
-          userName: `${item.first_name} ${item.last_name}`,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
-          images: item.images || [],
-          videos: item.videos || [],
-        }));
+        console.log('Interventions data:', response.data);
+        try {
+          const mappedReports = response.data.map((item: any) => ({
+            id: item.id.toString(),
+            type: "intervention" as const,
+            title: item.title,
+            description: item.description,
+            latitude: parseFloat(item.latitude),
+            longitude: parseFloat(item.longitude),
+            status: item.status
+              .toUpperCase()
+              .replace("-", " ") as Report["status"],
+            userId: item.user_id.toString(),
+            userName: `${item.first_name} ${item.last_name}`,
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+            images: item.images || [],
+            videos: item.videos || [],
+          }));
 
-     setReports(mappedReports);
-      const resolved = mappedReports.filter(
-          (r: Report) => r.status === "RESOLVED"
-        ).length;
-        const unresolved = mappedReports.filter(
-          (r: Report) =>
-            r.status === "DRAFT" || r.status === "UNDER INVESTIGATION"
-        ).length;
-        const rejected = mappedReports.filter(
-          (r: Report) => r.status === "REJECTED"
-        ).length;
-        setStats({ resolved, unresolved, rejected });
+          console.log('Mapped interventions:', mappedReports);
+          setReports(mappedReports);
+
+          const resolved = mappedReports.filter(
+            (r: Report) => r.status === "RESOLVED"
+          ).length;
+          const unresolved = mappedReports.filter(
+            (r: Report) =>
+              r.status === "DRAFT" || r.status === "UNDER INVESTIGATION"
+          ).length;
+          const rejected = mappedReports.filter(
+            (r: Report) => r.status === "REJECTED"
+          ).length;
+          setStats({ resolved, unresolved, rejected });
+        } catch (mapError) {
+          console.error('Error mapping interventions data:', mapError);
+          toast({
+            title: "Error",
+            description: "Failed to process interventions data",
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.error('Invalid response:', response);
+        toast({
+          title: "Error",
+          description: "Invalid response from server",
+          variant: "destructive",
+        });
       }
     } catch (error) {
+      console.error('Error loading interventions:', error);
       toast({
         title: "Error",
         description: "Failed to load interventions",
@@ -187,71 +210,92 @@ export default function Interventions() {
   }`;
 
   return (
-    <div className="page-dashboard">
-      <button
-        className="mobile-menu-btn"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-      >
-        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
-      <div
-        className={`mobile-overlay ${sidebarOpen ? "show" : ""}`}
-        onClick={() => setSidebarOpen(false)}
+    <div className="page-dashboard min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        onClose={() => setSidebarOpen(false)}
       />
 
-      <aside className={`page-aside ${sidebarOpen ? "" : "mobile-hidden"}`}>
-        <div className="sidebar-brand">
-          <div className="brand-icon">
-            <Flag className="text-primary-foreground" size={20} />
-          </div>
-          <h1 className="sidebar-title">iReporter</h1>
+      <main className="main-content">
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Link
+              to="/dashboard"
+              className="flex items-center hover:text-foreground transition-colors"
+            >
+              <Home size={16} className="mr-1" />
+              Dashboard
+            </Link>
+            <ChevronRight size={16} />
+            <span className="text-foreground font-medium">Interventions</span>
+          </nav>
         </div>
 
-        <nav className="sidebar-nav" style={{ marginTop: "2rem" }}>
-          <Link to="/dashboard" className="nav-link">
-            <Grid3x3 size={20} />
-            <span>Dashboard</span>
-          </Link>
-
-          <Link to="/red-flags" className="nav-link">
-            <Flag size={20} />
-            <span>Red Flags</span>
-          </Link>
-
-          <Link to="/interventions" className="nav-link nav-link-active">
-            <Plus size={20} />
-            <span>Interventions</span>
-          </Link>
-
-          <button
-            onClick={handleLogout}
-            className="nav-link"
-            style={{ width: "100%", textAlign: "left" }}
-          >
-            <LogOut size={20} />
-            <span>Logout</span>
-          </button>
-        </nav>
-      </aside>
-
-      <main className="main-content">
         <div className="page-header">
-          <div>
-            <div className="page-subtitle">
-              <Plus size={20} />
-              <span>Interventions</span>
+          <div className="flex-1">
+            {/* Personalized Greeting */}
+            <div className="mb-2">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Clock size={16} />
+                <span className="text-sm">
+                  {new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">
+                {(() => {
+                  const hour = new Date().getHours();
+                  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+                  return `${greeting}, ${currentUser?.first_name || 'User'}! 👋`;
+                })()}
+              </h1>
             </div>
-            <h2 className="text-2xl font-semibold">My Interventions</h2>
+
+            <div className="page-subtitle">
+              <Plus size={20} className="text-blue-500" />
+              <span>Interventions Management</span>
+            </div>
+            <h2 className="text-xl font-semibold text-muted-foreground">My Interventions</h2>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span>{displayName}</span>
+          {/* Enhanced User Profile Section */}
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <div className="text-sm font-medium text-foreground">{displayName}</div>
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                <User size={12} />
+                Citizen Reporter
+              </div>
+            </div>
             <div
-              className="brand-icon"
-              style={{ width: "2.5rem", height: "2.5rem" }}
+              className="brand-icon relative"
+              style={{
+                width: "3rem",
+                height: "3rem",
+                overflow: "hidden",
+                borderRadius: "50%",
+                border: "2px solid hsl(var(--border))",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+              }}
             >
-              <span>{initials}</span>
+              {currentUser?.profile_picture ? (
+                <img
+                  src={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${currentUser.profile_picture}`}
+                  alt="Profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <span className="text-lg font-semibold text-primary">{initials}</span>
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full"></div>
             </div>
           </div>
         </div>

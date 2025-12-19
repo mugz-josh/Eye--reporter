@@ -11,6 +11,7 @@ router.post('/auth/login', authController.login);
 
 router.get('/auth/profile', auth.verifyToken, authController.getProfile);
 router.patch('/auth/profile', auth.verifyToken, authController.updateProfile);
+router.post('/auth/profile/picture', auth.verifyToken, upload.single('profile_picture'), authController.uploadProfilePicture);
 router.get('/auth/users', auth.verifyToken, auth.isAdmin, authController.getUsers);
 
 router.get('/red-flags', auth.verifyToken, redFlagsController.getAllRedFlags);

@@ -22,6 +22,7 @@ function formatUser(userData: any): Omit<User, "password"> {
     email: userData.email,
     phone: userData.phone || undefined,
     is_admin: userData.is_admin,
+    profile_picture: userData.profile_picture || undefined,
     created_at: userData.created_at,
     updated_at: userData.updated_at,
   };
@@ -132,7 +133,7 @@ export const authController = {
       }
 
       const [results]: any = await pool.execute(
-        "SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users WHERE id = ?",
+        "SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users WHERE id = ?",
         [userId]
       );
 
@@ -217,7 +218,7 @@ export const authController = {
 
       
       const [results]: any = await pool.execute(
-        "SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users WHERE id = ?",
+        "SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users WHERE id = ?",
         [userId]
       );
 
@@ -232,7 +233,31 @@ export const authController = {
     }
   },
 
-   getUsers: async (req: AuthRequest, res: Response): Promise<void> => {
+  uploadProfilePicture: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, 401, "Authentication required");
+      }
+
+      if (!req.file) {
+        return sendError(res, 400, "No file uploaded");
+      }
+
+      const filePath = `/uploads/${req.file.filename}`;
+
+      await pool.execute(
+        "UPDATE users SET profile_picture = ?, updated_at = NOW() WHERE id = ?",
+        [filePath, userId]
+      );
+
+      sendSuccess(res, 200, [{ profile_picture: filePath }]);
+    } catch (error) {
+      sendError(res, 500, "Server error while uploading profile picture", error);
+    }
+  },
+
+  getUsers: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
 
@@ -255,7 +280,7 @@ export const authController = {
       }
 
     const [results]: any = await pool.execute(
-        "SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users ORDER BY created_at DESC"
+        "SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users ORDER BY created_at DESC"
       );
 
    const users = results.map(formatUser);

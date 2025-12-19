@@ -55,12 +55,13 @@ export default function Auth() {
           email: raw.email || "",
           phone: raw.phone || undefined,
           is_admin: raw.is_admin || raw.isAdmin || false,
+          profile_picture: raw.profile_picture || undefined,
           created_at:
             raw.created_at || raw.createdAt || new Date().toISOString(),
           updated_at:
             raw.updated_at || raw.updatedAt || new Date().toISOString(),
-          name: `${raw.first_name || ""} ${raw.last_name || ""}`, 
-          role: raw.is_admin || raw.isAdmin ? "admin" : "user", 
+          name: `${raw.first_name || ""} ${raw.last_name || ""}`,
+          role: raw.is_admin || raw.isAdmin ? "admin" : "user",
         };
         storage.setCurrentUser(mapped);
         setUser(mapped);

@@ -15,7 +15,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 interface ApiResponse<T> {
   status: number;
-  data?: T[];
+  data?: T[] | T;
   message?: string;
   error?: string;
 }
@@ -37,6 +37,17 @@ export const api = {
     profileData: Partial<User>
   ): Promise<ApiResponse<User>> => {
     return fetchPatch("/v1/auth/profile", profileData);
+  },
+
+  uploadProfilePicture: async (file: File): Promise<ApiResponse<{ profile_picture: string }>> => {
+    const formData = new FormData();
+    formData.append("profile_picture", file);
+    const response = await fetch(`${API_URL}/v1/auth/profile/picture`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: formData,
+    });
+    return response.json();
   },
 
   getUsers: async (): Promise<ApiResponse<User>> => {

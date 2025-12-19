@@ -101,7 +101,7 @@ export default function AdminDashboard() {
       const mockUsers = storage.getUsers().map((user) => ({
         ...user,
         name: `${user.first_name} ${user.last_name}`,
-        role: user.is_admin ? "admin" : "user",
+        role: user.is_admin ? "admin" : "user" as "admin" | "user",
       }));
       setUsers(mockUsers);
     } catch (error) {
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
         const formattedUsers = response.data.map((user: any) => ({
           ...user,
           name: `${user.first_name} ${user.last_name}`,
-          role: user.is_admin ? "admin" : "user",
+          role: (user.is_admin ? "admin" : "user") as "admin" | "user",
         }));
         setRealUsers(formattedUsers);
         toast({ title: "Success", description: " Users loaded successfully" });

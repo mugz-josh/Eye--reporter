@@ -5,6 +5,7 @@ import { api } from "@/services/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useUser } from "@/contexts/UserContext";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -18,6 +19,12 @@ export default function Dashboard() {
     resolved: 0,
     rejected: 0,
   });
+
+  const [chartData, setChartData] = useState({
+    typeDistribution: [] as { name: string; value: number; color: string }[],
+    statusDistribution: [] as { name: string; value: number; color: string }[],
+    monthlyData: [] as { month: string; redFlags: number; interventions: number }[],
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -26,6 +33,7 @@ export default function Dashboard() {
     last_name: "",
     email: "",
   });
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -44,21 +52,103 @@ export default function Dashboard() {
         api.getInterventions(),
       ]);
 
-      const redFlagsCount = (redFlagsRes.data || []).filter(
+      const userRedFlags = (redFlagsRes.data || []).filter(
         (r: any) => r.user_id.toString() === currentUser?.id
-      ).length;
-      const interventionsCount = (interventionsRes.data || []).filter(
+      );
+      const userInterventions = (interventionsRes.data || []).filter(
         (r: any) => r.user_id.toString() === currentUser?.id
-      ).length;
+      );
+
+      const redFlagsCount = userRedFlags.length;
+      const interventionsCount = userInterventions.length;
+
+      // Calculate status distribution
+      const allUserReports = [...userRedFlags, ...userInterventions];
+      const statusCounts = {
+        draft: 0,
+        underInvestigation: 0,
+        resolved: 0,
+        rejected: 0,
+      };
+
+      allUserReports.forEach((report: any) => {
+        const status = report.status?.toLowerCase().replace(/\s+/g, '') || 'draft';
+        if (status === 'draft') statusCounts.draft++;
+        else if (status === 'underinvestigation') statusCounts.underInvestigation++;
+        else if (status === 'resolved') statusCounts.resolved++;
+        else if (status === 'rejected') statusCounts.rejected++;
+      });
+
+      // Prepare chart data
+      const typeDistribution = [
+        { name: 'Red Flags', value: redFlagsCount, color: 'hsl(var(--destructive))' },
+        { name: 'Interventions', value: interventionsCount, color: 'hsl(var(--chart-2))' },
+      ];
+
+      const statusDistribution = [
+        { name: 'Draft', value: statusCounts.draft, color: 'hsl(var(--muted-foreground))' },
+        { name: 'Under Investigation', value: statusCounts.underInvestigation, color: 'hsl(var(--chart-2))' },
+        { name: 'Resolved', value: statusCounts.resolved, color: 'hsl(var(--chart-3))' },
+        { name: 'Rejected', value: statusCounts.rejected, color: 'hsl(var(--destructive))' },
+      ];
+
+      // Process real monthly data from user's reports
+      const monthlyStats: { [key: string]: { redFlags: number; interventions: number } } = {};
+
+      // Initialize last 6 months
+      const now = new Date();
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        monthlyStats[monthKey] = { redFlags: 0, interventions: 0 };
+      }
+
+      // Count reports by month
+      allUserReports.forEach((report: any) => {
+        if (report.created_at || report.createdAt) {
+          const createdDate = new Date(report.created_at || report.createdAt);
+          const monthKey = createdDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+          // Only count if it's within the last 6 months
+          const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+          if (createdDate >= sixMonthsAgo) {
+            if (monthlyStats[monthKey]) {
+              // Check if it's a red flag or intervention based on the data structure
+              const isRedFlag = report.type === 'red-flag' || report.type === 'redflag' ||
+                               (report.title && report.title.toLowerCase().includes('red flag')) ||
+                               userRedFlags.some((rf: any) => rf.id === report.id);
+
+              if (isRedFlag) {
+                monthlyStats[monthKey].redFlags++;
+              } else {
+                monthlyStats[monthKey].interventions++;
+              }
+            }
+          }
+        }
+      });
+
+      // Convert to array format for the chart
+      const monthlyData = Object.entries(monthlyStats).map(([month, counts]) => ({
+        month: month.split(' ')[0], // Just the month abbreviation
+        redFlags: counts.redFlags,
+        interventions: counts.interventions,
+      }));
 
       setStats({
         redFlags: redFlagsCount,
         interventions: interventionsCount,
         total: redFlagsCount + interventionsCount,
-        draft: 0,
-        underInvestigation: 0,
-        resolved: 0,
-        rejected: 0,
+        draft: statusCounts.draft,
+        underInvestigation: statusCounts.underInvestigation,
+        resolved: statusCounts.resolved,
+        rejected: statusCounts.rejected,
+      });
+
+      setChartData({
+        typeDistribution,
+        statusDistribution,
+        monthlyData,
       });
     } catch (error) {
       console.error("Failed to load stats:", error);
@@ -84,11 +174,26 @@ export default function Dashboard() {
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
+
+      let updatedUser = { ...currentUser };
+
+      // Upload profile picture if selected
+      if (profilePictureFile) {
+        const uploadRes = await api.uploadProfilePicture(profilePictureFile);
+        if (uploadRes.status === 200 && uploadRes.data && uploadRes.data[0]) {
+          updatedUser.profile_picture = uploadRes.data[0].profile_picture;
+        } else {
+          alert("Failed to upload profile picture");
+          return;
+        }
+      }
+
+      // Update profile data
       const res = await api.updateProfile(profileData);
       if (res.status === 200 && res.data) {
-        
-       const updatedUser = { ...currentUser, ...profileData };
+        updatedUser = { ...updatedUser, ...profileData };
         setUser(updatedUser);
+        setProfilePictureFile(null);
         setShowProfileModal(false);
         loadStats();
       } else {
@@ -199,11 +304,38 @@ export default function Dashboard() {
             </button>
             <div
               className="brand-icon"
-              style={{ width: "2.5rem", height: "2.5rem" }}
+              style={{ width: "2.5rem", height: "2.5rem", overflow: "hidden", borderRadius: "50%" }}
             >
-              <span>{`${currentUser?.first_name?.[0] || ""}${
-                currentUser?.last_name?.[0] || ""
-              }`}</span>
+              {currentUser?.profile_picture ? (
+                <img
+                  src={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${currentUser.profile_picture}`}
+                  alt="Profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={(e) => {
+                    // Hide broken image and show fallback
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <span
+                style={{
+                  display: currentUser?.profile_picture ? 'none' : 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: '100%',
+                  background: 'hsl(var(--muted))',
+                  color: 'hsl(var(--muted-foreground))',
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
+                }}
+              >
+                {`${currentUser?.first_name?.[0] || ""}${
+                  currentUser?.last_name?.[0] || ""
+                }`}
+              </span>
             </div>
           </div>
 
@@ -351,6 +483,56 @@ export default function Dashboard() {
                       placeholder="Enter email"
                     />
                   </div>
+                  <div>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "0.5rem",
+                        fontSize: "0.875rem",
+                        fontWeight: "500",
+                        color: "hsl(var(--primary))",
+                      }}
+                    >
+                      Profile Picture
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setProfilePictureFile(file);
+                        }
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "0.375rem",
+                        background: "hsl(var(--background))",
+                        color: "hsl(var(--foreground))",
+                        fontSize: "0.875rem",
+                      }}
+                    />
+                    {profilePictureFile && (
+                      <div style={{ marginTop: "0.5rem" }}>
+                        <p style={{ fontSize: "0.75rem", marginBottom: "0.25rem", color: "hsl(var(--muted-foreground))" }}>
+                          Selected: {profilePictureFile.name}
+                        </p>
+                        <img
+                          src={URL.createObjectURL(profilePictureFile)}
+                          alt="Profile preview"
+                          style={{
+                            width: "80px",
+                            height: "80px",
+                            objectFit: "cover",
+                            borderRadius: "50%",
+                            border: "2px solid hsl(var(--border))"
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div
                   style={{
@@ -424,6 +606,348 @@ export default function Dashboard() {
               {stats.interventions}
             </div>
             <div className="stat-label">Interventions</div>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div style={{ marginBottom: "2rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+              Analytics Overview
+            </h3>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                onClick={loadStats}
+                style={{
+                  padding: "0.5rem 1rem",
+                  background: "hsl(var(--primary))",
+                  color: "hsl(var(--primary-foreground))",
+                  border: "none",
+                  borderRadius: "0.375rem",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.25rem"
+                }}
+              >
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "1.5rem" }}>
+            {/* Report Type Distribution Pie Chart */}
+            <div
+              className="stat-card"
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                cursor: "pointer"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                  Report Types
+                </h4>
+                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                  {stats.total} total
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={chartData.typeDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={1000}
+                  >
+                    {chartData.typeDistribution.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke={entry.color}
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                      color: "hsl(var(--popover-foreground))"
+                    }}
+                    formatter={(value: number, name: string) => [
+                      `${value} reports (${((value / stats.total) * 100).toFixed(1)}%)`,
+                      name
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
+                {chartData.typeDistribution.map((item, index) => (
+                  <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <div
+                      style={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        background: item.color
+                      }}
+                    />
+                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                      {item.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Status Distribution Pie Chart */}
+            <div
+              className="stat-card"
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                cursor: "pointer"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                  Report Status
+                </h4>
+                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                  {stats.total} total
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={chartData.statusDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                    animationBegin={200}
+                    animationDuration={1000}
+                  >
+                    {chartData.statusDistribution.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke={entry.color}
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                      color: "hsl(var(--popover-foreground))"
+                    }}
+                    formatter={(value: number, name: string) => [
+                      `${value} reports (${stats.total > 0 ? ((value / stats.total) * 100).toFixed(1) : 0}%)`,
+                      name
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.75rem", marginTop: "1rem" }}>
+                {chartData.statusDistribution.map((item, index) => (
+                  <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <div
+                      style={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        background: item.color
+                      }}
+                    />
+                    <span style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
+                      {item.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Monthly Trend Bar Chart */}
+            <div
+              className="stat-card"
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
+                gridColumn: "1 / -1",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                  Monthly Report Trends
+                </h4>
+                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                  Last 6 months
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={320}>
+                <BarChart
+                  data={chartData.monthlyData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                  <XAxis
+                    dataKey="month"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                      color: "hsl(var(--popover-foreground))"
+                    }}
+                    formatter={(value: number, name: string) => [
+                      `${value} ${name.toLowerCase()}`,
+                      name
+                    ]}
+                  />
+                  <Legend
+                    wrapperStyle={{ paddingTop: "1rem" }}
+                  />
+                  <Bar
+                    dataKey="redFlags"
+                    fill="hsl(var(--destructive))"
+                    name="Red Flags"
+                    radius={[4, 4, 0, 0]}
+                    animationBegin={400}
+                    animationDuration={1200}
+                  />
+                  <Bar
+                    dataKey="interventions"
+                    fill="hsl(var(--chart-2))"
+                    name="Interventions"
+                    radius={[4, 4, 0, 0]}
+                    animationBegin={600}
+                    animationDuration={1200}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Summary Stats Row */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1rem",
+            marginTop: "1.5rem"
+          }}>
+            <div style={{
+              padding: "1rem",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "0.5rem",
+              textAlign: "center"
+            }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--primary))" }}>
+                {stats.draft}
+              </div>
+              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
+                Draft Reports
+              </div>
+            </div>
+            <div style={{
+              padding: "1rem",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "0.5rem",
+              textAlign: "center"
+            }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--chart-2))" }}>
+                {stats.underInvestigation}
+              </div>
+              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
+                Under Investigation
+              </div>
+            </div>
+            <div style={{
+              padding: "1rem",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "0.5rem",
+              textAlign: "center"
+            }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--chart-3))" }}>
+                {stats.resolved}
+              </div>
+              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
+                Resolved
+              </div>
+            </div>
+            <div style={{
+              padding: "1rem",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "0.5rem",
+              textAlign: "center"
+            }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--destructive))" }}>
+                {stats.rejected}
+              </div>
+              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
+                Rejected
+              </div>
+            </div>
           </div>
         </div>
       </main>

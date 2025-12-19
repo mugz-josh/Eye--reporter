@@ -16,14 +16,14 @@ export interface Report {
 
 export interface User {
   id: string;
-  name: string;
-
   first_name: string;
   last_name: string;
   email: string;
   phone?: string;
-  role: string;
   is_admin: boolean;
+  profile_picture?: string;
   created_at: string;
   updated_at: string;
+  name?: string;
+  role?: "admin" | "user";
 }

@@ -14,11 +14,12 @@ export interface User {
   email: string;
   phone?: string;
   is_admin: boolean;
+  profile_picture?: string;
   created_at: string;
   updated_at: string;
 
-  name: string; 
-  role: "admin" | "user"; 
+  name: string;
+  role: "admin" | "user";
 }
 
 interface UserContextType {
