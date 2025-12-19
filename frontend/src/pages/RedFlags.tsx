@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import MapPicker from "@/components/MapPicker";
 import { useUser } from "@/contexts/UserContext";
 import Sidebar from "@/components/Sidebar";
+import { getGreeting } from "@/utils/greetingUtils";
 
 export default function RedFlags() {
   const navigate = useNavigate();
