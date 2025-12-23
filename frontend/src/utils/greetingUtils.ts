@@ -1,5 +1,6 @@
 
 
+
 /**
  * Returns a time-based greeting based on the current hour
  * @returns {string} The appropriate greeting

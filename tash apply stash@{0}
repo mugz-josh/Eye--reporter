@@ -1,0 +1,11 @@
+stash@{0}: On main: Stash untracked uploads before rebase
+stash@{1}: filter-branch: rewrite
+stash@{2}: WIP on main: 6694ef4 modified homepage
+stash@{3}: WIP on Josh.M: 950d106 Am up to date
+stash@{4}: On Josh.M: Save untracked index.html and package.json before merge
+stash@{5}: On Josh.M: WIP: current progress
+stash@{6}: On Josh.M: Save my current work
+stash@{7}: On Josh.M: hide frontend changes
+stash@{8}: On Josh.M: WIP: hide frontend changes
+stash@{9}: WIP on Josh.M: 91db465 error handling
+stash@{10}: WIP on Josh.M: 91db465 error handling
