@@ -8,7 +8,7 @@ import { api, authHelper } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/utils/storage";
 import { useUser } from "@/contexts/UserContext";
-import type { User } from "@/contexts/UserContext"; 
+import type { User } from "@/contexts/UserContext";
 
 export default function Auth() {
   const [showLogin, setShowLogin] = useState(false);

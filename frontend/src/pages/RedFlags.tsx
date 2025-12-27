@@ -26,6 +26,7 @@ import { useUser } from "@/contexts/UserContext";
 import Sidebar from "@/components/Sidebar";
 import { getGreeting } from "@/utils/greetingUtils";
 
+
 export default function RedFlags() {
   const navigate = useNavigate();
   const { user: currentUser, setUser } = useUser();

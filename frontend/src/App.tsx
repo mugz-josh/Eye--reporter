@@ -13,8 +13,10 @@ import CreateReport from "./pages/CreateReport";
 import RedFlags from "./pages/RedFlags";
 import Interventions from "./pages/Interventions";
 import AdminDashboard from "./pages/AdminDashboard";
+import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/Notifications";
+
 const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,11 +33,13 @@ const App = () => (
               <Route path="/red-flags" element={<RedFlags />} />
               <Route path="/interventions" element={<Interventions />} />
               <Route path="/create" element={<CreateReport />} />
+              <Route path="/support" element={<Support />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<AdminDashboard />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+
           </BrowserRouter>
         </TooltipProvider>
       </UserProvider>

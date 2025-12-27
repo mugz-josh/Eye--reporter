@@ -122,14 +122,12 @@ export const interventionsController = {
       const userId = req.user?.id;
       const files = req.files as Express.Multer.File[];
 
-      
       const authCheck = validateUserAuth(userId);
       if (!authCheck.valid) {
         sendError(res, 401, authCheck.error!);
         return;
       }
 
-      
       const validation = validateCreateRecord(
         title,
         description,
@@ -141,15 +139,18 @@ export const interventionsController = {
         return;
       }
 
+      // Filter files to only images and videos
+      const validFiles = files ? files.filter(file =>
+        file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')
+      ) : [];
 
       const media =
-        files && files.length > 0
-          ? processMediaFiles(files)
+        validFiles && validFiles.length > 0
+          ? processMediaFiles(validFiles)
           : { images: [], videos: [] };
 
-      
       const query = `
-        INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos) 
+        INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
 
@@ -617,7 +618,6 @@ export const interventionsController = {
         return;
       }
 
-
       const checkQuery =
         "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
@@ -635,7 +635,6 @@ export const interventionsController = {
 
       const intervention = checkResults[0];
 
-    
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -644,7 +643,6 @@ export const interventionsController = {
         return;
       }
 
-      
       if (intervention?.status !== "draft") {
         res.status(403).json({
           status: 403,
@@ -654,7 +652,6 @@ export const interventionsController = {
         return;
       }
 
-    
       let updatedImages = intervention.images
         ? JSON.parse(intervention.images)
         : [];
@@ -663,11 +660,15 @@ export const interventionsController = {
         : [];
 
       if (files && files.length > 0) {
-        
-        const imageFiles = files.filter((file) =>
+        // Filter files to only images and videos
+        const validFiles = files.filter(file =>
+          file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')
+        );
+
+        const imageFiles = validFiles.filter((file) =>
           file.mimetype.startsWith("image/")
         );
-        const videoFiles = files.filter((file) =>
+        const videoFiles = validFiles.filter((file) =>
           file.mimetype.startsWith("video/")
         );
 
@@ -675,10 +676,9 @@ export const interventionsController = {
         updatedVideos = videoFiles.map((file) => file.filename);
       }
 
-      
       const updateQuery = `
-        UPDATE interventions 
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ? 
+        UPDATE interventions
+        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
         WHERE id = ?
       `;
 

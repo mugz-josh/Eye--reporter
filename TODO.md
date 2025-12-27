@@ -1,15 +1,6 @@
-# Profile Image Implementation
+# TODO: Enhance Footer Component
 
-## Completed Tasks
-- [x] Added uploadProfilePicture method to API service
-- [x] Updated User type to include profile_picture field
-- [x] Added profile picture file state to Dashboard component
-- [x] Added file input to profile edit modal
-- [x] Updated handleSaveProfile to upload profile picture and update user context
-- [x] Updated profile display to show image instead of initials when available
-- [x] Created uploads directory in backend
-
-## Pending Tasks
-- [ ] Test the profile image upload functionality
-- [ ] Ensure backend serves uploaded images correctly
-- [ ] Handle image loading errors gracefully
+- [ ] Add a new "Our Mission" section to the footer with a professional message about iReporter's goals.
+- [ ] Enhance the brand description with an additional empowering message.
+- [ ] Add a "Stay Informed" message in the newsletter section for better engagement.
+- [ ] Verify all necessary features are included: newsletter subscription, social media links, contact info, back-to-top button, and policy links.

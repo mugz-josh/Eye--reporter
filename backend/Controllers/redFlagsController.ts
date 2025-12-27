@@ -128,13 +128,18 @@ export const redFlagsController = {
         return;
       }
 
+      // Filter files to only images and videos
+      const validFiles = files ? files.filter(file =>
+        file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')
+      ) : [];
+
       const media =
-        files && files.length > 0
-          ? processMediaFiles(files)
+        validFiles && validFiles.length > 0
+          ? processMediaFiles(validFiles)
           : { images: [], videos: [] };
 
       const query = `
-        INSERT INTO red_flags (user_id, title, description, latitude, longitude, images, videos) 
+        INSERT INTO red_flags (user_id, title, description, latitude, longitude, images, videos)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
 
@@ -594,10 +599,15 @@ export const redFlagsController = {
       let updatedVideos = redFlag.videos ? JSON.parse(redFlag.videos) : [];
 
       if (files && files.length > 0) {
-        const imageFiles = files.filter((file) =>
+        // Filter files to only images and videos
+        const validFiles = files.filter(file =>
+          file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')
+        );
+
+        const imageFiles = validFiles.filter((file) =>
           file.mimetype.startsWith("image/")
         );
-        const videoFiles = files.filter((file) =>
+        const videoFiles = validFiles.filter((file) =>
           file.mimetype.startsWith("video/")
         );
 
@@ -605,8 +615,8 @@ export const redFlagsController = {
         updatedVideos = videoFiles.map((file) => file.filename);
       }
       const updateQuery = `
-        UPDATE red_flags 
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ? 
+        UPDATE red_flags
+        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
         WHERE id = ?
       `;
 
