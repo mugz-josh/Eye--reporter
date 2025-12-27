@@ -205,7 +205,7 @@ export default function Auth() {
                   className="link-primary"
                   onClick={() => setShowLogin(false)}
                 >
-                  Don't have an account? Sign Up
+                  Don't have an account?<span>Sign Up</span>
                 </button>
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function Auth() {
                   className="link-primary"
                   onClick={() => setShowLogin(true)}
                 >
-                  Already have an account? Login
+                  Already have an account? <span>Login</span>
                 </button>
               </div>
             </div>

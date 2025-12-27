@@ -1000,6 +1000,9 @@ input {
   font-size: inherit;
   color: hsl(var(--primary)); /* keeps its default color in light mode */
 }
+.link-primary span {
+  color: white ;
+}
 
 /* Normal primary links in dark mode */
 [data-theme="dark"] .link-primary {
