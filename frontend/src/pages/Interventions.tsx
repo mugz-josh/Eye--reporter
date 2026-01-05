@@ -420,22 +420,24 @@ export default function Interventions() {
                     </div>
                   )}
 
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-2 mt-4 pt-4 pb-2 px-2 border-t border-border bg-muted/30 rounded-b-lg">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleEdit(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
+                      className="flex-1 text-xs px-3 py-2 h-9"
                     >
-                      <Edit size={16} />
-                      Edit Report
+                      <Edit size={14} className="mr-1" />
+                      Edit
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setShareReport({ id: report.id, type: 'intervention', title: report.title })}
+                      className="flex-1 text-xs px-3 py-2 h-9"
                     >
-                      <Share2 size={16} />
+                      <Share2 size={14} className="mr-1" />
                       Share
                     </Button>
                     <Button
@@ -443,8 +445,9 @@ export default function Interventions() {
                       variant="destructive"
                       onClick={() => handleDelete(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
+                      className="flex-1 text-xs px-3 py-2 h-9 opacity-100"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} className="mr-1" />
                       Delete
                     </Button>
                   </div>

@@ -708,13 +708,13 @@ export default function RedFlags() {
                   )}
 
                   {/* Actions Section */}
-                  <div className="flex gap-2 pt-3 border-t border-border">
+                  <div className="flex gap-2 pt-4 pb-2 px-2 border-t border-border bg-muted/30 rounded-b-lg">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleEdit(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
-                      className="flex-1"
+                      className="flex-1 text-xs px-3 py-2 h-9"
                     >
                       <Edit size={14} className="mr-1" />
                       Edit
@@ -723,7 +723,7 @@ export default function RedFlags() {
                       size="sm"
                       variant="outline"
                       onClick={() => setShareReport({ id: report.id, type: 'red-flag', title: report.title })}
-                      className="flex-1"
+                      className="flex-1 text-xs px-3 py-2 h-9"
                     >
                       <Share2 size={14} className="mr-1" />
                       Share
@@ -733,7 +733,7 @@ export default function RedFlags() {
                       variant="destructive"
                       onClick={() => handleDelete(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
-                      className="flex-1"
+                      className="flex-1 text-xs px-3 py-2 h-9 opacity-100"
                     >
                       <Trash2 size={14} className="mr-1" />
                       Delete
