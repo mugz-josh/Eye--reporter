@@ -158,6 +158,34 @@ export const api = {
   markAllNotificationsRead: async (): Promise<ApiResponse<any>> => {
     return fetchPut("/v1/notifications/read", {});
   },
+
+  getComments: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
+    return fetchGet(`/v1/${reportType}s/${reportId}/comments`);
+  },
+
+  addComment: async (reportType: string, reportId: string, commentText: string): Promise<ApiResponse<any>> => {
+    return fetchPost(`/v1/${reportType}s/${reportId}/comments`, { comment_text: commentText });
+  },
+
+  deleteComment: async (commentId: string): Promise<ApiResponse<any>> => {
+    return fetchDelete(`/v1/comments/${commentId}`);
+  },
+
+  upvoteReport: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
+    return fetchPost(`/v1/${reportType}s/${reportId}/upvotes`, {});
+  },
+
+  removeUpvote: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
+    return fetchDelete(`/v1/${reportType}s/${reportId}/upvotes`);
+  },
+
+  getUpvotes: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
+    return fetchGet(`/v1/${reportType}s/${reportId}/upvotes`);
+  },
+
+  toggleUpvote: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
+    return fetchPost(`/v1/${reportType}s/${reportId}/toggle-upvote`, {});
+  },
 };
 
 

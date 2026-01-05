@@ -14,6 +14,8 @@ import {
   FileText,
   FileSpreadsheet,
   Plus,
+  MessageSquare,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -25,6 +27,8 @@ import MapPicker from "@/components/MapPicker";
 import { useUser } from "@/contexts/UserContext";
 import Sidebar from "@/components/Sidebar";
 import { getGreeting } from "@/utils/greetingUtils";
+import { UpvoteButton } from "@/components/UpvoteButton";
+import { CommentsSection } from "@/components/CommentsSection";
 
 
 export default function RedFlags() {
@@ -47,6 +51,8 @@ export default function RedFlags() {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [showComments, setShowComments] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
   const FILE_BASE = API_URL.replace(/\/api$/, "");
 
@@ -747,6 +753,38 @@ export default function RedFlags() {
                   Cancel
                 </Button>
                 <Button onClick={saveLocation}>Save Location</Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Comments Modal */}
+        {showComments && selectedReport && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowComments(false)}
+          >
+            <div
+              className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Comments for "{selectedReport.title}"</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowComments(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[60vh]">
+                <CommentsSection
+                  reportType="red_flag"
+                  reportId={selectedReport.id}
+                />
               </div>
             </div>
           </div>

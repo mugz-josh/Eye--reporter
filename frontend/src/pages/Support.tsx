@@ -367,6 +367,7 @@ export default function Support() {
                 e.currentTarget.style.background = "hsl(var(--muted) / 0.8)";
               }}
               onMouseLeave={(e) => {
+                
                 e.currentTarget.style.background = "hsl(var(--muted))";
               }}
             >

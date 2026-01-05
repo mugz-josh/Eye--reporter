@@ -2,6 +2,8 @@ import express from 'express';
 import authController from '../Controllers/authController';
 import redFlagsController from '../Controllers/redFlagsController';
 import interventionsController from '../Controllers/interventionsController';
+import commentsController from '../Controllers/commentsController';
+import upvotesController from '../Controllers/upvotesController';
 import auth from '../middleware/auth';
 import notificationController from '../Controllers/notificationController';
 import upload from '../config/multer';
@@ -36,5 +38,13 @@ router.post('/interventions/:id/media', auth.verifyToken, auth.checkRecordOwners
 router.delete('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), interventionsController.deleteIntervention);
 router.patch('/interventions/:id/status', auth.verifyToken, auth.isAdmin, interventionsController.updateStatus);
 router.put('/interventions/:id', auth.verifyToken, auth.checkRecordOwnership('interventions'), upload.any(), interventionsController.updateIntervention);
+
+// Community interaction routes
+router.get('/:reportType/:reportId/comments', auth.verifyToken, commentsController.getComments);
+router.post('/:reportType/:reportId/comments', auth.verifyToken, commentsController.addComment);
+router.delete('/comments/:commentId', auth.verifyToken, commentsController.deleteComment);
+
+router.get('/:reportType/:reportId/upvotes', auth.verifyToken, upvotesController.getUpvotes);
+router.post('/:reportType/:reportId/upvotes', auth.verifyToken, upvotesController.toggleUpvote);
 
 export default router;

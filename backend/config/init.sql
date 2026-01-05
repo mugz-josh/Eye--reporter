@@ -67,3 +67,42 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Comments table for community interaction
+CREATE TABLE IF NOT EXISTS comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    report_type ENUM('red_flag', 'intervention') NOT NULL,
+    report_id INT NOT NULL,
+    comment_text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Upvotes table for liking reports
+CREATE TABLE IF NOT EXISTS upvotes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    report_type ENUM('red_flag', 'intervention') NOT NULL,
+    report_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_upvote (user_id, report_type, report_id)
+);
+
+-- Follows table for following reports
+CREATE TABLE IF NOT EXISTS follows (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    report_type ENUM('red_flag', 'intervention') NOT NULL,
+    report_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_follow (user_id, report_type, report_id)
+);
+
+-- Create indexes for better performance
+CREATE INDEX idx_comments_report ON comments(report_type, report_id);
+CREATE INDEX idx_upvotes_report ON upvotes(report_type, report_id);
+CREATE INDEX idx_follows_report ON follows(report_type, report_id);
