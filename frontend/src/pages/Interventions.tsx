@@ -7,6 +7,7 @@ import {
   Clock,
   User,
   Plus,
+  Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,6 +19,7 @@ import MapPicker from "@/components/MapPicker";
 import { useUser } from "@/contexts/UserContext";
 import Sidebar from  "@/components/Sidebar";
 import { getGreeting } from "@/utils/greetingUtils";
+import { ShareReport } from "@/components/ShareReport";
 
 export default function Interventions() {
   const navigate = useNavigate();
@@ -35,6 +37,11 @@ export default function Interventions() {
     lat: number;
     lng: number;
     open: boolean;
+  } | null>(null);
+  const [shareReport, setShareReport] = useState<{
+    id: string;
+    type: 'red-flag' | 'intervention';
+    title: string;
   } | null>(null);
   const { toast } = useToast();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
@@ -425,6 +432,14 @@ export default function Interventions() {
                     </Button>
                     <Button
                       size="sm"
+                      variant="outline"
+                      onClick={() => setShareReport({ id: report.id, type: 'intervention', title: report.title })}
+                    >
+                      <Share2 size={16} />
+                      Share
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="destructive"
                       onClick={() => handleDelete(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
@@ -487,6 +502,17 @@ export default function Interventions() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Share Report Modal */}
+        {shareReport && (
+          <ShareReport
+            reportId={shareReport.id}
+            reportType={shareReport.type}
+            reportTitle={shareReport.title}
+            isOpen={!!shareReport}
+            onClose={() => setShareReport(null)}
+          />
         )}
       </main>
     </div>

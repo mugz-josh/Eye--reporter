@@ -213,6 +213,66 @@ export default function Dashboard() {
 
   return (
     <div className="page-dashboard">
+      {/* Welcome Animation */}
+      <div className="welcome-animation" style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'hsl(var(--background))',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        animation: 'fadeOut 2s ease-in-out 1s forwards'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          animation: 'slideIn 0.8s ease-out'
+        }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            margin: '0 auto 1rem',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--destructive)))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '2rem',
+            fontWeight: 'bold'
+          }}>
+            ✓
+          </div>
+          <h2 style={{
+            color: 'hsl(var(--foreground))',
+            fontSize: '1.5rem',
+            marginBottom: '0.5rem'
+          }}>
+            Welcome back, {currentUser?.first_name}!
+          </h2>
+          <p style={{
+            color: 'hsl(var(--muted-foreground))',
+            fontSize: '1rem'
+          }}>
+            Ready to make a difference today?
+          </p>
+        </div>
+      </div>
+
+      <style >{`
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          100% { opacity: 0; visibility: hidden; }
+        }
+        @keyframes slideIn {
+          0% { transform: translateY(20px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
+
       <button
         className="mobile-menu-btn"
         onClick={() => setSidebarOpen(!sidebarOpen)}

@@ -253,6 +253,149 @@ const handleSignup = () => {
         </div>
       </section>
     
+      {/* Testimonials Section */}
+      <section className="testimonials-section">
+        <h2 className="section-title">What Citizens Are Saying</h2>
+        <p className="section-subtitle">
+          Real stories from real people making real change
+        </p>
+        <div className="testimonials-grid">
+          <div className="testimonial-card">
+            <div className="testimonial-content">
+              <p className="testimonial-text">
+                "iReporter helped me report a corrupt official in my community. Within weeks, action was taken and justice was served. This platform truly empowers citizens!"
+              </p>
+              <div className="testimonial-author">
+                <div className="author-avatar">
+                  <span>SA</span>
+                </div>
+                <div className="author-info">
+                  <h4>Sarah Adebayo</h4>
+                  <p>Lagos, Nigeria</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="testimonial-card">
+            <div className="testimonial-content">
+              <p className="testimonial-text">
+                "The potholes on our main road were dangerous for months. Thanks to iReporter, the local government fixed them within two weeks. Amazing platform!"
+              </p>
+              <div className="testimonial-author">
+                <div className="author-avatar">
+                  <span>MK</span>
+                </div>
+                <div className="author-info">
+                  <h4>Michael Kofi</h4>
+                  <p>Accra, Ghana</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="testimonial-card">
+            <div className="testimonial-content">
+              <p className="testimonial-text">
+                "As a journalist, I use iReporter to track corruption stories. The real-time updates and community features make it invaluable for investigative work."
+              </p>
+              <div className="testimonial-author">
+                <div className="author-avatar">
+                  <span>ZN</span>
+                </div>
+                <div className="author-info">
+                  <h4>Zara Ndlovu</h4>
+                  <p>Harare, Zimbabwe</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="faq-section">
+        <h2 className="section-title">Frequently Asked Questions</h2>
+        <p className="section-subtitle">
+          Everything you need to know about reporting issues
+        </p>
+        <div className="faq-grid">
+          <div className="faq-item">
+            <h3 className="faq-question">Is my report anonymous?</h3>
+            <p className="faq-answer">
+              Yes, you can choose to submit reports anonymously. Your personal information will not be shared with authorities unless you explicitly consent.
+            </p>
+          </div>
+
+          <div className="faq-item">
+            <h3 className="faq-question">How long does it take for action to be taken?</h3>
+            <p className="faq-answer">
+              Response times vary depending on the severity and type of issue. Most reports receive initial acknowledgment within 48 hours, with resolution updates provided regularly.
+            </p>
+          </div>
+
+          <div className="faq-item">
+            <h3 className="faq-question">Can I track the status of my report?</h3>
+            <p className="faq-answer">
+              Absolutely! You'll receive real-time notifications and can track your report's progress from submission to resolution through your dashboard.
+            </p>
+          </div>
+
+          <div className="faq-item">
+            <h3 className="faq-question">What types of issues can I report?</h3>
+            <p className="faq-answer">
+              You can report corruption incidents (red-flag reports) or request government intervention for infrastructure issues like broken roads, faulty streetlights, or damaged public facilities.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Professional Footer */}
+      <footer className="professional-footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <Flag size={24} style={{ color: "hsl(var(--destructive))" }} />
+              <h3>iReporter</h3>
+            </div>
+            <p>Empowering citizens to drive positive change in their communities through transparent reporting and accountability.</p>
+            <div className="footer-social">
+              <a href="#" className="social-link">Twitter</a>
+              <a href="#" className="social-link">Facebook</a>
+              <a href="#" className="social-link">LinkedIn</a>
+            </div>
+          </div>
+
+          <div className="footer-links">
+            <div className="footer-column">
+              <h4>Platform</h4>
+              <a href="#features">Features</a>
+              <a href="#how-it-works">How It Works</a>
+              <a href="#impact">Impact</a>
+              <a href="/support">Support</a>
+            </div>
+
+            <div className="footer-column">
+              <h4>Legal</h4>
+              <a href="/privacy">Privacy Policy</a>
+              <a href="/terms">Terms of Service</a>
+              <a href="/cookies">Cookie Policy</a>
+            </div>
+
+            <div className="footer-column">
+              <h4>Contact</h4>
+              <a href="mailto:support@ireporter.com">support@ireporter.com</a>
+              <a href="/support">Help Center</a>
+              <a href="/feedback">Send Feedback</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>&copy; 2024 iReporter. All rights reserved. Made with ❤️ for transparent governance.</p>
+        </div>
+      </footer>
+
       <section className="cta-mid-section">
         <div className="cta-mid-content">
           <h2 className="cta-mid-title">Ready to Make a Difference?</h2>

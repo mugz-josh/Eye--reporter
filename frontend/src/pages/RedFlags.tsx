@@ -16,6 +16,8 @@ import {
   Plus,
   MessageSquare,
   Heart,
+  Share2,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -29,6 +31,8 @@ import Sidebar from "@/components/Sidebar";
 import { getGreeting } from "@/utils/greetingUtils";
 import { UpvoteButton } from "@/components/UpvoteButton";
 import { CommentsSection } from "@/components/CommentsSection";
+import { ShareReport } from "@/components/ShareReport";
+import { AdvancedSearch, SearchFilters } from "@/components/AdvancedSearch";
 
 
 export default function RedFlags() {
@@ -53,6 +57,22 @@ export default function RedFlags() {
   const [sortBy, setSortBy] = useState("newest");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [showComments, setShowComments] = useState(false);
+  const [shareReport, setShareReport] = useState<{
+    id: string;
+    type: 'red-flag' | 'intervention';
+    title: string;
+  } | null>(null);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({
+    query: '',
+    status: '',
+    dateFrom: '',
+    dateTo: '',
+    location: '',
+    type: ''
+  });
+
+
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
   const FILE_BASE = API_URL.replace(/\/api$/, "");
 
@@ -556,7 +576,7 @@ export default function RedFlags() {
 
         {/* Filter Bar */}
         <div className="bg-card border border-border rounded-lg p-4 mb-6 shadow-sm">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -577,6 +597,14 @@ export default function RedFlags() {
               <option value="oldest">Oldest First</option>
               <option value="status">By Status</option>
             </select>
+            <Button
+              variant="outline"
+              onClick={() => setShowAdvancedSearch(true)}
+              className="px-3 py-2"
+            >
+              <Filter size={16} className="mr-2" />
+              Advanced Search
+            </Button>
           </div>
         </div>
 
@@ -693,6 +721,15 @@ export default function RedFlags() {
                     </Button>
                     <Button
                       size="sm"
+                      variant="outline"
+                      onClick={() => setShareReport({ id: report.id, type: 'red-flag', title: report.title })}
+                      className="flex-1"
+                    >
+                      <Share2 size={14} className="mr-1" />
+                      Share
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="destructive"
                       onClick={() => handleDelete(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
@@ -788,6 +825,30 @@ export default function RedFlags() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Share Report Modal */}
+        {shareReport && (
+          <ShareReport
+            reportId={shareReport.id}
+            reportType={shareReport.type}
+            reportTitle={shareReport.title}
+            isOpen={!!shareReport}
+            onClose={() => setShareReport(null)}
+          />
+        )}
+
+        {/* Advanced Search Modal */}
+        {showAdvancedSearch && (
+          <AdvancedSearch
+            onSearch={(filters) => {
+              setSearchFilters(filters);
+              setShowAdvancedSearch(false);
+              // Apply filters to reports
+              loadReports();
+            }}
+            onClose={() => setShowAdvancedSearch(false)}
+          />
         )}
       </main>
     </div>
