@@ -128,7 +128,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
             <div className="text-center py-4 text-muted-foreground">Loading comments...</div>
           ) : comments.length === 0 ? (
             <div className="text-center py-4 text-muted-foreground">
-              No comments yet. Be the first to share your thoughts!
+              No comments yet. Be the first to share your thoughts in the way you think!
             </div>
           ) : (
             comments.map((comment) => (
