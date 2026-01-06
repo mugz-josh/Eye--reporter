@@ -464,11 +464,7 @@ export default function RedFlags() {
                 </span>
               </div>
               <h1 className="text-2xl font-bold text-foreground">
-                {(() => {
-                  const hour = new Date().getHours();
-                  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-                  return `${greeting}, ${currentUser?.first_name || 'User'}! 👋`;
-                })()}
+                {getGreeting(currentUser?.first_name || 'User')}
               </h1>
             </div>
 
@@ -709,6 +705,18 @@ export default function RedFlags() {
 
                   {/* Actions Section */}
                   <div className="flex gap-2 pt-4 pb-2 px-2 border-t border-border bg-muted/30 rounded-b-lg">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedReport(report);
+                        setShowComments(true);
+                      }}
+                      className="flex-1 text-xs px-3 py-2 h-9"
+                    >
+                      <MessageSquare size={14} className="mr-1" />
+                      Comments
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"

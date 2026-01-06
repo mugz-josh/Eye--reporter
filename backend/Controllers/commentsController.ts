@@ -40,8 +40,9 @@ export const commentsController = {
   addComment: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { reportType, reportId } = req.params;
-      const { comment_text } = req.body;
+      const { comment_text, comment_type } = req.body;
       const userId = req.user?.id;
+      const isAdmin = req.user?.isAdmin;
 
       if (!reportType || !reportId) {
         sendError(res, 400, "Report type and report ID are required");
@@ -63,6 +64,16 @@ export const commentsController = {
         return;
       }
 
+      // Determine comment type
+      let finalCommentType = 'user';
+      if (isAdmin) {
+        if (comment_type === 'official') {
+          finalCommentType = 'official';
+        } else {
+          finalCommentType = 'admin';
+        }
+      }
+
       // Verify the report exists
       const reportTable = reportType === 'red_flag' ? 'red_flags' : 'interventions';
       const checkQuery = `SELECT id FROM ${reportTable} WHERE id = ?`;
@@ -74,15 +85,16 @@ export const commentsController = {
       }
 
       const insertQuery = `
-        INSERT INTO comments (user_id, report_type, report_id, comment_text)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO comments (user_id, report_type, report_id, comment_text, comment_type)
+        VALUES (?, ?, ?, ?, ?)
       `;
 
       const [result] = await pool.execute<ResultSetHeader>(insertQuery, [
         userId,
         reportType,
         reportId,
-        comment_text.trim()
+        comment_text.trim(),
+        finalCommentType
       ]);
 
       // Get the inserted comment with user info

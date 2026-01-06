@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS comments (
     report_type ENUM('red_flag', 'intervention') NOT NULL,
     report_id INT NOT NULL,
     comment_text TEXT NOT NULL,
+    comment_type ENUM('user', 'admin', 'official') DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

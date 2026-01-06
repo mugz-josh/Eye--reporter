@@ -7,6 +7,7 @@ import {
   X,
   Menu,
   Search,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { useState, useEffect } from "react";
 import { Report, User } from "@/types/report";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { CommentsSection } from "@/components/CommentsSection";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -171,6 +173,7 @@ export default function AdminDashboard() {
   };
 
   const isUsersPage = location.pathname === "/admin/users";
+  const isCommentsPage = location.pathname === "/admin/comments";
   const getUserReports = (userId: string) =>
     reports.filter((r) => r.userId === userId);
 
@@ -225,6 +228,14 @@ export default function AdminDashboard() {
             <span>Users</span>
           </Link>
 
+          <Link
+            to="/admin/comments"
+            className={`nav-link ${location.pathname === "/admin/comments" ? "nav-link-active" : ""}`}
+          >
+            <MessageSquare size={20} />
+            <span>Comments</span>
+          </Link>
+
           <button
             onClick={handleLogout}
             className="nav-link"
@@ -237,7 +248,172 @@ export default function AdminDashboard() {
       </aside>
 
       <main className="main-content">
-        {!isUsersPage ? (
+        {isCommentsPage ? (
+          <>
+            <div className="page-header">
+              <h2 className="text-2xl font-semibold">Comments Management</h2>
+              <div className="flex items-center gap-3">
+                <span>Admin</span>
+                <div
+                  className="brand-icon"
+                  style={{ width: "2.5rem", height: "2.5rem" }}
+                >
+                  <span>AD</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-muted-foreground">
+                Manage all comments and official responses across reports. As an admin, you can post official responses to provide authoritative information to users.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {reports.slice(0, 5).map((report) => (
+                <div key={report.id} className="bg-card rounded-lg border border-border p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">{report.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {report.type === "red-flag" ? "Red Flag" : "Intervention"} • {report.userName}
+                      </p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      report.status === "RESOLVED" ? "bg-green-100 text-green-800" :
+                      report.status === "UNDER INVESTIGATION" ? "bg-blue-100 text-blue-800" :
+                      report.status === "REJECTED" ? "bg-red-100 text-red-800" :
+                      "bg-gray-100 text-gray-800"
+                    }`}>
+                      {report.status}
+                    </span>
+                  </div>
+
+                  <CommentsSection
+                    reportType={report.type === "red-flag" ? "red_flag" : "intervention"}
+                    reportId={report.id}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : isUsersPage ? (
+          <>
+            <div className="page-header">
+              <h2 className="text-2xl font-semibold">Users</h2>
+              <div className="flex items-center gap-3">
+                <span>Admin</span>
+                <div
+                  className="brand-icon"
+                  style={{ width: "2.5rem", height: "2.5rem" }}
+                >
+                  <span>AD</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <Button onClick={loadRealUsers} variant="outline">
+                Load Real Users
+              </Button>
+            </div>
+
+            <div className="cards-grid">
+              {(realUsers.length > 0 ? realUsers : users).map((user) => (
+                <div key={user.id} className="record-card">
+                  <div className="record-body">
+                    <h4 className="text-lg font-semibold mb-2">{user.name}</h4>
+                    <div className="space-y-2 text-sm muted-foreground mb-4">
+                      <p>
+                        <strong>User ID:</strong> {user.id}
+                      </p>
+                      <p>
+                        <strong>Email:</strong> {user.email}
+                      </p>
+                      <p>
+                        <strong>Role:</strong> {user.role}
+                      </p>
+
+                      <p>
+                        <strong>Reports:</strong>{" "}
+                        {getUserReports(user.id).length}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setSelectedUser(user)}
+                    >
+                      <Eye size={16} />
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {selectedUser && (
+              <div
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  backgroundColor: "rgba(0,0,0,0.8)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 50,
+                }}
+                onClick={() => setSelectedUser(null)}
+              >
+                <div
+                  className="bg-card"
+                  style={{
+                    maxWidth: "40rem",
+                    width: "100%",
+                    borderRadius: "1rem",
+                    padding: "2rem",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "1.5rem",
+                    }}
+                  >
+                    <h3 className="text-2xl font-bold">{selectedUser.name}</h3>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setSelectedUser(null)}
+                    >
+                      <X size={20} />
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    <p className="muted-foreground">{selectedUser.email}</p>
+                    <div>
+                      <h4 className="font-semibold mb-2">Reports</h4>
+                      {getUserReports(selectedUser.id).map((report) => (
+                        <div
+                          key={report.id}
+                          className="p-3 border border-border rounded-lg mb-2"
+                        >
+                          <p className="font-medium text-sm">{report.title}</p>
+                          <p className="text-xs muted-foreground">
+                            {report.status}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
           <>
             <div className="page-header">
               <h2 className="text-2xl font-semibold">All Reports</h2>
@@ -414,123 +590,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </>
-        ) : isUsersPage ? (
-          <>
-            <div className="page-header">
-              <h2 className="text-2xl font-semibold">Users</h2>
-              <div className="flex items-center gap-3">
-                <span>Admin</span>
-                <div
-                  className="brand-icon"
-                  style={{ width: "2.5rem", height: "2.5rem" }}
-                >
-                  <span>AD</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <Button onClick={loadRealUsers} variant="outline">
-                Load Real Users
-              </Button>
-            </div>
-
-            <div className="cards-grid">
-              {(realUsers.length > 0 ? realUsers : users).map((user) => (
-                <div key={user.id} className="record-card">
-                  <div className="record-body">
-                    <h4 className="text-lg font-semibold mb-2">{user.name}</h4>
-                    <div className="space-y-2 text-sm muted-foreground mb-4">
-                      <p>
-                        <strong>User ID:</strong> {user.id}
-                      </p>
-                      <p>
-                        <strong>Email:</strong> {user.email}
-                      </p>
-                      <p>
-                        <strong>Role:</strong> {user.role}
-                      </p>
-
-                      <p>
-                        <strong>Reports:</strong>{" "}
-                        {getUserReports(user.id).length}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => setSelectedUser(user)}
-                    >
-                      <Eye size={16} />
-                      View Details
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {selectedUser && (
-              <div
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  backgroundColor: "rgba(0,0,0,0.8)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 50,
-                }}
-                onClick={() => setSelectedUser(null)}
-              >
-                <div
-                  className="bg-card"
-                  style={{
-                    maxWidth: "40rem",
-                    width: "100%",
-                    borderRadius: "1rem",
-                    padding: "2rem",
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "1.5rem",
-                    }}
-                  >
-                    <h3 className="text-2xl font-bold">{selectedUser.name}</h3>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setSelectedUser(null)}
-                    >
-                      <X size={20} />
-                    </Button>
-                  </div>
-                  <div className="space-y-4">
-                    <p className="muted-foreground">{selectedUser.email}</p>
-                    <div>
-                      <h4 className="font-semibold mb-2">Reports</h4>
-                      {getUserReports(selectedUser.id).map((report) => (
-                        <div
-                          key={report.id}
-                          className="p-3 border border-border rounded-lg mb-2"
-                        >
-                          <p className="font-medium text-sm">{report.title}</p>
-                          <p className="text-xs muted-foreground">
-                            {report.status}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        ) : null}
+        )}
       </main>
     </div>
   );

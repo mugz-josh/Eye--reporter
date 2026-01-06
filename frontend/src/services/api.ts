@@ -160,11 +160,11 @@ export const api = {
   },
 
   getComments: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
-    return fetchGet(`/v1/${reportType}s/${reportId}/comments`);
+    return fetchGet(`/v1/${reportType}/${reportId}/comments`);
   },
 
-  addComment: async (reportType: string, reportId: string, commentText: string): Promise<ApiResponse<any>> => {
-    return fetchPost(`/v1/${reportType}s/${reportId}/comments`, { comment_text: commentText });
+  addComment: async (reportType: string, reportId: string, commentData: { comment_text: string; comment_type?: string }): Promise<ApiResponse<any>> => {
+    return fetchPost(`/v1/${reportType}/${reportId}/comments`, commentData);
   },
 
   deleteComment: async (commentId: string): Promise<ApiResponse<any>> => {
@@ -172,11 +172,11 @@ export const api = {
   },
 
   upvoteReport: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
-    return fetchPost(`/v1/${reportType}s/${reportId}/upvotes`, {});
+    return fetchPost(`/v1/${reportType}/${reportId}/upvotes`, {});
   },
 
   removeUpvote: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
-    return fetchDelete(`/v1/${reportType}s/${reportId}/upvotes`);
+    return fetchDelete(`/v1/${reportType}/${reportId}/upvotes`);
   },
 
   getUpvotes: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
@@ -184,7 +184,7 @@ export const api = {
   },
 
   toggleUpvote: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
-    return fetchPost(`/v1/${reportType}s/${reportId}/toggle-upvote`, {});
+    return fetchPost(`/v1/${reportType}/${reportId}/toggle-upvote`, {});
   },
 };
 

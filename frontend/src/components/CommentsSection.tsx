@@ -14,6 +14,7 @@ interface Comment {
   report_type: string;
   report_id: number;
   comment_text: string;
+  comment_type: 'user' | 'admin' | 'official';
   created_at: string;
   updated_at: string;
   first_name: string;
@@ -32,6 +33,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isOfficialResponse, setIsOfficialResponse] = useState(false);
 
   useEffect(() => {
     loadComments();
@@ -57,10 +59,15 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
 
     try {
       setSubmitting(true);
-      const response = await api.addComment(reportType, reportId, newComment.trim());
+      const commentData = {
+        comment_text: newComment.trim(),
+        comment_type: isOfficialResponse ? 'official' : undefined
+      };
+      const response = await api.addComment(reportType, reportId, commentData);
       if (response.status === 201) {
         setComments(prev => [...prev, response.data]);
         setNewComment('');
+        setIsOfficialResponse(false);
         toast.success('Comment added successfully');
       }
     } catch (error) {
@@ -103,8 +110,21 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
         {/* Add Comment Section */}
         {user && (
           <div className="space-y-2">
+            {user.is_admin && (
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={isOfficialResponse}
+                    onChange={(e) => setIsOfficialResponse(e.target.checked)}
+                    className="rounded"
+                  />
+                  Post as Official Response
+                </label>
+              </div>
+            )}
             <Textarea
-              placeholder="Share your thoughts about this report..."
+              placeholder={isOfficialResponse ? "Post an official response..." : "Share your thoughts about this report..."}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="min-h-[80px]"
@@ -116,7 +136,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
                 className="flex items-center gap-2"
               >
                 <Send size={16} />
-                {submitting ? 'Posting...' : 'Post Comment'}
+                {submitting ? 'Posting...' : (isOfficialResponse ? 'Post Official Response' : 'Post Comment')}
               </Button>
             </div>
           </div>
@@ -148,8 +168,20 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
 
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
-                    <div className="font-medium text-sm">
-                      {comment.first_name} {comment.last_name}
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium text-sm">
+                        {comment.first_name} {comment.last_name}
+                      </div>
+                      {comment.comment_type === 'admin' && (
+                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                          Admin
+                        </span>
+                      )}
+                      {comment.comment_type === 'official' && (
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                          Official Response
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">

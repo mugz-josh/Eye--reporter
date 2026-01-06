@@ -8,6 +8,7 @@ import {
   User,
   Plus,
   Share2,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -20,6 +21,7 @@ import { useUser } from "@/contexts/UserContext";
 import Sidebar from  "@/components/Sidebar";
 import { getGreeting } from "@/utils/greetingUtils";
 import { ShareReport } from "@/components/ShareReport";
+import { CommentsSection } from "@/components/CommentsSection";
 
 export default function Interventions() {
   const navigate = useNavigate();
@@ -43,6 +45,8 @@ export default function Interventions() {
     type: 'red-flag' | 'intervention';
     title: string;
   } | null>(null);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [showComments, setShowComments] = useState(false);
   const { toast } = useToast();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
   const FILE_BASE = API_URL.replace(/\/api$/, "");
@@ -257,11 +261,7 @@ export default function Interventions() {
                 </span>
               </div>
               <h1 className="text-2xl font-bold text-foreground">
-                {(() => {
-                  const hour = new Date().getHours();
-                  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-                  return `${greeting}, ${currentUser?.first_name || 'User'}! 👋`;
-                })()}
+                {getGreeting(currentUser?.first_name || 'User')}
               </h1>
             </div>
 
@@ -421,6 +421,18 @@ export default function Interventions() {
                   )}
 
                   <div className="flex gap-2 mt-4 pt-4 pb-2 px-2 border-t border-border bg-muted/30 rounded-b-lg">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedReport(report);
+                        setShowComments(true);
+                      }}
+                      className="flex-1 text-xs px-3 py-2 h-9"
+                    >
+                      <MessageSquare size={14} className="mr-1" />
+                      Comments
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
