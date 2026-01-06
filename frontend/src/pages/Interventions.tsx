@@ -294,7 +294,7 @@ export default function Interventions() {
             >
               {currentUser?.profile_picture ? (
                 <img
-                  src={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${currentUser.profile_picture}`}
+                  src={`${FILE_BASE}${currentUser.profile_picture}`}
                   alt="Profile"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />

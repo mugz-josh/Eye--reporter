@@ -326,6 +326,73 @@ export default function Dashboard() {
             borderTop: "1px solid hsl(var(--border))",
           }}
         >
+          {/* User Profile Section */}
+          {currentUser && (
+            <div style={{ marginBottom: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <div
+                  className="brand-icon"
+                  style={{
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    border: "2px solid hsl(var(--border))",
+                  }}
+                >
+                  {currentUser.profile_picture ? (
+                    <img
+                      src={`${(import.meta.env.VITE_API_URL || "http://localhost:3000").replace('/api', '')}${currentUser.profile_picture}`}
+                      alt="Profile"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        background: "hsl(var(--primary))",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "hsl(var(--primary-foreground))",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {`${currentUser.first_name?.[0] || ""}${currentUser.last_name?.[0] || ""}`}
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: "0.875rem",
+                      fontWeight: "500",
+                      color: "hsl(var(--foreground))",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {`${currentUser.first_name} ${currentUser.last_name}`}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "hsl(var(--muted-foreground))",
+                    }}
+                  >
+                    Citizen Reporter
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <span style={{ fontSize: "0.875rem" }}>Theme</span>
             <ThemeToggle />
@@ -368,7 +435,7 @@ export default function Dashboard() {
             >
               {currentUser?.profile_picture ? (
                 <img
-                  src={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${currentUser.profile_picture}`}
+                  src={`${(import.meta.env.VITE_API_URL || "http://localhost:3000").replace('/api', '')}${currentUser.profile_picture}`}
                   alt="Profile"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   onError={(e) => {

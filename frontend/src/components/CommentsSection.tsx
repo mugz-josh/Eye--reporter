@@ -159,10 +159,10 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
                       `${import.meta.env.VITE_API_URL || "http://localhost:3000"}${comment.profile_picture}` :
                       undefined
                     }
-                    alt={`${comment.first_name} ${comment.last_name}`}
+                    alt={`${comment.first_name || 'Unknown'} ${comment.last_name || 'User'}`}
                   />
                   <AvatarFallback>
-                    {comment.first_name[0]}{comment.last_name[0]}
+                    {(comment.first_name?.[0] || '?')}{(comment.last_name?.[0] || '?')}
                   </AvatarFallback>
                 </Avatar>
 
@@ -170,7 +170,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="font-medium text-sm">
-                        {comment.first_name} {comment.last_name}
+                        {comment.first_name || 'Unknown'} {comment.last_name || 'User'}
                       </div>
                       {comment.comment_type === 'admin' && (
                         <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">

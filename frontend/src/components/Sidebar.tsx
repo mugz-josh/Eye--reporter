@@ -24,6 +24,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
   const navigate = useNavigate();
   const { user, setUser } = useUser();
 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  const FILE_BASE = API_URL.replace(/\/api$/, "");
+
   const handleLogout = () => {
     setUser(null);
     navigate("/");
@@ -137,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
             >
               {user.profile_picture ? (
                 <img
-                  src={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}${user.profile_picture}`}
+                  src={`${FILE_BASE}${user.profile_picture}`}
                   alt="Profile"
                   style={{
                     width: "100%",

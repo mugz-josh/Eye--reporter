@@ -550,6 +550,8 @@ export const redFlagsController = {
 
 
   updateRedFlag: async (req: AuthRequest, res: Response): Promise<void> => {
+    const startTime = Date.now();
+    console.log(`🔄 Starting updateRedFlag for ID: ${req.params.id}`);
     try {
       const { id } = req.params;
       const { title, description, latitude, longitude }: CreateRecordData =
@@ -564,11 +566,14 @@ export const redFlagsController = {
         return;
       }
 
+      console.log(`⏳ Checking record existence...`);
+      const checkStart = Date.now();
       const checkQuery =
         "SELECT user_id, status, images, videos FROM red_flags WHERE id = ?";
       const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [
         id,
       ]);
+      console.log(`✅ Record check took ${Date.now() - checkStart}ms`);
 
       if (checkResults.length === 0) {
         res.status(404).json({
@@ -599,6 +604,8 @@ export const redFlagsController = {
       let updatedVideos = redFlag.videos ? JSON.parse(redFlag.videos) : [];
 
       if (files && files.length > 0) {
+        console.log(`📁 Processing ${files.length} files...`);
+        const fileStart = Date.now();
         // Filter files to only images and videos
         const validFiles = files.filter(file =>
           file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')
@@ -613,7 +620,13 @@ export const redFlagsController = {
 
         updatedImages = imageFiles.map((file) => file.filename);
         updatedVideos = videoFiles.map((file) => file.filename);
+        console.log(`✅ File processing took ${Date.now() - fileStart}ms`);
+      } else {
+        console.log(`📁 No new files uploaded, keeping existing media`);
       }
+
+      console.log(`💾 Updating database...`);
+      const dbStart = Date.now();
       const updateQuery = `
         UPDATE red_flags
         SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
@@ -629,7 +642,9 @@ export const redFlagsController = {
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
         id,
       ]);
+      console.log(`✅ Database update took ${Date.now() - dbStart}ms`);
 
+      console.log(`🎉 Total update time: ${Date.now() - startTime}ms`);
       res.status(200).json({
         status: 200,
         data: [
