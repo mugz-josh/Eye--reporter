@@ -476,7 +476,7 @@ export default function RedFlags() {
           </div>
 
           {/* Enhanced User Profile Section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4" style={{ marginTop: '-6rem' }}>
             <div className="text-right hidden sm:block">
               <div className="text-sm font-medium text-foreground">{displayName}</div>
               <div className="text-xs text-muted-foreground flex items-center gap-1">
@@ -606,7 +606,7 @@ export default function RedFlags() {
 
         <Button
           onClick={() => navigate("/create?type=red-flag")}
-          className="mb-6 shadow-sm hover:shadow-md transition-shadow"
+          className="mb-32 shadow-sm hover:shadow-md transition-shadow"
         >
           <Plus size={20} className="mr-2" />
           Create Red Flag

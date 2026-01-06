@@ -23,6 +23,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
 app.use("/api/v1", routes);
 
 app.get("/health", (req: Request, res: Response) => {
@@ -32,11 +35,9 @@ app.get("/health", (req: Request, res: Response) => {
   });
 });
 
-app.use("*", (req: Request, res: Response) => {
-  res.status(404).json({
-    status: 404,
-    error: "Route not found",
-  });
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get("*", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

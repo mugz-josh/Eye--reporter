@@ -1,16 +1,23 @@
-# Fix 400 Bad Request Error for Comment Posting
+# Page Persistence on Refresh Implementation
 
-## Issue
-- Frontend API calls use plural forms (e.g., `/v1/red_flags/54/comments`)
-- Backend routes expect singular forms (e.g., `/v1/red_flag/54/comments`)
-- This mismatch causes validation failure in controllers
+## Completed Tasks
+- [x] Analyzed the application structure (React Router with BrowserRouter)
+- [x] Identified the issue: Backend server returns 404 for non-API routes
+- [x] Modified backend/server.ts to serve static files from frontend/dist
+- [x] Changed catch-all route to serve index.html for SPA routing
 
-## Tasks
-- [ ] Update `frontend/src/services/api.ts` to remove 's' from reportType in URLs
-- [ ] Fix comments API methods (getComments, addComment)
-- [ ] Fix upvotes API methods (upvoteReport, removeUpvote, getUpvotes, toggleUpvote)
-- [ ] Test comment posting functionality
-- [ ] Verify upvotes functionality still works
+## Key Changes Made
+- Updated `backend/server.ts` to serve static files from `../frontend/dist`
+- Replaced 404 catch-all with index.html serving for client-side routing
 
-## Files to Edit
-- `frontend/src/services/api.ts`
+## How It Works
+- When a user refreshes the page, the browser requests the current URL from the server
+- The server now serves the index.html file instead of returning 404
+- React Router takes over and renders the correct component based on the URL
+- User stays on the same page after refresh
+
+## Testing
+- Build the frontend: `cd frontend && npm run build`
+- Start the backend server: `cd backend && npm start`
+- Navigate to any route (e.g., /dashboard, /red-flags)
+- Refresh the page - should stay on the same route

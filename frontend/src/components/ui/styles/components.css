@@ -130,7 +130,7 @@
   padding: 0.625rem 1.5rem;
   font-size: 0.9375rem;
   position: relative; /* enables top/bottom/left/right adjustments */
-  top: -12px;          /* moves the button up by 8 pixels */
+  top: -2px;          /* moves the button up by 8 pixels */
 }
 
 
