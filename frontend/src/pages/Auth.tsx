@@ -87,7 +87,7 @@ export default function Auth() {
       if (response.status >= 400) {
         toast({
           title: "Error",
-          description: response.message || "Registration failed",
+          description: response.error || "Registration failed",
           variant: "destructive",
         });
         return;
@@ -123,7 +123,7 @@ export default function Auth() {
       if (response.status >= 400) {
         toast({
           title: "Error",
-          description: response.message || "Login failed",
+          description: response.error || "Login failed",
           variant: "destructive",
         });
         return;

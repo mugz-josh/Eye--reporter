@@ -77,10 +77,12 @@ async function setupDatabase() {
     // Insert test data
     console.log('🔧 Inserting test data...');
 
-    // Insert test user
+    // Insert test user (password: test123)
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash('test123', 10);
     await connection.execute(`
       INSERT INTO users (first_name, last_name, email, password, is_admin)
-      VALUES ('Test', 'User', 'test@example.com', '$2b$10$test.hash.here', FALSE)
+      VALUES ('Test', 'User', 'test@example.com', '${hashedPassword}', FALSE)
     `);
 
     // Insert test red flag
