@@ -1,4 +1,4 @@
-import { Response } from "express";
+  import { Response } from "express";
 import pool from "../config/database";
 import {
   AuthRequest,
@@ -91,11 +91,12 @@ export const interventionsController = {
       }
 
       const intervention = results[0];
-      
+
       const interventionWithParsedMedia = {
         ...intervention,
         images: intervention?.images ? JSON.parse(intervention.images) : [],
         videos: intervention?.videos ? JSON.parse(intervention?.videos) : [],
+        audio: intervention?.audio ? JSON.parse(intervention.audio) : [],
       };
 
       res.status(200).json({
@@ -139,19 +140,19 @@ export const interventionsController = {
         return;
       }
 
-      // Filter files to only images and videos
+      // Filter files to images, videos, and audio
       const validFiles = files ? files.filter(file =>
-        file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')
+        file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype.startsWith('audio/')
       ) : [];
 
       const media =
         validFiles && validFiles.length > 0
           ? processMediaFiles(validFiles)
-          : { images: [], videos: [] };
+          : { images: [], videos: [], audio: [] };
 
       const query = `
-        INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos, audio)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const [result] = await pool.execute<ResultSetHeader>(query, [
@@ -162,6 +163,7 @@ export const interventionsController = {
         longitude,
         media.images.length > 0 ? JSON.stringify(media.images) : null,
         media.videos.length > 0 ? JSON.stringify(media.videos) : null,
+        media.audio.length > 0 ? JSON.stringify(media.audio) : null,
       ]);
 
       sendSuccess(
@@ -198,7 +200,7 @@ export const interventionsController = {
 
       
       const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
+        "SELECT user_id, status, images, videos, audio FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
         checkQuery,
         [id]
@@ -214,7 +216,7 @@ export const interventionsController = {
 
       const intervention = checkResults[0];
 
-      
+
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -223,7 +225,7 @@ export const interventionsController = {
         return;
       }
 
-      
+
       if (intervention?.status !== "draft") {
         res.status(403).json({
           status: 403,
@@ -233,35 +235,44 @@ export const interventionsController = {
         return;
       }
 
-      
+
       const imageFiles = files.filter((file) =>
         file.mimetype.startsWith("image/")
       );
       const videoFiles = files.filter((file) =>
         file.mimetype.startsWith("video/")
       );
+      const audioFiles = files.filter((file) =>
+        file.mimetype.startsWith("audio/")
+      );
 
-      
+
       const existingImages = intervention.images
         ? JSON.parse(intervention.images)
         : [];
       const existingVideos = intervention.videos
         ? JSON.parse(intervention.videos)
         : [];
+      const existingAudio = intervention.audio
+        ? JSON.parse(intervention.audio)
+        : [];
 
-  
+
       const newImages = imageFiles.map((file) => file.filename);
       const newVideos = videoFiles.map((file) => file.filename);
+      const newAudio = audioFiles.map((file) => file.filename);
 
       const updatedImages = [...existingImages, ...newImages];
       const updatedVideos = [...existingVideos, ...newVideos];
+      const updatedAudio = [...existingAudio, ...newAudio];
 
-    
+
       const updateQuery =
-        "UPDATE interventions SET images = ?, videos = ? WHERE id = ?";
+        "UPDATE interventions SET images = ?, videos = ?, audio = ? WHERE id = ?";
       await pool.execute(updateQuery, [
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
+        updatedAudio.length > 0 ? JSON.stringify(updatedAudio) : null,
         id,
       ]);
 
@@ -270,7 +281,7 @@ export const interventionsController = {
         data: [
           {
             id: parseInt(id),
-            message: `Added ${newImages.length} images and ${newVideos.length} videos to intervention record`,
+            message: `Added ${newImages.length} images, ${newVideos.length} videos, and ${newAudio.length} audio files to intervention record`,
           },
         ],
       });
@@ -623,7 +634,7 @@ export const interventionsController = {
       console.log(`⏳ Checking record existence...`);
       const checkStart = Date.now();
       const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
+        "SELECT user_id, status, images, videos, audio FROM interventions WHERE id = ?";
       const [checkResults] = await pool.execute<InterventionWithUser[]>(
         checkQuery,
         [id]
@@ -663,13 +674,16 @@ export const interventionsController = {
       let updatedVideos = intervention.videos
         ? JSON.parse(intervention.videos)
         : [];
+      let updatedAudio = intervention.audio
+        ? JSON.parse(intervention.audio)
+        : [];
 
       if (files && files.length > 0) {
         console.log(`📁 Processing ${files.length} files...`);
         const fileStart = Date.now();
-        // Filter files to only images and videos
+        // Filter files to images, videos, and audio
         const validFiles = files.filter(file =>
-          file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')
+          file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype.startsWith('audio/')
         );
 
         const imageFiles = validFiles.filter((file) =>
@@ -678,9 +692,13 @@ export const interventionsController = {
         const videoFiles = validFiles.filter((file) =>
           file.mimetype.startsWith("video/")
         );
+        const audioFiles = validFiles.filter((file) =>
+          file.mimetype.startsWith("audio/")
+        );
 
         updatedImages = imageFiles.map((file) => file.filename);
         updatedVideos = videoFiles.map((file) => file.filename);
+        updatedAudio = audioFiles.map((file) => file.filename);
         console.log(`✅ File processing took ${Date.now() - fileStart}ms`);
       } else {
         console.log(`📁 No new files uploaded, keeping existing media`);
@@ -690,7 +708,7 @@ export const interventionsController = {
       const dbStart = Date.now();
       const updateQuery = `
         UPDATE interventions
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
+        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?, audio = ?
         WHERE id = ?
       `;
 
@@ -701,6 +719,7 @@ export const interventionsController = {
         longitude,
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
+        updatedAudio.length > 0 ? JSON.stringify(updatedAudio) : null,
         id,
       ]);
       console.log(`✅ Database update took ${Date.now() - dbStart}ms`);

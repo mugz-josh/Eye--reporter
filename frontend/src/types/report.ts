@@ -8,6 +8,7 @@ export interface Report {
   status: "DRAFT" | "UNDER INVESTIGATION" | "RESOLVED" | "REJECTED";
   images?: string[];
   videos?: string[];
+  audio?: string[];
   userId: string;
   userName: string;
   createdAt: string;

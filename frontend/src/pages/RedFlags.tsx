@@ -110,6 +110,7 @@ export default function RedFlags() {
             updatedAt: item.updated_at,
             images: item.images || [],
             videos: item.videos || [],
+            audio: item.audio || [],
           }));
 
           console.log('Mapped red flags:', mappedReports);
@@ -270,7 +271,8 @@ export default function RedFlags() {
         "Updated Date",
         "User Name",
         "Images Count",
-        "Videos Count"
+        "Videos Count",
+        "Audio Count"
       ];
 
       const csvData = filteredReports.map(report => [
@@ -284,7 +286,8 @@ export default function RedFlags() {
         new Date(report.updatedAt).toLocaleDateString(),
         report.userName,
         report.images?.length || 0,
-        report.videos?.length || 0
+        report.videos?.length || 0,
+        report.audio?.length || 0
       ]);
 
       const csvContent = [
@@ -699,6 +702,27 @@ export default function RedFlags() {
                             +{report.images.length - 2} more
                           </div>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Audio Section */}
+                  {report.audio && report.audio.length > 0 && (
+                    <div className="mb-4">
+                      <h5 className="text-sm font-medium text-muted-foreground mb-2">🎵 Audio Recordings:</h5>
+                      <div className="space-y-2">
+                        {report.audio.map((aud: string, idx: number) => (
+                          <div key={idx} className="bg-muted/50 rounded-lg p-3">
+                            <audio controls className="w-full">
+                              <source src={`${FILE_BASE}/uploads/${aud}`} type="audio/wav" />
+                              <source src={`${FILE_BASE}/uploads/${aud}`} type="audio/mpeg" />
+                              Your browser does not support the audio element.
+                            </audio>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Audio {idx + 1}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
