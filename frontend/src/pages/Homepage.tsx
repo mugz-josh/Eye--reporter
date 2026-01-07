@@ -1,7 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../components/ui/styles/components.css";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import LanguageSelector from "@/components/LanguageSelector";
 import {
   Shield,
   Activity,
@@ -19,10 +21,15 @@ import {
   Zap,
   Eye,
   Target,
+  Smartphone,
+  Apple,
+  Play,
+  ExternalLink,
 } from "lucide-react";
 
 const Homepage: React.FC = () => {
  const navigate = useNavigate();
+ const { t } = useTranslation();
 const handleSignup = () => {
  navigate("/login", { state: { mode: "signup" } });
   };
@@ -51,6 +58,7 @@ const handleSignup = () => {
           </nav>
           <div className="header-actions">
             <ThemeToggle />
+            <LanguageSelector />
             <button
               className="btn-ghost"
               onClick={() => navigate("/login", { state: { mode: "login" } })}
@@ -82,12 +90,10 @@ const handleSignup = () => {
             Trusted by 10,000+ Citizens
           </div>
           <h1 className="hero-title">
-            Empower Your Voice, Drive Change in Your Community
+            {t('hero.title')}
           </h1>
           <p className="hero-description">
-            Report corruption and any other issues that would require government
-            intervention directly to the authorities. Join thousands of citizens
-            making Africa more transparent and accountable.
+            {t('hero.description')}
           </p>
           <div className="hero-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
@@ -257,6 +263,221 @@ const handleSignup = () => {
                 <CheckCircle size={18} /> Resolution updates
               </li>
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="testimonials-section">
+        <h2 className="section-title">What Our Users Say</h2>
+        <p className="section-subtitle">Hear from citizens who have made a difference</p>
+        <div className="testimonials-grid">
+          <div className="testimonial-card">
+            <Quote size={24} />
+            <p className="testimonial-quote">"iReporter helped me report corruption in my local government. The process was secure and anonymous, and I saw real change."</p>
+            <div className="testimonial-author">
+              <p className="author-name">Sarah Johnson</p>
+              <p className="author-role">Community Activist</p>
+            </div>
+          </div>
+          <div className="testimonial-card">
+            <Quote size={24} />
+            <p className="testimonial-quote">"Reporting infrastructure issues has never been easier. The app's location mapping and tracking features are fantastic."</p>
+            <div className="testimonial-author">
+              <p className="author-name">Michael Chen</p>
+              <p className="author-role">Local Resident</p>
+            </div>
+          </div>
+          <div className="testimonial-card">
+            <Quote size={24} />
+            <p className="testimonial-quote">"As a journalist, iReporter has been invaluable for gathering citizen reports and holding authorities accountable."</p>
+            <div className="testimonial-author">
+              <p className="author-name">Amina Okafor</p>
+              <p className="author-role">Investigative Journalist</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="success-stories-section">
+        <div className="success-stories-content">
+          <h2 className="success-stories-title">Recent Success Stories</h2>
+          <p className="success-stories-subtitle">
+            See how iReporter has helped citizens make real change in their communities
+          </p>
+          <div className="success-stories-grid">
+            <div className="success-story-card">
+              <div className="success-story-status">Resolved</div>
+              <div className="success-story-header">
+                <div className="success-story-icon">
+                  <Flag size={24} />
+                </div>
+                <div>
+                  <div className="success-story-category">Red-Flag Report</div>
+                  <div className="success-story-location">Lagos, Nigeria</div>
+                </div>
+              </div>
+              <h3 className="success-story-title">Corruption in Local Government</h3>
+              <p className="success-story-description">
+                A citizen reported embezzlement of public funds by local officials. The report led to a full investigation, recovery of stolen funds, and prosecution of those involved.
+              </p>
+              <div className="success-story-stats">
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">₦2.5M</div>
+                  <div className="success-story-stat-label">Funds Recovered</div>
+                </div>
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">3</div>
+                  <div className="success-story-stat-label">Officials Charged</div>
+                </div>
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">45</div>
+                  <div className="success-story-stat-label">Days to Resolution</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="success-story-card">
+              <div className="success-story-status">Resolved</div>
+              <div className="success-story-header">
+                <div className="success-story-icon">
+                  <MapPin size={24} />
+                </div>
+                <div>
+                  <div className="success-story-category">Intervention Request</div>
+                  <div className="success-story-location">Nairobi, Kenya</div>
+                </div>
+              </div>
+              <h3 className="success-story-title">Broken Street Lights Fixed</h3>
+              <p className="success-story-description">
+                Community members reported non-functional street lights affecting safety. Authorities responded within 48 hours, repairing 15 lights and improving neighborhood security.
+              </p>
+              <div className="success-story-stats">
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">15</div>
+                  <div className="success-story-stat-label">Lights Repaired</div>
+                </div>
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">48hrs</div>
+                  <div className="success-story-stat-label">Response Time</div>
+                </div>
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">200+</div>
+                  <div className="success-story-stat-label">Citizens Benefited</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="success-story-card">
+              <div className="success-story-status">Resolved</div>
+              <div className="success-story-header">
+                <div className="success-story-icon">
+                  <Heart size={24} />
+                </div>
+                <div>
+                  <div className="success-story-category">Healthcare Issue</div>
+                  <div className="success-story-location">Accra, Ghana</div>
+                </div>
+              </div>
+              <h3 className="success-story-title">Hospital Equipment Restored</h3>
+              <p className="success-story-description">
+                Reports of malfunctioning medical equipment in a public hospital led to immediate repairs and restocking of essential supplies, improving healthcare delivery.
+              </p>
+              <div className="success-story-stats">
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">8</div>
+                  <div className="success-story-stat-label">Equipment Fixed</div>
+                </div>
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">24hrs</div>
+                  <div className="success-story-stat-label">Response Time</div>
+                </div>
+                <div className="success-story-stat">
+                  <div className="success-story-stat-number">500+</div>
+                  <div className="success-story-stat-label">Patients Helped</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <a href="/reports" className="view-all-stories">
+            View All Success Stories
+          </a>
+        </div>
+      </section>
+
+      <section className="partners-section">
+        <h2 className="section-title">Trusted Partners</h2>
+        <p className="section-subtitle">Working together with leading organizations for transparency and accountability</p>
+        <div className="partners-grid">
+          <div className="partner-logo">
+            <div className="partner-placeholder">
+              <Shield size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
+              Transparency International
+            </div>
+          </div>
+          <div className="partner-logo">
+            <div className="partner-placeholder">
+              <Heart size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
+              Amnesty International
+            </div>
+          </div>
+          <div className="partner-logo">
+            <div className="partner-placeholder">
+              <Globe size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
+              UNDP
+            </div>
+          </div>
+          <div className="partner-logo">
+            <div className="partner-placeholder">
+              <Award size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
+              World Bank
+            </div>
+          </div>
+          <div className="partner-logo">
+            <div className="partner-placeholder">
+              <Eye size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
+              Open Government Partnership
+            </div>
+          </div>
+          <div className="partner-logo">
+            <div className="partner-placeholder">
+              <Target size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
+              African Union
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mobile-app-section">
+        <div className="mobile-app-content">
+          <h2 className="mobile-app-title">Get the iReporter App</h2>
+          <p className="mobile-app-description">
+            Take your reporting on the go. Download our mobile app for instant access to reporting tools, real-time updates, and seamless communication with authorities.
+          </p>
+          <div className="app-stores">
+            <a
+              href="https://apps.apple.com/app/ireporter/id1234567890"
+              className="app-store-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Apple className="app-store-icon" />
+              <div className="app-store-text">
+                <span className="app-store-label">Download on the</span>
+                <span className="app-store-name">App Store</span>
+              </div>
+            </a>
+            <a
+              href="https://play.google.com/store/apps/details?id=com.ireporter.app"
+              className="app-store-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Play className="app-store-icon" />
+              <div className="app-store-text">
+                <span className="app-store-label">Get it on</span>
+                <span className="app-store-name">Google Play</span>
+              </div>
+            </a>
           </div>
         </div>
       </section>
