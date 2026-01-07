@@ -89,7 +89,6 @@ export const redFlagsController = {
         ...redFlag,
         images: redFlag?.images ? JSON.parse(redFlag.images) : [],
         videos: redFlag?.videos ? JSON.parse(redFlag.videos) : [],
-        audio: redFlag?.audio ? JSON.parse(redFlag.audio) : [],
       };
 
       res.status(200).json({
@@ -140,8 +139,8 @@ export const redFlagsController = {
           : { images: [], videos: [], audio: [] };
 
       const query = `
-        INSERT INTO red_flags (user_id, title, description, latitude, longitude, images, videos, audio)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO red_flags (user_id, title, description, latitude, longitude, images, videos)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
 
       const [result] = await pool.execute<ResultSetHeader>(query, [
@@ -152,7 +151,6 @@ export const redFlagsController = {
         longitude,
         media.images.length > 0 ? JSON.stringify(media.images) : null,
         media.videos.length > 0 ? JSON.stringify(media.videos) : null,
-        media.audio.length > 0 ? JSON.stringify(media.audio) : null,
       ]);
 
       sendSuccess(
@@ -225,28 +223,22 @@ export const redFlagsController = {
       const videoFiles = files.filter((file) =>
         file.mimetype.startsWith("video/")
       );
-      const audioFiles = files.filter((file) =>
-        file.mimetype.startsWith("audio/")
-      );
 
       const existingImages = redFlag.images ? JSON.parse(redFlag.images) : [];
       const existingVideos = redFlag.videos ? JSON.parse(redFlag.videos) : [];
-      const existingAudio = redFlag.audio ? JSON.parse(redFlag.audio) : [];
 
       const newImages = imageFiles.map((file) => file.filename);
       const newVideos = videoFiles.map((file) => file.filename);
-      const newAudio = audioFiles.map((file) => file.filename);
 
       const updatedImages = [...existingImages, ...newImages];
       const updatedVideos = [...existingVideos, ...newVideos];
-      const updatedAudio = [...existingAudio, ...newAudio];
 
       const updateQuery =
         "UPDATE red_flags SET images = ?, videos = ?, audio = ? WHERE id = ?";
       await pool.execute(updateQuery, [
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
-        updatedAudio.length > 0 ? JSON.stringify(updatedAudio) : null,
+        
         id,
       ]);
 
@@ -255,7 +247,7 @@ export const redFlagsController = {
         data: [
           {
             id: parseInt(id),
-            message: `Added ${newImages.length} images, ${newVideos.length} videos, and ${newAudio.length} audio files to red-flag record`,
+            message: `Added ${newImages.length} images and ${newVideos.length} videos to red-flag record`,
           },
         ],
       });
@@ -578,7 +570,7 @@ export const redFlagsController = {
       console.log(`⏳ Checking record existence...`);
       const checkStart = Date.now();
       const checkQuery =
-        "SELECT user_id, status, images, videos, audio FROM red_flags WHERE id = ?";
+        "SELECT user_id, status, images, videos FROM red_flags WHERE id = ?";
       const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [
         id,
       ]);
@@ -627,13 +619,9 @@ export const redFlagsController = {
         const videoFiles = validFiles.filter((file) =>
           file.mimetype.startsWith("video/")
         );
-        const audioFiles = validFiles.filter((file) =>
-          file.mimetype.startsWith("audio/")
-        );
 
         updatedImages = imageFiles.map((file) => file.filename);
         updatedVideos = videoFiles.map((file) => file.filename);
-        updatedAudio = audioFiles.map((file) => file.filename);
         console.log(`✅ File processing took ${Date.now() - fileStart}ms`);
       } else {
         console.log(`📁 No new files uploaded, keeping existing media`);
@@ -643,7 +631,7 @@ export const redFlagsController = {
       const dbStart = Date.now();
       const updateQuery = `
         UPDATE red_flags
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?, audio = ?
+        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
         WHERE id = ?
       `;
 
@@ -654,7 +642,6 @@ export const redFlagsController = {
         longitude,
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
-        updatedAudio.length > 0 ? JSON.stringify(updatedAudio) : null,
         id,
       ]);
       console.log(`✅ Database update took ${Date.now() - dbStart}ms`);

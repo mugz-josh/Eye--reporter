@@ -23,6 +23,7 @@ import { getGreeting } from "@/utils/greetingUtils";
 import { ShareReport } from "@/components/ShareReport";
 import { CommentsSection } from "@/components/CommentsSection";
 
+
 export default function Interventions() {
   const navigate = useNavigate();
   const { user: currentUser, setUser } = useUser();
@@ -85,7 +86,7 @@ export default function Interventions() {
             updatedAt: item.updated_at,
             images: item.images || [],
             videos: item.videos || [],
-            audio: item.audio || [],
+
           }));
 
           console.log('Mapped interventions:', mappedReports);
@@ -421,23 +422,7 @@ export default function Interventions() {
                     </div>
                   )}
 
-                  {report.audio && report.audio.length > 0 && (
-                    <div className="space-y-2 mb-4">
-                      <h5 className="text-sm font-medium text-muted-foreground">🎵 Audio Recordings:</h5>
-                      {report.audio.map((aud: string, idx: number) => (
-                        <div key={idx} className="bg-muted/50 rounded-lg p-3">
-                          <audio controls className="w-full">
-                            <source src={`${FILE_BASE}/uploads/${aud}`} type="audio/wav" />
-                            <source src={`${FILE_BASE}/uploads/${aud}`} type="audio/mpeg" />
-                            Your browser does not support the audio element.
-                          </audio>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Audio {idx + 1}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+
 
                   <div className="flex gap-2 mt-4 pt-4 pb-2 px-2 border-t border-border bg-muted/30 rounded-b-lg">
                     <Button

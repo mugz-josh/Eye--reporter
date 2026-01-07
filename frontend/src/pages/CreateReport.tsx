@@ -32,11 +32,7 @@ export default function CreateReport() {
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Audio recording state
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string>("");
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+
 
 useEffect(() => {
     if (!currentUser) {
@@ -123,46 +119,7 @@ useEffect(() => {
     handleImageChange(updated);
   };
 
-  // Audio recording functions
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
 
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/wav' });
-        setAudioBlob(blob);
-        setAudioUrl(URL.createObjectURL(blob));
-      };
-
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-    } catch (err) {
-      console.error('Error accessing microphone:', err);
-      toast({
-        title: "Error",
-        description: "Could not access microphone. Please check permissions.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
-      setIsRecording(false);
-    }
-  };
-
-  const removeAudio = () => {
-    setAudioBlob(null);
-    setAudioUrl("");
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,12 +144,8 @@ useEffect(() => {
     }
 
     
-    // Prepare files including audio
+    // Prepare files
     const allFiles = [...files];
-    if (audioBlob) {
-      const audioFile = new File([audioBlob], `audio-${Date.now()}.wav`, { type: 'audio/wav' });
-      allFiles.push(audioFile);
-    }
 
     const payload = {
       title,
@@ -619,76 +572,7 @@ useEffect(() => {
               )}
             </div>
 
-            <div>
-              <Label className="muted-foreground">Record Audio (Optional)</Label>
-              <div
-                style={{
-                  marginTop: "1rem",
-                  display: "flex",
-                  gap: "1rem",
-                  alignItems: "center",
-                  flexWrap: "wrap"
-                }}
-              >
-                {!isRecording ? (
-                  <Button
-                    type="button"
-                    onClick={startRecording}
-                    variant="outline"
-                    disabled={isLoading}
-                  >
-                    🎤 Start Recording
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={stopRecording}
-                    variant="destructive"
-                    disabled={isLoading}
-                  >
-                    ⏹️ Stop Recording
-                  </Button>
-                )}
 
-                {audioUrl && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "1rem",
-                      padding: "0.5rem",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem",
-                      backgroundColor: "hsl(var(--muted) / 0.1)"
-                    }}
-                  >
-                    <audio
-                      controls
-                      src={audioUrl}
-                      style={{ maxWidth: "200px", height: "40px" }}
-                    />
-                    <Button
-                      type="button"
-                      onClick={removeAudio}
-                      variant="outline"
-                      size="sm"
-                      disabled={isLoading}
-                    >
-                      ✕ Remove
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <p
-                style={{
-                  fontSize: "0.875rem",
-                  color: "hsl(var(--muted-foreground))",
-                  marginTop: "0.5rem"
-                }}
-              >
-                Record an audio description of the incident if you prefer speaking over writing.
-              </p>
-            </div>
 
             <div
               style={{ display: "flex", gap: "1rem" }}

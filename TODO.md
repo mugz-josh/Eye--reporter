@@ -1,20 +1,17 @@
-# Audio Recording Feature Implementation
+# Remove Audio Feature Tasks
 
-## Completed Tasks
-- [x] Analyzed current file upload system (images/videos)
-- [x] Planned database, backend, and frontend changes
-- [x] Update database schema to add 'audio' column to red_flags and interventions tables
-- [x] Update multer config to accept audio files
-- [x] Update redFlagsController.ts to handle audio uploads
-- [x] Update interventionsController.ts to handle audio uploads
-- [x] Update frontend types to include audio field
+## Frontend Changes
+- [ ] Remove audio field from Report interface (frontend/types/report.ts)
+- [ ] Delete AudioPlayer component (frontend/components/AudioPlayer.tsx)
+- [ ] Remove audio recording UI from CreateReport.tsx
+- [ ] Remove audio display sections from RedFlags.tsx and Interventions.tsx
 
-## Completed Tasks
-- [x] Add audio recording UI to CreateReport.tsx using MediaRecorder API
-- [x] Add audio preview/playback functionality
-- [x] Update form submission to handle audio files
-- [x] Test audio recording, upload, and playback
-- [x] Ensure audio files are stored securely
+## Backend Changes
+- [ ] Remove audio handling from redFlagsController.ts
+- [ ] Remove audio handling from interventionsController.ts
+- [ ] Remove audio from processMediaFiles and parseMedia in controllerHelpers.ts
+- [ ] Update multer config to disallow audio uploads
 
-## 🎉 FEATURE COMPLETE!
-The audio recording feature has been successfully implemented and tested. Users can now record audio descriptions for their reports, making the app more accessible for those who prefer speaking over writing.
+## Database and Migration
+- [ ] Delete audio migration files (migration_add_audio.sql, run_audio_migration.js)
+- [ ] Update TODO.md to remove audio-related tasks
