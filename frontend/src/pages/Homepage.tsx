@@ -11,6 +11,14 @@ import {
   CheckCircle,
   MapPin,
   TrendingUp,
+  Star,
+  Quote,
+  Award,
+  Globe,
+  Heart,
+  Zap,
+  Eye,
+  Target,
 } from "lucide-react";
 
 const Homepage: React.FC = () => {
