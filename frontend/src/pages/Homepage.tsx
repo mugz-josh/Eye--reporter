@@ -47,13 +47,13 @@ const handleSignup = () => {
           </div>
           <nav className="header-nav">
             <a href="#features" className="nav-link">
-              Features
+              {t('nav.features')}
             </a>
             <a href="#how-it-works" className="nav-link">
-              How It Works
+              {t('nav.howItWorks')}
             </a>
             <a href="#impact" className="nav-link">
-              Impact
+              {t('nav.impact')}
             </a>
           </nav>
           <div className="header-actions">
@@ -63,10 +63,10 @@ const handleSignup = () => {
               className="btn-ghost"
               onClick={() => navigate("/login", { state: { mode: "login" } })}
             >
-              Login
+              {t('login')}
             </button>
             <button className="btn-primary" onClick={handleSignup}>
-              Get Started
+              {t('getStarted')}
             </button>
           </div>
         </div>
@@ -97,7 +97,7 @@ const handleSignup = () => {
           </p>
           <div className="hero-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
-              Report an Issue
+              {t('createAccountBtn')}
             </button>
             <button
               className="btn-secondary btn-lg"
@@ -129,7 +129,7 @@ const handleSignup = () => {
 
       
       <section id="impact" className="stats-section">
-        <h2 className="section-title">Making Real Impact Across Africa</h2>
+        <h2 className="section-title">{t('trustedBy')}</h2>
         <p className="section-subtitle">
           Together, we're building more transparent and accountable communities
         </p>
@@ -144,7 +144,7 @@ const handleSignup = () => {
               <Users size={28} />
             </div>
             <h3 className="stat-number">10,000+</h3>
-            <p className="stat-label">Active Citizens</p>
+            <p className="stat-label">{t('activeCitizens')}</p>
           </div>
           <div className="stat-card">
             <div
@@ -156,7 +156,7 @@ const handleSignup = () => {
               <TrendingUp size={28} />
             </div>
             <h3 className="stat-number">5,000+</h3>
-            <p className="stat-label">Reports Submitted</p>
+            <p className="stat-label">{t('reportsSubmitted')}</p>
           </div>
           <div className="stat-card">
             <div
@@ -168,42 +168,42 @@ const handleSignup = () => {
               <CheckCircle size={28} />
             </div>
             <h3 className="stat-number">2,500+</h3>
-            <p className="stat-label">Issues Resolved</p>
+            <p className="stat-label">{t('issuesResolved')}</p>
           </div>
         </div>
       </section>
 
       
       <section id="how-it-works" className="process-section">
-        <h2 className="section-title">Simple, Transparent Process</h2>
+        <h2 className="section-title">{t('simpleProcess')}</h2>
         <p className="section-subtitle">
           From report to resolution in four easy steps
         </p>
         <div className="process-steps">
           <div className="process-step">
             <div className="step-number">1</div>
-            <h3 className="step-title">Create Account</h3>
+            <h3 className="step-title">{t('createAccount')}</h3>
             <p className="step-description">
               Sign up with your email and create a secure account
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">2</div>
-            <h3 className="step-title">Submit Report</h3>
+            <h3 className="step-title">{t('submitReport')}</h3>
             <p className="step-description">
               Describe the issue, add location, and upload evidence
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">3</div>
-            <h3 className="step-title">Track Progress</h3>
+            <h3 className="step-title">{t('trackProgress')}</h3>
             <p className="step-description">
               Monitor your report status from draft to resolution
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">4</div>
-            <h3 className="step-title">See Change</h3>
+            <h3 className="step-title">{t('seeChange')}</h3>
             <p className="step-description">
               Get notified when authorities take action
             </p>
@@ -213,7 +213,7 @@ const handleSignup = () => {
 
       
       <section id="features" className="report-types-section">
-        <h2 className="section-title">Two Ways to Make a Difference</h2>
+        <h2 className="section-title">{t('twoWays')}</h2>
         <p className="section-subtitle">
           Whether it's corruption or broken infrastructure, your voice matters
         </p>
@@ -222,22 +222,19 @@ const handleSignup = () => {
             <div className="report-type-icon red-flag-icon">
               <Flag size={32} />
             </div>
-            <h3 className="report-type-title">Red-Flag Reports</h3>
+            <h3 className="report-type-title">{t('redFlagReports')}</h3>
             <p className="report-type-description">
-              Report incidents of corruption, bribery, embezzlement, and other
-              forms of misconduct by public officials. Your reports help
-              authorities take action against corruption and misuse of
-              government offices.
+              {t('redFlagDesc')}
             </p>
             <ul className="report-type-features">
               <li>
-                <CheckCircle size={18} /> Anonymous reporting option
+                <CheckCircle size={18} /> {t('anonymousReporting')}
               </li>
               <li>
-                <CheckCircle size={18} /> Upload evidence (photos, videos)
+                <CheckCircle size={18} /> {t('uploadEvidence')}
               </li>
               <li>
-                <CheckCircle size={18} /> Track investigation status
+                <CheckCircle size={18} /> {t('trackStatus')}
               </li>
             </ul>
           </div>
@@ -245,22 +242,19 @@ const handleSignup = () => {
             <div className="report-type-icon intervention-icon">
               <MapPin size={32} />
             </div>
-            <h3 className="report-type-title">Intervention Requests</h3>
+            <h3 className="report-type-title">{t('interventionRequests')}</h3>
             <p className="report-type-description">
-              Report infrastructure problems like broken roads and bridges,
-              non-functional streetlights, drug understocked hospitals, or
-              damaged public facilities. Help authorities prioritize repairs and
-              maintenance.
+              {t('interventionDesc')}
             </p>
             <ul className="report-type-features">
               <li>
-                <CheckCircle size={18} /> Precise location mapping
+                <CheckCircle size={18} /> {t('preciseMapping')}
               </li>
               <li>
-                <CheckCircle size={18} /> Visual documentation
+                <CheckCircle size={18} /> {t('visualDoc')}
               </li>
               <li>
-                <CheckCircle size={18} /> Resolution updates
+                <CheckCircle size={18} /> {t('resolutionUpdates')}
               </li>
             </ul>
           </div>
@@ -300,9 +294,9 @@ const handleSignup = () => {
 
       <section className="success-stories-section">
         <div className="success-stories-content">
-          <h2 className="success-stories-title">Recent Success Stories</h2>
+          <h2 className="success-stories-title">{t('recentSuccess')}</h2>
           <p className="success-stories-subtitle">
-            See how iReporter has helped citizens make real change in their communities
+            {t('seeChangeCommunity')}
           </p>
           <div className="success-stories-grid">
             <div className="success-story-card">
@@ -405,8 +399,8 @@ const handleSignup = () => {
       </section>
 
       <section className="partners-section">
-        <h2 className="section-title">Trusted Partners</h2>
-        <p className="section-subtitle">Working together with leading organizations for transparency and accountability</p>
+        <h2 className="section-title">{t('trustedPartners')}</h2>
+        <p className="section-subtitle">{t('workingTogether')}</p>
         <div className="partners-grid">
           <div className="partner-logo">
             <div className="partner-placeholder">
@@ -449,9 +443,9 @@ const handleSignup = () => {
 
       <section className="mobile-app-section">
         <div className="mobile-app-content">
-          <h2 className="mobile-app-title">Get the iReporter App</h2>
+          <h2 className="mobile-app-title">{t('getApp')}</h2>
           <p className="mobile-app-description">
-            Take your reporting on the go. Download our mobile app for instant access to reporting tools, real-time updates, and seamless communication with authorities.
+            {t('appDesc')}
           </p>
           <div className="app-stores">
             <a
@@ -484,20 +478,19 @@ const handleSignup = () => {
 
       <section className="cta-mid-section">
         <div className="cta-mid-content">
-          <h2 className="cta-mid-title">Ready to Make a Difference?</h2>
+          <h2 className="cta-mid-title">{t('readyToMakeDifference')}</h2>
           <p className="cta-mid-description">
-            Join thousands of citizens holding authorities accountable and
-            improving government services. Your voice really matters!
+            {t('joinThousands')}
           </p>
           <div className="cta-final-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
-              Create an Account
+              {t('createAccountBtn')}
             </button>
             <button
               className="btn-secondary btn-lg"
               onClick={() => navigate("/login", { state: { mode: "login" } })}
             >
-              Login
+              {t('loginBtn')}
             </button>
           </div>
         </div>

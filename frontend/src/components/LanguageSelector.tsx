@@ -27,6 +27,15 @@ const LanguageSelector: React.FC = () => {
         <SelectItem value="en">English</SelectItem>
         <SelectItem value="fr">Français</SelectItem>
         <SelectItem value="sw">Kiswahili</SelectItem>
+        <SelectItem value="lg">Luganda</SelectItem>
+        <SelectItem value="rn">Runyankole</SelectItem>
+        <SelectItem value="xog">Lusoga</SelectItem>
+        <SelectItem value="ar">العربية</SelectItem>
+        <SelectItem value="pt">Português</SelectItem>
+        <SelectItem value="zu">isiZulu</SelectItem>
+        <SelectItem value="yo">Yorùbá</SelectItem>
+        <SelectItem value="am">አማርኛ</SelectItem>
+        <SelectItem value="ha">Hausa</SelectItem>
       </SelectContent>
     </Select>
   );
