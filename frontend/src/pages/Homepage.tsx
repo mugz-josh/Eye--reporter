@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import "../components/ui/styles/components.css";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import LanguageSelector from "@/components/LanguageSelector";
+import ClickableText from "@/components/ClickableText";
 import {
   Shield,
   Activity,
@@ -47,13 +48,13 @@ const handleSignup = () => {
           </div>
           <nav className="header-nav">
             <a href="#features" className="nav-link">
-              {t('nav.features')}
+              <ClickableText translationKey="nav.features" />
             </a>
             <a href="#how-it-works" className="nav-link">
-              {t('nav.howItWorks')}
+              <ClickableText translationKey="nav.howItWorks" />
             </a>
             <a href="#impact" className="nav-link">
-              {t('nav.impact')}
+              <ClickableText translationKey="nav.impact" />
             </a>
           </nav>
           <div className="header-actions">
@@ -63,10 +64,10 @@ const handleSignup = () => {
               className="btn-ghost"
               onClick={() => navigate("/login", { state: { mode: "login" } })}
             >
-              {t('login')}
+              <ClickableText translationKey="login" />
             </button>
             <button className="btn-primary" onClick={handleSignup}>
-              {t('getStarted')}
+              <ClickableText translationKey="getStarted" />
             </button>
           </div>
         </div>
@@ -87,17 +88,17 @@ const handleSignup = () => {
         <div className="hero-content">
           <div className="hero-badge">
             <Shield size={16} />
-            Trusted by 10,000+ Citizens
+            <ClickableText translationKey="hero.badge" />
           </div>
           <h1 className="hero-title">
-            {t('hero.title')}
+            <ClickableText translationKey="hero.title" />
           </h1>
           <p className="hero-description">
-            {t('hero.description')}
+            <ClickableText translationKey="hero.description" />
           </p>
           <div className="hero-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
-              {t('createAccountBtn')}
+              <ClickableText translationKey="createAccountBtn" />
             </button>
             <button
               className="btn-secondary btn-lg"
@@ -107,21 +108,21 @@ const handleSignup = () => {
                   ?.scrollIntoView({ behavior: "smooth" })
               }
             >
-              Learn More
+              <ClickableText translationKey="learnMore" />
             </button>
           </div>
           <div className="hero-features">
             <div className="feature-badge">
               <CheckCircle className="feature-icon" size={20} />
-              Secure & Anonymous
+              <ClickableText translationKey="secureAnonymous" />
             </div>
             <div className="feature-badge">
               <Activity className="feature-icon" size={20} />
-              Real-time Tracking
+              <ClickableText translationKey="realTimeTracking" />
             </div>
             <div className="feature-badge">
               <Users className="feature-icon" size={20} />
-              Community Driven
+              <ClickableText translationKey="communityDriven" />
             </div>
           </div>
         </div>
@@ -129,9 +130,9 @@ const handleSignup = () => {
 
       
       <section id="impact" className="stats-section">
-        <h2 className="section-title">{t('trustedBy')}</h2>
+        <h2 className="section-title"><ClickableText translationKey="trustedBy" /></h2>
         <p className="section-subtitle">
-          Together, we're building more transparent and accountable communities
+          <ClickableText translationKey="stats.subtitle" />
         </p>
         <div className="stats-grid">
           <div className="stat-card">
@@ -144,7 +145,7 @@ const handleSignup = () => {
               <Users size={28} />
             </div>
             <h3 className="stat-number">10,000+</h3>
-            <p className="stat-label">{t('activeCitizens')}</p>
+            <p className="stat-label"><ClickableText translationKey="activeCitizens" /></p>
           </div>
           <div className="stat-card">
             <div
@@ -156,7 +157,7 @@ const handleSignup = () => {
               <TrendingUp size={28} />
             </div>
             <h3 className="stat-number">5,000+</h3>
-            <p className="stat-label">{t('reportsSubmitted')}</p>
+            <p className="stat-label"><ClickableText translationKey="reportsSubmitted" /></p>
           </div>
           <div className="stat-card">
             <div
@@ -168,44 +169,44 @@ const handleSignup = () => {
               <CheckCircle size={28} />
             </div>
             <h3 className="stat-number">2,500+</h3>
-            <p className="stat-label">{t('issuesResolved')}</p>
+            <p className="stat-label"><ClickableText translationKey="issuesResolved" /></p>
           </div>
         </div>
       </section>
 
       
       <section id="how-it-works" className="process-section">
-        <h2 className="section-title">{t('simpleProcess')}</h2>
+        <h2 className="section-title"><ClickableText translationKey="simpleProcess" /></h2>
         <p className="section-subtitle">
-          From report to resolution in four easy steps
+          <ClickableText translationKey="process.subtitle" />
         </p>
         <div className="process-steps">
           <div className="process-step">
             <div className="step-number">1</div>
-            <h3 className="step-title">{t('createAccount')}</h3>
+            <h3 className="step-title"><ClickableText translationKey="createAccount" /></h3>
             <p className="step-description">
-              Sign up with your email and create a secure account
+              <ClickableText translationKey="process.step1.detail" />
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">2</div>
-            <h3 className="step-title">{t('submitReport')}</h3>
+            <h3 className="step-title"><ClickableText translationKey="submitReport" /></h3>
             <p className="step-description">
-              Describe the issue, add location, and upload evidence
+              <ClickableText translationKey="process.step2.detail" />
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">3</div>
-            <h3 className="step-title">{t('trackProgress')}</h3>
+            <h3 className="step-title"><ClickableText translationKey="trackProgress" /></h3>
             <p className="step-description">
-              Monitor your report status from draft to resolution
+              <ClickableText translationKey="process.step3.detail" />
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">4</div>
-            <h3 className="step-title">{t('seeChange')}</h3>
+            <h3 className="step-title"><ClickableText translationKey="seeChange" /></h3>
             <p className="step-description">
-              Get notified when authorities take action
+              <ClickableText translationKey="process.step4.detail" />
             </p>
           </div>
         </div>
@@ -213,28 +214,28 @@ const handleSignup = () => {
 
       
       <section id="features" className="report-types-section">
-        <h2 className="section-title">{t('twoWays')}</h2>
+        <h2 className="section-title"><ClickableText translationKey="twoWays" /></h2>
         <p className="section-subtitle">
-          Whether it's corruption or broken infrastructure, your voice matters
+          <ClickableText translationKey="reportTypes.subtitle" />
         </p>
         <div className="report-types-grid">
           <div className="report-type-card">
             <div className="report-type-icon red-flag-icon">
               <Flag size={32} />
             </div>
-            <h3 className="report-type-title">{t('redFlagReports')}</h3>
+            <h3 className="report-type-title"><ClickableText translationKey="redFlagReports" /></h3>
             <p className="report-type-description">
-              {t('redFlagDesc')}
+              <ClickableText translationKey="redFlagDesc" />
             </p>
             <ul className="report-type-features">
               <li>
-                <CheckCircle size={18} /> {t('anonymousReporting')}
+                <CheckCircle size={18} /> <ClickableText translationKey="anonymousReporting" />
               </li>
               <li>
-                <CheckCircle size={18} /> {t('uploadEvidence')}
+                <CheckCircle size={18} /> <ClickableText translationKey="uploadEvidence" />
               </li>
               <li>
-                <CheckCircle size={18} /> {t('trackStatus')}
+                <CheckCircle size={18} /> <ClickableText translationKey="trackStatus" />
               </li>
             </ul>
           </div>
@@ -262,31 +263,31 @@ const handleSignup = () => {
       </section>
 
       <section className="testimonials-section">
-        <h2 className="section-title">What Our Users Say</h2>
-        <p className="section-subtitle">Hear from citizens who have made a difference</p>
+        <h2 className="section-title"><ClickableText translationKey="testimonials.title" /></h2>
+        <p className="section-subtitle"><ClickableText translationKey="testimonials.subtitle" /></p>
         <div className="testimonials-grid">
           <div className="testimonial-card">
             <Quote size={24} />
-            <p className="testimonial-quote">"iReporter helped me report corruption in my local government. The process was secure and anonymous, and I saw real change."</p>
+            <p className="testimonial-quote"><ClickableText translationKey="testimonial1.quote" /></p>
             <div className="testimonial-author">
-              <p className="author-name">Sarah Johnson</p>
-              <p className="author-role">Community Activist</p>
+              <p className="author-name"><ClickableText translationKey="testimonial1.name" /></p>
+              <p className="author-role"><ClickableText translationKey="testimonial1.role" /></p>
             </div>
           </div>
           <div className="testimonial-card">
             <Quote size={24} />
-            <p className="testimonial-quote">"Reporting infrastructure issues has never been easier. The app's location mapping and tracking features are fantastic."</p>
+            <p className="testimonial-quote"><ClickableText translationKey="testimonial2.quote" /></p>
             <div className="testimonial-author">
-              <p className="author-name">Michael Chen</p>
-              <p className="author-role">Local Resident</p>
+              <p className="author-name"><ClickableText translationKey="testimonial2.name" /></p>
+              <p className="author-role"><ClickableText translationKey="testimonial2.role" /></p>
             </div>
           </div>
           <div className="testimonial-card">
             <Quote size={24} />
-            <p className="testimonial-quote">"As a journalist, iReporter has been invaluable for gathering citizen reports and holding authorities accountable."</p>
+            <p className="testimonial-quote"><ClickableText translationKey="testimonial3.quote" /></p>
             <div className="testimonial-author">
-              <p className="author-name">Amina Okafor</p>
-              <p className="author-role">Investigative Journalist</p>
+              <p className="author-name"><ClickableText translationKey="testimonial3.name" /></p>
+              <p className="author-role"><ClickableText translationKey="testimonial3.role" /></p>
             </div>
           </div>
         </div>
@@ -294,148 +295,148 @@ const handleSignup = () => {
 
       <section className="success-stories-section">
         <div className="success-stories-content">
-          <h2 className="success-stories-title">{t('recentSuccess')}</h2>
+          <h2 className="success-stories-title"><ClickableText translationKey="recentSuccess" /></h2>
           <p className="success-stories-subtitle">
-            {t('seeChangeCommunity')}
+            <ClickableText translationKey="seeChangeCommunity" />
           </p>
           <div className="success-stories-grid">
             <div className="success-story-card">
-              <div className="success-story-status">Resolved</div>
+              <div className="success-story-status"><ClickableText translationKey="resolved" /></div>
               <div className="success-story-header">
                 <div className="success-story-icon">
                   <Flag size={24} />
                 </div>
                 <div>
-                  <div className="success-story-category">Red-Flag Report</div>
-                  <div className="success-story-location">Lagos, Nigeria</div>
+                  <div className="success-story-category"><ClickableText translationKey="redFlagReport" /></div>
+                  <div className="success-story-location"><ClickableText translationKey="story1.location" /></div>
                 </div>
               </div>
-              <h3 className="success-story-title">Corruption in Local Government</h3>
+              <h3 className="success-story-title"><ClickableText translationKey="story1.title" /></h3>
               <p className="success-story-description">
-                A citizen reported embezzlement of public funds by local officials. The report led to a full investigation, recovery of stolen funds, and prosecution of those involved.
+                <ClickableText translationKey="story1.desc" />
               </p>
               <div className="success-story-stats">
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">₦2.5M</div>
-                  <div className="success-story-stat-label">Funds Recovered</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="fundsRecovered" /></div>
                 </div>
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">3</div>
-                  <div className="success-story-stat-label">Officials Charged</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="officialsCharged" /></div>
                 </div>
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">45</div>
-                  <div className="success-story-stat-label">Days to Resolution</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="daysToResolution" /></div>
                 </div>
               </div>
             </div>
 
             <div className="success-story-card">
-              <div className="success-story-status">Resolved</div>
+              <div className="success-story-status"><ClickableText translationKey="resolved" /></div>
               <div className="success-story-header">
                 <div className="success-story-icon">
                   <MapPin size={24} />
                 </div>
                 <div>
-                  <div className="success-story-category">Intervention Request</div>
-                  <div className="success-story-location">Nairobi, Kenya</div>
+                  <div className="success-story-category"><ClickableText translationKey="interventionRequest" /></div>
+                  <div className="success-story-location"><ClickableText translationKey="story2.location" /></div>
                 </div>
               </div>
-              <h3 className="success-story-title">Broken Street Lights Fixed</h3>
+              <h3 className="success-story-title"><ClickableText translationKey="story2.title" /></h3>
               <p className="success-story-description">
-                Community members reported non-functional street lights affecting safety. Authorities responded within 48 hours, repairing 15 lights and improving neighborhood security.
+                <ClickableText translationKey="story2.desc" />
               </p>
               <div className="success-story-stats">
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">15</div>
-                  <div className="success-story-stat-label">Lights Repaired</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="lightsRepaired" /></div>
                 </div>
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">48hrs</div>
-                  <div className="success-story-stat-label">Response Time</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="responseTime" /></div>
                 </div>
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">200+</div>
-                  <div className="success-story-stat-label">Citizens Benefited</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="citizensBenefited" /></div>
                 </div>
               </div>
             </div>
 
             <div className="success-story-card">
-              <div className="success-story-status">Resolved</div>
+              <div className="success-story-status"><ClickableText translationKey="resolved" /></div>
               <div className="success-story-header">
                 <div className="success-story-icon">
                   <Heart size={24} />
                 </div>
                 <div>
-                  <div className="success-story-category">Healthcare Issue</div>
-                  <div className="success-story-location">Accra, Ghana</div>
+                  <div className="success-story-category"><ClickableText translationKey="healthcareIssue" /></div>
+                  <div className="success-story-location"><ClickableText translationKey="story3.location" /></div>
                 </div>
               </div>
-              <h3 className="success-story-title">Hospital Equipment Restored</h3>
+              <h3 className="success-story-title"><ClickableText translationKey="story3.title" /></h3>
               <p className="success-story-description">
-                Reports of malfunctioning medical equipment in a public hospital led to immediate repairs and restocking of essential supplies, improving healthcare delivery.
+                <ClickableText translationKey="story3.desc" />
               </p>
               <div className="success-story-stats">
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">8</div>
-                  <div className="success-story-stat-label">Equipment Fixed</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="equipmentFixed" /></div>
                 </div>
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">24hrs</div>
-                  <div className="success-story-stat-label">Response Time</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="responseTime" /></div>
                 </div>
                 <div className="success-story-stat">
                   <div className="success-story-stat-number">500+</div>
-                  <div className="success-story-stat-label">Patients Helped</div>
+                  <div className="success-story-stat-label"><ClickableText translationKey="patientsHelped" /></div>
                 </div>
               </div>
             </div>
           </div>
           <a href="/reports" className="view-all-stories">
-            View All Success Stories
+            <ClickableText translationKey="viewAllStories" />
           </a>
         </div>
       </section>
 
       <section className="partners-section">
-        <h2 className="section-title">{t('trustedPartners')}</h2>
-        <p className="section-subtitle">{t('workingTogether')}</p>
+        <h2 className="section-title"><ClickableText translationKey="trustedPartners" /></h2>
+        <p className="section-subtitle"><ClickableText translationKey="workingTogether" /></p>
         <div className="partners-grid">
           <div className="partner-logo">
             <div className="partner-placeholder">
               <Shield size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
-              Transparency International
+              <ClickableText translationKey="partner1" />
             </div>
           </div>
           <div className="partner-logo">
             <div className="partner-placeholder">
               <Heart size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
-              Amnesty International
+              <ClickableText translationKey="partner2" />
             </div>
           </div>
           <div className="partner-logo">
             <div className="partner-placeholder">
               <Globe size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
-              UNDP
+              <ClickableText translationKey="partner3" />
             </div>
           </div>
           <div className="partner-logo">
             <div className="partner-placeholder">
               <Award size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
-              World Bank
+              <ClickableText translationKey="partner4" />
             </div>
           </div>
           <div className="partner-logo">
             <div className="partner-placeholder">
               <Eye size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
-              Open Government Partnership
+              <ClickableText translationKey="partner5" />
             </div>
           </div>
           <div className="partner-logo">
             <div className="partner-placeholder">
               <Target size={32} style={{ marginBottom: '0.5rem', color: 'hsl(var(--primary))' }} />
-              African Union
+              <ClickableText translationKey="partner6" />
             </div>
           </div>
         </div>
@@ -443,9 +444,9 @@ const handleSignup = () => {
 
       <section className="mobile-app-section">
         <div className="mobile-app-content">
-          <h2 className="mobile-app-title">{t('getApp')}</h2>
+          <h2 className="mobile-app-title"><ClickableText translationKey="getApp" /></h2>
           <p className="mobile-app-description">
-            {t('appDesc')}
+            <ClickableText translationKey="appDesc" />
           </p>
           <div className="app-stores">
             <a
@@ -456,8 +457,8 @@ const handleSignup = () => {
             >
               <Apple className="app-store-icon" />
               <div className="app-store-text">
-                <span className="app-store-label">Download on the</span>
-                <span className="app-store-name">App Store</span>
+                <span className="app-store-label"><ClickableText translationKey="downloadOnThe" /></span>
+                <span className="app-store-name"><ClickableText translationKey="appStore" /></span>
               </div>
             </a>
             <a
@@ -468,8 +469,8 @@ const handleSignup = () => {
             >
               <Play className="app-store-icon" />
               <div className="app-store-text">
-                <span className="app-store-label">Get it on</span>
-                <span className="app-store-name">Google Play</span>
+                <span className="app-store-label"><ClickableText translationKey="getItOn" /></span>
+                <span className="app-store-name"><ClickableText translationKey="googlePlay" /></span>
               </div>
             </a>
           </div>
@@ -478,19 +479,19 @@ const handleSignup = () => {
 
       <section className="cta-mid-section">
         <div className="cta-mid-content">
-          <h2 className="cta-mid-title">{t('readyToMakeDifference')}</h2>
+          <h2 className="cta-mid-title"><ClickableText translationKey="readyToMakeDifference" /></h2>
           <p className="cta-mid-description">
-            {t('joinThousands')}
+            <ClickableText translationKey="joinThousands" />
           </p>
           <div className="cta-final-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
-              {t('createAccountBtn')}
+              <ClickableText translationKey="createAccountBtn" />
             </button>
             <button
               className="btn-secondary btn-lg"
               onClick={() => navigate("/login", { state: { mode: "login" } })}
             >
-              {t('loginBtn')}
+              <ClickableText translationKey="loginBtn" />
             </button>
           </div>
         </div>

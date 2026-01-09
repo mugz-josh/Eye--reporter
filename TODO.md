@@ -1,17 +1,11 @@
-# Remove Audio Feature Tasks
+# Language Switching Implementation for Homepage
 
-## Frontend Changes
-- [ ] Remove audio field from Report interface (frontend/types/report.ts)
-- [ ] Delete AudioPlayer component (frontend/components/AudioPlayer.tsx)
-- [ ] Remove audio recording UI from CreateReport.tsx
-- [ ] Remove audio display sections from RedFlags.tsx and Interventions.tsx
+## Tasks
+- [ ] Add missing translation keys to i18n.ts for partners, locations, and other hardcoded texts
+- [ ] Add translations for all supported languages (fr, yo, am, ha) in i18n.ts
+- [ ] Update Homepage.tsx to use t() for all hardcoded texts (partners, locations, etc.)
+- [ ] Test language switching functionality
 
-## Backend Changes
-- [ ] Remove audio handling from redFlagsController.ts
-- [ ] Remove audio handling from interventionsController.ts
-- [ ] Remove audio from processMediaFiles and parseMedia in controllerHelpers.ts
-- [ ] Update multer config to disallow audio uploads
-
-## Database and Migration
-- [ ] Delete audio migration files (migration_add_audio.sql, run_audio_migration.js)
-- [ ] Update TODO.md to remove audio-related tasks
+## Progress
+- Analyzed current translations and identified missing keys
+- Confirmed plan with user
