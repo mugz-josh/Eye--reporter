@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { FC } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { format, isSameDay, parseISO } from 'date-fns';
-import { Calendar, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { format, isSameDay, parseISO, addMonths, subMonths } from 'date-fns';
+import { Calendar, Clock, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '@/services/api';
 import { useUser } from '@/contexts/UserContext';
 
@@ -18,6 +19,7 @@ interface CalendarEvent {
 export default function CalendarView() {
   const { user } = useUser();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [reminders, setReminders] = useState<CalendarEvent[]>([]);
@@ -27,6 +29,10 @@ export default function CalendarView() {
       loadCalendarData();
     }
   }, [user]);
+
+  useEffect(() => {
+    console.log('Selected date changed:', selectedDate);
+  }, [selectedDate]);
 
   const loadCalendarData = async () => {
     setLoading(true);
@@ -46,7 +52,12 @@ export default function CalendarView() {
       const allReports = [...userRedFlags, ...userInterventions];
       const calendarEvents: CalendarEvent[] = [];
 
+      console.log('Loading calendar data for user:', user?.id);
+      console.log('User reports:', allReports.length);
+
       allReports.forEach((report: any) => {
+        console.log('Processing report:', report.id, report.status, report.title);
+
         // Add deadline events (simulated - you can add actual deadline fields to your backend)
         if (report.status === 'UNDER INVESTIGATION') {
           const deadlineDate = new Date(report.created_at || report.createdAt);
@@ -61,6 +72,7 @@ export default function CalendarView() {
             status: report.status,
             priority: 'high'
           });
+          console.log('Added deadline event for:', report.title, 'on:', deadlineDate);
         }
 
         // Add follow-up events for resolved reports
@@ -77,6 +89,7 @@ export default function CalendarView() {
             status: report.status,
             priority: 'medium'
           });
+          console.log('Added followup event for:', report.title, 'on:', followupDate);
         }
 
         // Add reminders for draft reports
@@ -93,9 +106,11 @@ export default function CalendarView() {
             status: report.status,
             priority: 'low'
           });
+          console.log('Added reminder event for:', report.title, 'on:', reminderDate);
         }
       });
 
+      console.log('Total calendar events created:', calendarEvents.length);
       setEvents(calendarEvents);
 
       // Load reminders from localStorage
@@ -111,8 +126,33 @@ export default function CalendarView() {
   };
 
   const getEventsForDate = (date: Date) => {
-    return events.filter(event => isSameDay(event.date, date));
+    const filteredEvents = events.filter(event => isSameDay(event.date, date));
+    console.log('Getting events for date:', date, 'Found events:', filteredEvents.length);
+    return filteredEvents;
   };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    console.log('Date selected:', date);
+    setSelectedDate(date);
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      setCurrentMonth(prev => subMonths(prev, 1));
+    } else {
+      setCurrentMonth(prev => addMonths(prev, 1));
+    }
+  };
+
+  const goToMonth = (monthIndex: number) => {
+    const newDate = new Date(currentMonth.getFullYear(), monthIndex, 1);
+    setCurrentMonth(newDate);
+  };
+
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -162,13 +202,50 @@ export default function CalendarView() {
               <Calendar size={20} />
               Report Calendar
             </h3>
+            {/* Custom Month Navigation */}
+            <div className="flex items-center justify-between mb-4 p-2 bg-muted rounded-lg">
+              <button
+                onClick={() => navigateMonth('prev')}
+                className="p-1 hover:bg-background rounded transition-colors"
+                aria-label="Previous month"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <div className="flex items-center gap-2">
+                <select
+                  value={currentMonth.getMonth()}
+                  onChange={(e) => goToMonth(parseInt(e.target.value))}
+                  className="bg-transparent border-none outline-none font-semibold cursor-pointer hover:bg-background px-2 py-1 rounded transition-colors"
+                >
+                  {months.map((month, index) => (
+                    <option key={month} value={index}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
+                <span className="font-semibold">{currentMonth.getFullYear()}</span>
+              </div>
+
+              <button
+                onClick={() => navigateMonth('next')}
+                className="p-1 hover:bg-background rounded transition-colors"
+                aria-label="Next month"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
             <DayPicker
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={handleDateSelect}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
               className="calendar-picker"
+              showOutsideDays={false}
             />
           </div>
         </div>
