@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Bell, HelpCircle, Calendar } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Bell, HelpCircle, Calendar, MessageCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
@@ -1410,6 +1410,39 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* WhatsApp Floating Button */}
+      <button
+        onClick={() => window.open('https://wa.me/0754316375', '_blank')}
+        style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          background: '#25D366',
+          border: 'none',
+          cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(37, 211, 102, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          transition: 'all 0.3s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(37, 211, 102, 0.6)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 211, 102, 0.4)';
+        }}
+        title="Contact us on WhatsApp"
+      >
+        <MessageCircle size={28} color="white" />
+      </button>
     </div>
   );
 }
