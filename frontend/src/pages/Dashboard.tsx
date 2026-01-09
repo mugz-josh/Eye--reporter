@@ -9,6 +9,8 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import CalendarView from '@/components/CalendarView';
 import ActivityTimeline from '@/components/ActivityTimeline';
 
+const RECENT_REPORTS_DAYS = 7; // Reports older than this will not appear in recent reports
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user: currentUser, setUser } = useUser();
@@ -64,9 +66,17 @@ export default function Dashboard() {
         (r: any) => r.user_id.toString() === currentUser?.id
       );
 
-      // Get recent reports (combine and sort by created_at, take latest 3)
+      // Get recent reports (combine and sort by created_at, take latest 3 within last RECENT_REPORTS_DAYS days)
       const allUserReports = [...userRedFlags, ...userInterventions];
-      const sortedReports = allUserReports
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - RECENT_REPORTS_DAYS);
+
+      const recentReportsFiltered = allUserReports.filter(report => {
+        const createdDate = new Date(report.created_at || report.createdAt);
+        return createdDate >= cutoffDate;
+      });
+
+      const sortedReports = recentReportsFiltered
         .sort((a, b) => new Date(b.created_at || b.createdAt).getTime() - new Date(a.created_at || a.createdAt).getTime())
         .slice(0, 3);
       setRecentReports(sortedReports);
@@ -1042,6 +1052,19 @@ export default function Dashboard() {
                     fontSize: "0.875rem"
                   }}>
                     No recent reports found. Create your first report to see it here!
+                  </div>
+                )}
+                {recentReports.length > 0 && (
+                  <div style={{
+                    marginTop: "0.75rem",
+                    padding: "0.5rem",
+                    background: "hsl(var(--muted))",
+                    borderRadius: "0.25rem",
+                    fontSize: "0.75rem",
+                    color: "hsl(var(--muted-foreground))",
+                    textAlign: "center"
+                  }}>
+                    Reports shown are from the last {RECENT_REPORTS_DAYS} days
                   </div>
                 )}
               </div>
