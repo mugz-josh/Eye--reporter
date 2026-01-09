@@ -56,20 +56,47 @@ export default function CalendarView() {
       console.log('User reports:', allReports.length);
 
       allReports.forEach((report: any) => {
-        console.log('Processing report:', report.id, report.status, report.title);
+        console.log('Processing report:', report.id, report.status, report.title, 'created_at:', report.created_at);
 
-        // Add reminder for the report on its creation date
-        const createdDate = new Date(report.created_at || report.createdAt);
-        calendarEvents.push({
-          id: `reminder-${report.id}`,
-          title: `Reminder: ${report.title}`,
-          date: createdDate,
-          type: 'reminder',
-          reportType: report.type === 'red-flag' ? 'red-flag' : 'intervention',
-          status: report.status,
-          priority: report.status === 'DRAFT' ? 'low' : report.status === 'UNDER INVESTIGATION' ? 'high' : 'medium'
-        });
-        console.log('Added reminder for:', report.title, 'on:', createdDate);
+        // Parse creation date more robustly
+        let createdDate: Date;
+        try {
+          if (report.created_at) {
+            // Handle different date formats
+            if (typeof report.created_at === 'string') {
+              createdDate = parseISO(report.created_at);
+            } else {
+              createdDate = new Date(report.created_at);
+            }
+          } else if (report.createdAt) {
+            createdDate = new Date(report.createdAt);
+          } else {
+            console.warn('No creation date found for report:', report.id);
+            return; // Skip this report
+          }
+
+          // Validate the date
+          if (isNaN(createdDate.getTime())) {
+            console.warn('Invalid date for report:', report.id, report.created_at);
+            return;
+          }
+
+          console.log('Parsed date for report:', report.title, 'Date:', createdDate.toISOString());
+
+          calendarEvents.push({
+            id: `reminder-${report.id}`,
+            title: `Reminder: ${report.title}`,
+            date: createdDate,
+            type: 'reminder',
+            reportType: report.type === 'red-flag' ? 'red-flag' : 'intervention',
+            status: report.status,
+            priority: report.status === 'DRAFT' ? 'low' : report.status === 'UNDER INVESTIGATION' ? 'high' : 'medium'
+          });
+
+          console.log('Added reminder for:', report.title, 'on:', createdDate.toDateString());
+        } catch (error) {
+          console.error('Error parsing date for report:', report.id, error);
+        }
       });
 
       console.log('Total calendar events created:', calendarEvents.length);

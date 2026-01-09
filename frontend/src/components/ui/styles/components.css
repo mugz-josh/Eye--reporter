@@ -1631,14 +1631,19 @@ input {
   line-height: 1.2;
   margin: 1.5rem 0;
   color: hsl(var(--foreground));
+  text-align: center;
+  transform: translateX(-105px);
 }
+
 
 .hero-description {
   font-size: 1.125rem;
   color: hsl(var(--muted-foreground));
   margin: 1.5rem 0 2rem;
   line-height: 1.6;
+  transform: translateX(-35px);
 }
+
 
 /* In light theme, force hero description to white for better contrast over the image as requested */
 [data-theme="light"] .hero-description {
@@ -1907,8 +1912,10 @@ input {
 
 .report-type-description {
   color: hsl(var(--muted-foreground));
-  line-height: 1.6;
+  line-height: 1.4;
   margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .report-type-features {
@@ -2110,7 +2117,7 @@ input {
   color: hsl(var(--foreground));
   font-style: italic;
   line-height: 1.6;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .testimonial-author {

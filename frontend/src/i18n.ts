@@ -1,6 +1,5 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
 import { translateText, getLanguageCode } from "./services/translationService";
 
 const resources = {
@@ -8,7 +7,7 @@ const resources = {
     translation: {
       "hero.title": "Empower Your Voice, Drive Change in Your Community",
       "hero.description":
-        "Report corruption and any other issues that would require government intervention directly to the authorities. Join thousands of citizens making Africa more transparent and accountable.",
+        "Report corruption and issues requiring government intervention. Join thousands making Africa more transparent.",
       "nav.features": "Features",
       "nav.howItWorks": "How It Works",
       "nav.impact": "Impact",
@@ -30,9 +29,9 @@ const resources = {
       redFlagReports: "Red-Flag Reports",
       interventionRequests: "Intervention Requests",
       redFlagDesc:
-        "Report incidents of corruption, bribery, embezzlement, and other forms of misconduct by public officials.",
+        "Report corruption, bribery, embezzlement, and misconduct by public officials.",
       interventionDesc:
-        "Report infrastructure problems like broken roads, non-functional streetlights, understocked hospitals, or damaged public facilities.",
+        "Report broken roads, faulty streetlights, understocked hospitals.",
       anonymousReporting: "Anonymous reporting option",
       uploadEvidence: "Upload evidence (photos, videos)",
       trackStatus: "Track investigation status",
@@ -299,10 +298,10 @@ const resources = {
 };
 
 i18n
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
+    lng: "en",
     fallbackLng: "en",
     debug: false,
     interpolation: {

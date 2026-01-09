@@ -24,7 +24,6 @@ const LanguageSelector: React.FC = () => {
         <SelectValue placeholder="Language" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="en">English</SelectItem>
         <SelectItem value="fr">Français</SelectItem>
         <SelectItem value="sw">Kiswahili</SelectItem>
         <SelectItem value="lg">Luganda</SelectItem>
@@ -36,6 +35,7 @@ const LanguageSelector: React.FC = () => {
         <SelectItem value="yo">Yorùbá</SelectItem>
         <SelectItem value="am">አማርኛ</SelectItem>
         <SelectItem value="ha">Hausa</SelectItem>
+        <SelectItem value="en">English</SelectItem>
       </SelectContent>
     </Select>
   );

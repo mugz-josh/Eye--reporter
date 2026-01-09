@@ -243,52 +243,21 @@ const handleSignup = () => {
             <div className="report-type-icon intervention-icon">
               <MapPin size={32} />
             </div>
-            <h3 className="report-type-title">{t('interventionRequests')}</h3>
+            <h3 className="report-type-title"><ClickableText translationKey="interventionRequests" /></h3>
             <p className="report-type-description">
-              {t('interventionDesc')}
+              <ClickableText translationKey="interventionDesc" />
             </p>
             <ul className="report-type-features">
               <li>
-                <CheckCircle size={18} /> {t('preciseMapping')}
+                <CheckCircle size={18} /> <ClickableText translationKey="preciseMapping" />
               </li>
               <li>
-                <CheckCircle size={18} /> {t('visualDoc')}
+                <CheckCircle size={18} /> <ClickableText translationKey="visualDoc" />
               </li>
               <li>
-                <CheckCircle size={18} /> {t('resolutionUpdates')}
+                <CheckCircle size={18} /> <ClickableText translationKey="resolutionUpdates" />
               </li>
             </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="testimonials-section">
-        <h2 className="section-title"><ClickableText translationKey="testimonials.title" /></h2>
-        <p className="section-subtitle"><ClickableText translationKey="testimonials.subtitle" /></p>
-        <div className="testimonials-grid">
-          <div className="testimonial-card">
-            <Quote size={24} />
-            <p className="testimonial-quote"><ClickableText translationKey="testimonial1.quote" /></p>
-            <div className="testimonial-author">
-              <p className="author-name"><ClickableText translationKey="testimonial1.name" /></p>
-              <p className="author-role"><ClickableText translationKey="testimonial1.role" /></p>
-            </div>
-          </div>
-          <div className="testimonial-card">
-            <Quote size={24} />
-            <p className="testimonial-quote"><ClickableText translationKey="testimonial2.quote" /></p>
-            <div className="testimonial-author">
-              <p className="author-name"><ClickableText translationKey="testimonial2.name" /></p>
-              <p className="author-role"><ClickableText translationKey="testimonial2.role" /></p>
-            </div>
-          </div>
-          <div className="testimonial-card">
-            <Quote size={24} />
-            <p className="testimonial-quote"><ClickableText translationKey="testimonial3.quote" /></p>
-            <div className="testimonial-author">
-              <p className="author-name"><ClickableText translationKey="testimonial3.name" /></p>
-              <p className="author-role"><ClickableText translationKey="testimonial3.role" /></p>
-            </div>
           </div>
         </div>
       </section>
