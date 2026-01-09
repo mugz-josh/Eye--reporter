@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Bell, HelpCircle } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Bell, HelpCircle, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useUser } from "@/contexts/UserContext";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import CalendarView from '@/components/CalendarView';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function Dashboard() {
   });
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
@@ -873,6 +875,39 @@ export default function Dashboard() {
                 Help and resources
               </span>
             </button>
+
+            <button
+              onClick={() => setShowCalendar(!showCalendar)}
+              style={{
+                padding: "1.5rem",
+                background: showCalendar ? "hsl(var(--primary))" : "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <Calendar size={24} style={{ color: showCalendar ? "hsl(var(--primary-foreground))" : "hsl(var(--chart-4))" }} />
+              <span style={{ fontSize: "0.875rem", fontWeight: "500", color: showCalendar ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))" }}>
+                {showCalendar ? "Hide Calendar" : "View Calendar"}
+              </span>
+              <span style={{ fontSize: "0.75rem", color: showCalendar ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))" }}>
+                Deadlines & reminders
+              </span>
+            </button>
           </div>
         </div>
 
@@ -1217,6 +1252,18 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Calendar Integration Section */}
+        {showCalendar && (
+          <div style={{ marginBottom: "2rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                📅 Report Calendar & Reminders
+              </h3>
+            </div>
+            <CalendarView />
+          </div>
+        )}
       </main>
     </div>
   );
