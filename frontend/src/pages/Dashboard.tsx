@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Bell, HelpCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
@@ -733,6 +733,146 @@ export default function Dashboard() {
               {stats.interventions}
             </div>
             <div className="stat-label">Interventions</div>
+          </div>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div style={{ marginBottom: "2rem" }}>
+          <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))", marginBottom: "1rem" }}>
+            Quick Actions
+          </h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+            <button
+              onClick={() => navigate("/create?type=red-flag")}
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <Flag size={24} style={{ color: "hsl(var(--destructive))" }} />
+              <span style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))" }}>
+                Create Red Flag
+              </span>
+              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                Report corruption or issues
+              </span>
+            </button>
+
+            <button
+              onClick={() => navigate("/create?type=intervention")}
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <Plus size={24} style={{ color: "hsl(var(--chart-2))" }} />
+              <span style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))" }}>
+                Create Intervention
+              </span>
+              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                Request government help
+              </span>
+            </button>
+
+            <button
+              onClick={() => navigate("/notifications")}
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <Bell size={24} style={{ color: "hsl(var(--primary))" }} />
+              <span style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))" }}>
+                View Notifications
+              </span>
+              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                Check recent updates
+              </span>
+            </button>
+
+            <button
+              onClick={() => navigate("/support")}
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <HelpCircle size={24} style={{ color: "hsl(var(--chart-3))" }} />
+              <span style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))" }}>
+                Get Support
+              </span>
+              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                Help and resources
+              </span>
+            </button>
           </div>
         </div>
 
