@@ -198,9 +198,9 @@ export default function Support() {
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <Mail size={18} style={{ color: "hsl(var(--primary))" }} />
                     <div>
-                      <div style={{ fontWeight: "500", color: "hsl(var(--foreground))" }}>Email Support</div>
+                      <div style={{ fontWeight: "500", color: "hsl(var(--foreground))" }}>Admin Email</div>
                       <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
-                        support@ireporter.com
+                        joshua.mugisha.upti@gmail.com
                       </div>
                     </div>
                   </div>
@@ -208,9 +208,9 @@ export default function Support() {
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <Mail size={18} style={{ color: "hsl(var(--primary))" }} />
                     <div>
-                      <div style={{ fontWeight: "500", color: "hsl(var(--foreground))" }}>Admin Contact</div>
+                      <div style={{ fontWeight: "500", color: "hsl(var(--foreground))" }}>Contact for Help</div>
                       <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
-                        admin@ireporter.com
+                        0754316375
                       </div>
                     </div>
                   </div>
@@ -324,6 +324,14 @@ export default function Support() {
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <button
+              onClick={() => {
+                // Try to initiate phone call, fallback to alert
+                try {
+                  window.location.href = 'tel:0754316375';
+                } catch (e) {
+                  alert('Contact Support: 0754316375\nEmail: joshua.mugisha.upti@gmail.com');
+                }
+              }}
               style={{
                 padding: "0.75rem 1.5rem",
                 background: "hsl(var(--primary))",
