@@ -7,6 +7,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { useUser } from "@/contexts/UserContext";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import CalendarView from '@/components/CalendarView';
+import ActivityTimeline from '@/components/ActivityTimeline';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -908,6 +909,150 @@ export default function Dashboard() {
                 Deadlines & reminders
               </span>
             </button>
+          </div>
+        </div>
+
+        {/* Activity Timeline Section */}
+        <div style={{ marginBottom: "2rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))", gap: "1.5rem" }}>
+            <div
+              className="stat-card"
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
+              }}
+            >
+              <ActivityTimeline limit={8} showHeader={false} />
+            </div>
+
+            {/* Recent Reports Section */}
+            <div
+              className="stat-card"
+              style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                  Recent Reports
+                </h4>
+                <button
+                  onClick={() => navigate("/red-flags")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "hsl(var(--primary))",
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                    fontWeight: "500"
+                  }}
+                >
+                  View All →
+                </button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {/* Mock recent reports - in real app this would come from API */}
+                <div style={{
+                  padding: "0.75rem",
+                  background: "hsl(var(--muted))",
+                  borderRadius: "0.5rem",
+                  border: "1px solid hsl(var(--border))"
+                }}>
+                  <div style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+                    Corruption in Lagos Central
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{
+                      fontSize: "0.75rem",
+                      color: "hsl(var(--destructive))",
+                      background: "hsl(var(--destructive) / 0.1)",
+                      padding: "0.125rem 0.5rem",
+                      borderRadius: "9999px"
+                    }}>
+                      High Priority
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                      Lagos Central • 2h ago
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: "0.75rem",
+                  background: "hsl(var(--muted))",
+                  borderRadius: "0.5rem",
+                  border: "1px solid hsl(var(--border))"
+                }}>
+                  <div style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+                    Street Light Repair Needed
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{
+                      fontSize: "0.75rem",
+                      color: "hsl(var(--chart-2))",
+                      background: "hsl(var(--chart-2) / 0.1)",
+                      padding: "0.125rem 0.5rem",
+                      borderRadius: "9999px"
+                    }}>
+                      Medium Priority
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                      Abuja North • 4h ago
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: "0.75rem",
+                  background: "hsl(var(--muted))",
+                  borderRadius: "0.5rem",
+                  border: "1px solid hsl(var(--border))"
+                }}>
+                  <div style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+                    Healthcare Facility Issues
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{
+                      fontSize: "0.75rem",
+                      color: "hsl(var(--destructive))",
+                      background: "hsl(var(--destructive) / 0.1)",
+                      padding: "0.125rem 0.5rem",
+                      borderRadius: "9999px"
+                    }}>
+                      High Priority
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                      Kano Central • 6h ago
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
