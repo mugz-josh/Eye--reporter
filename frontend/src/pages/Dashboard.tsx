@@ -22,6 +22,8 @@ export default function Dashboard() {
     rejected: 0,
   });
 
+  const [recentReports, setRecentReports] = useState<any[]>([]);
+
   const [chartData, setChartData] = useState({
     typeDistribution: [] as { name: string; value: number; color: string }[],
     statusDistribution: [] as { name: string; value: number; color: string }[],
@@ -62,11 +64,18 @@ export default function Dashboard() {
         (r: any) => r.user_id.toString() === currentUser?.id
       );
 
+      // Get recent reports (combine and sort by created_at, take latest 3)
+      const allUserReports = [...userRedFlags, ...userInterventions];
+      const sortedReports = allUserReports
+        .sort((a, b) => new Date(b.created_at || b.createdAt).getTime() - new Date(a.created_at || a.createdAt).getTime())
+        .slice(0, 3);
+      setRecentReports(sortedReports);
+
       const redFlagsCount = userRedFlags.length;
       const interventionsCount = userInterventions.length;
 
       // Calculate status distribution
-      const allUserReports = [...userRedFlags, ...userInterventions];
+      const allUserReportsForStats = [...userRedFlags, ...userInterventions];
       const statusCounts = {
         draft: 0,
         underInvestigation: 0,
@@ -107,7 +116,7 @@ export default function Dashboard() {
       }
 
       // Count reports by month
-      allUserReports.forEach((report: any) => {
+      allUserReportsForStats.forEach((report: any) => {
         if (report.created_at || report.createdAt) {
           const createdDate = new Date(report.created_at || report.createdAt);
           const monthKey = createdDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -976,81 +985,65 @@ export default function Dashboard() {
                 </button>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {/* Mock recent reports - in real app this would come from API */}
-                <div style={{
-                  padding: "0.75rem",
-                  background: "hsl(var(--muted))",
-                  borderRadius: "0.5rem",
-                  border: "1px solid hsl(var(--border))"
-                }}>
-                  <div style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
-                    Corruption in Lagos Central
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{
-                      fontSize: "0.75rem",
-                      color: "hsl(var(--destructive))",
-                      background: "hsl(var(--destructive) / 0.1)",
-                      padding: "0.125rem 0.5rem",
-                      borderRadius: "9999px"
-                    }}>
-                      High Priority
-                    </span>
-                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                      Lagos Central • 2h ago
-                    </span>
-                  </div>
-                </div>
+                {recentReports.length > 0 ? (
+                  recentReports.map((report: any, index: number) => {
+                    const isRedFlag = report.type === 'red-flag' || report.type === 'redflag' ||
+                                       (report.title && report.title.toLowerCase().includes('red flag'));
+                    const priority = isRedFlag ? 'High Priority' : 'Medium Priority';
+                    const priorityColor = isRedFlag ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))';
+                    const priorityBg = isRedFlag ? 'hsl(var(--destructive) / 0.1)' : 'hsl(var(--chart-2) / 0.1)';
 
-                <div style={{
-                  padding: "0.75rem",
-                  background: "hsl(var(--muted))",
-                  borderRadius: "0.5rem",
-                  border: "1px solid hsl(var(--border))"
-                }}>
-                  <div style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
-                    Street Light Repair Needed
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{
-                      fontSize: "0.75rem",
-                      color: "hsl(var(--chart-2))",
-                      background: "hsl(var(--chart-2) / 0.1)",
-                      padding: "0.125rem 0.5rem",
-                      borderRadius: "9999px"
-                    }}>
-                      Medium Priority
-                    </span>
-                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                      Abuja North • 4h ago
-                    </span>
-                  </div>
-                </div>
+                    // Calculate time ago
+                    const createdDate = new Date(report.created_at || report.createdAt);
+                    const now = new Date();
+                    const diffMs = now.getTime() - createdDate.getTime();
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffDays = Math.floor(diffHours / 24);
+                    const timeAgo = diffDays > 0 ? `${diffDays}d ago` : `${diffHours}h ago`;
 
-                <div style={{
-                  padding: "0.75rem",
-                  background: "hsl(var(--muted))",
-                  borderRadius: "0.5rem",
-                  border: "1px solid hsl(var(--border))"
-                }}>
-                  <div style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
-                    Healthcare Facility Issues
+                    // Placeholder location - in real app, you might reverse geocode lat/lng
+                    const lat = parseFloat(report.latitude);
+                    const lng = parseFloat(report.longitude);
+                    const location = (!isNaN(lat) && !isNaN(lng)) ?
+                      `${lat.toFixed(2)}, ${lng.toFixed(2)}` : 'Unknown Location';
+
+                    return (
+                      <div key={report.id || index} style={{
+                        padding: "0.75rem",
+                        background: "hsl(var(--muted))",
+                        borderRadius: "0.5rem",
+                        border: "1px solid hsl(var(--border))"
+                      }}>
+                        <div style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+                          {report.title || 'Untitled Report'}
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{
+                            fontSize: "0.75rem",
+                            color: priorityColor,
+                            background: priorityBg,
+                            padding: "0.125rem 0.5rem",
+                            borderRadius: "9999px"
+                          }}>
+                            {priority}
+                          </span>
+                          <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                            {location} • {timeAgo}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div style={{
+                    padding: "1rem",
+                    textAlign: "center",
+                    color: "hsl(var(--muted-foreground))",
+                    fontSize: "0.875rem"
+                  }}>
+                    No recent reports found. Create your first report to see it here!
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{
-                      fontSize: "0.75rem",
-                      color: "hsl(var(--destructive))",
-                      background: "hsl(var(--destructive) / 0.1)",
-                      padding: "0.125rem 0.5rem",
-                      borderRadius: "9999px"
-                    }}>
-                      High Priority
-                    </span>
-                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                      Kano Central • 6h ago
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
