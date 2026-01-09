@@ -10,7 +10,7 @@ interface CalendarEvent {
   id: string;
   title: string;
   date: Date;
-  type: 'deadline' | 'followup' | 'reminder';
+  type: 'deadline' | 'followup' | 'reminder' | 'report';
   reportType: 'red-flag' | 'intervention';
   status: string;
   priority: 'low' | 'medium' | 'high';
@@ -58,56 +58,18 @@ export default function CalendarView() {
       allReports.forEach((report: any) => {
         console.log('Processing report:', report.id, report.status, report.title);
 
-        // Add deadline events (simulated - you can add actual deadline fields to your backend)
-        if (report.status === 'UNDER INVESTIGATION') {
-          const deadlineDate = new Date(report.created_at || report.createdAt);
-          deadlineDate.setDate(deadlineDate.getDate() + 30); // 30 days deadline
-
-          calendarEvents.push({
-            id: `deadline-${report.id}`,
-            title: `Deadline: ${report.title}`,
-            date: deadlineDate,
-            type: 'deadline',
-            reportType: report.type === 'red-flag' ? 'red-flag' : 'intervention',
-            status: report.status,
-            priority: 'high'
-          });
-          console.log('Added deadline event for:', report.title, 'on:', deadlineDate);
-        }
-
-        // Add follow-up events for resolved reports
-        if (report.status === 'RESOLVED') {
-          const followupDate = new Date(report.updated_at || report.updatedAt);
-          followupDate.setDate(followupDate.getDate() + 7); // 7 days follow-up
-
-          calendarEvents.push({
-            id: `followup-${report.id}`,
-            title: `Follow-up: ${report.title}`,
-            date: followupDate,
-            type: 'followup',
-            reportType: report.type === 'red-flag' ? 'red-flag' : 'intervention',
-            status: report.status,
-            priority: 'medium'
-          });
-          console.log('Added followup event for:', report.title, 'on:', followupDate);
-        }
-
-        // Add reminders for draft reports
-        if (report.status === 'DRAFT') {
-          const reminderDate = new Date(report.created_at || report.createdAt);
-          reminderDate.setDate(reminderDate.getDate() + 3); // 3 days reminder
-
-          calendarEvents.push({
-            id: `reminder-${report.id}`,
-            title: `Reminder: Complete ${report.title}`,
-            date: reminderDate,
-            type: 'reminder',
-            reportType: report.type === 'red-flag' ? 'red-flag' : 'intervention',
-            status: report.status,
-            priority: 'low'
-          });
-          console.log('Added reminder event for:', report.title, 'on:', reminderDate);
-        }
+        // Add reminder for the report on its creation date
+        const createdDate = new Date(report.created_at || report.createdAt);
+        calendarEvents.push({
+          id: `reminder-${report.id}`,
+          title: `Reminder: ${report.title}`,
+          date: createdDate,
+          type: 'reminder',
+          reportType: report.type === 'red-flag' ? 'red-flag' : 'intervention',
+          status: report.status,
+          priority: report.status === 'DRAFT' ? 'low' : report.status === 'UNDER INVESTIGATION' ? 'high' : 'medium'
+        });
+        console.log('Added reminder for:', report.title, 'on:', createdDate);
       });
 
       console.log('Total calendar events created:', calendarEvents.length);
