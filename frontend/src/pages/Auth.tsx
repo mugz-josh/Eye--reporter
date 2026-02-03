@@ -11,7 +11,7 @@ import { useUser } from "@/contexts/UserContext";
 import type { User } from "@/contexts/UserContext";
 
 export default function Auth() {
-  const [showLogin, setShowLogin] = useState(false);
+  const [showLogin, setShowLogin] = useState(true);
 
   
   const [firstName, setFirstName] = useState("");

@@ -35,6 +35,19 @@ export default function Dashboard() {
   });
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [userReports, setUserReports] = useState<any[]>([]);
+  const [filteredReports, setFilteredReports] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [showReportDetails, setShowReportDetails] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [userSettings, setUserSettings] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    theme: 'light',
+    language: 'en'
+  });
 
   useEffect(() => {
     if (!currentUser) {
@@ -150,10 +163,44 @@ export default function Dashboard() {
         statusDistribution,
         monthlyData,
       });
+
+      // Set user reports for the history section
+      const reportsWithType = [
+        ...userRedFlags.map(r => ({ ...r, reportType: 'red-flag' })),
+        ...userInterventions.map(r => ({ ...r, reportType: 'intervention' }))
+      ].sort((a, b) => new Date(b.created_at || b.createdAt).getTime() - new Date(a.created_at || a.createdAt).getTime());
+
+      setUserReports(reportsWithType);
+      setFilteredReports(reportsWithType);
     } catch (error) {
       console.error("Failed to load stats:", error);
     }
   };
+
+  // Filter reports based on search and filters
+  useEffect(() => {
+    let filtered = userReports;
+
+    if (searchTerm) {
+      filtered = filtered.filter(report =>
+        report.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.location?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(report =>
+        (report.status?.toLowerCase().replace(/\s+/g, '') || 'draft') === statusFilter
+      );
+    }
+
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(report => report.reportType === typeFilter);
+    }
+
+    setFilteredReports(filtered);
+  }, [searchTerm, statusFilter, typeFilter, userReports]);
 
   const handleLogout = () => {
     setUser(null);
@@ -209,6 +256,60 @@ export default function Dashboard() {
 
   const handleCancelEdit = () => {
     setShowProfileModal(false);
+  };
+
+  const handleViewReportDetails = (report: any) => {
+    setSelectedReport(report);
+    setShowReportDetails(true);
+  };
+
+  const handleCloseReportDetails = () => {
+    setShowReportDetails(false);
+    setSelectedReport(null);
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      // Here you would typically save settings to backend
+      // For now, we'll just store in localStorage
+      localStorage.setItem('userSettings', JSON.stringify(userSettings));
+      alert('Settings saved successfully!');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('Error saving settings');
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusLower = status?.toLowerCase().replace(/\s+/g, '') || 'draft';
+    switch (statusLower) {
+      case 'draft':
+        return 'hsl(var(--muted-foreground))';
+      case 'underinvestigation':
+        return 'hsl(var(--chart-2))';
+      case 'resolved':
+        return 'hsl(var(--chart-3))';
+      case 'rejected':
+        return 'hsl(var(--destructive))';
+      default:
+        return 'hsl(var(--muted-foreground))';
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusLower = status?.toLowerCase().replace(/\s+/g, '') || 'draft';
+    switch (statusLower) {
+      case 'draft':
+        return 'Draft';
+      case 'underinvestigation':
+        return 'Under Investigation';
+      case 'resolved':
+        return 'Resolved';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return 'Draft';
+    }
   };
 
   return (
@@ -1012,6 +1113,272 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Report History Section */}
+          <div style={{ marginTop: "2rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                Report History
+              </h3>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <input
+                  type="text"
+                  placeholder="Search reports..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.375rem",
+                    background: "hsl(var(--background))",
+                    color: "hsl(var(--foreground))",
+                    fontSize: "0.875rem",
+                    width: "200px"
+                  }}
+                />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.375rem",
+                    background: "hsl(var(--background))",
+                    color: "hsl(var(--foreground))",
+                    fontSize: "0.875rem"
+                  }}
+                >
+                  <option value="all">All Status</option>
+                  <option value="draft">Draft</option>
+                  <option value="underinvestigation">Under Investigation</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.375rem",
+                    background: "hsl(var(--background))",
+                    color: "hsl(var(--foreground))",
+                    fontSize: "0.875rem"
+                  }}
+                >
+                  <option value="all">All Types</option>
+                  <option value="red-flag">Red Flags</option>
+                  <option value="intervention">Interventions</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "0.75rem",
+              overflow: "hidden"
+            }}>
+              {filteredReports.length === 0 ? (
+                <div style={{
+                  padding: "2rem",
+                  textAlign: "center",
+                  color: "hsl(var(--muted-foreground))"
+                }}>
+                  {userReports.length === 0 ? "No reports found. Create your first report!" : "No reports match your filters."}
+                </div>
+              ) : (
+                <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+                  {filteredReports.map((report, index) => (
+                    <div
+                      key={report.id || index}
+                      style={{
+                        padding: "1rem",
+                        borderBottom: index < filteredReports.length - 1 ? "1px solid hsl(var(--border))" : "none",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s ease"
+                      }}
+                      onClick={() => handleViewReportDetails(report)}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "hsl(var(--muted) / 0.5)"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                            <span style={{
+                              fontSize: "0.75rem",
+                              fontWeight: "500",
+                              color: report.reportType === 'red-flag' ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))',
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em"
+                            }}>
+                              {report.reportType === 'red-flag' ? 'Red Flag' : 'Intervention'}
+                            </span>
+                            <span style={{
+                              fontSize: "0.75rem",
+                              padding: "0.125rem 0.5rem",
+                              borderRadius: "0.25rem",
+                              backgroundColor: getStatusColor(report.status),
+                              color: "white",
+                              fontWeight: "500"
+                            }}>
+                              {getStatusBadge(report.status)}
+                            </span>
+                          </div>
+                          <h4 style={{
+                            fontSize: "1rem",
+                            fontWeight: "600",
+                            color: "hsl(var(--foreground))",
+                            marginBottom: "0.25rem"
+                          }}>
+                            {report.title || 'Untitled Report'}
+                          </h4>
+                          <p style={{
+                            fontSize: "0.875rem",
+                            color: "hsl(var(--muted-foreground))",
+                            marginBottom: "0.5rem",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden"
+                          }}>
+                            {report.description || 'No description provided'}
+                          </p>
+                          <div style={{ display: "flex", alignItems: "center", gap: "1rem", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                            <span>📍 {report.location || 'Location not specified'}</span>
+                            <span>📅 {report.created_at ? new Date(report.created_at).toLocaleDateString() : 'Date unknown'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* User Settings Section */}
+          <div style={{ marginTop: "2rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                Account Settings
+              </h3>
+              <button
+                onClick={handleSaveSettings}
+                style={{
+                  padding: "0.5rem 1rem",
+                  background: "hsl(var(--primary))",
+                  color: "hsl(var(--primary-foreground))",
+                  border: "none",
+                  borderRadius: "0.375rem",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  fontWeight: "500"
+                }}
+              >
+                Save Settings
+              </button>
+            </div>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: "1rem"
+            }}>
+              <div style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem"
+              }}>
+                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))", marginBottom: "1rem" }}>
+                  Notifications
+                </h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={userSettings.emailNotifications}
+                      onChange={(e) => setUserSettings({...userSettings, emailNotifications: e.target.checked})}
+                      style={{ width: "1rem", height: "1rem" }}
+                    />
+                    <span style={{ fontSize: "0.875rem", color: "hsl(var(--foreground))" }}>
+                      Email notifications for status updates
+                    </span>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={userSettings.smsNotifications}
+                      onChange={(e) => setUserSettings({...userSettings, smsNotifications: e.target.checked})}
+                      style={{ width: "1rem", height: "1rem" }}
+                    />
+                    <span style={{ fontSize: "0.875rem", color: "hsl(var(--foreground))" }}>
+                      SMS notifications for critical updates
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div style={{
+                padding: "1.5rem",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem"
+              }}>
+                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))", marginBottom: "1rem" }}>
+                  Preferences
+                </h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.875rem", color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
+                      Theme
+                    </label>
+                    <select
+                      value={userSettings.theme}
+                      onChange={(e) => setUserSettings({...userSettings, theme: e.target.value})}
+                      style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "0.375rem",
+                        background: "hsl(var(--background))",
+                        color: "hsl(var(--foreground))",
+                        fontSize: "0.875rem"
+                      }}
+                    >
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                      <option value="auto">Auto</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.875rem", color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
+                      Language
+                    </label>
+                    <select
+                      value={userSettings.language}
+                      onChange={(e) => setUserSettings({...userSettings, language: e.target.value})}
+                      style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "0.375rem",
+                        background: "hsl(var(--background))",
+                        color: "hsl(var(--foreground))",
+                        fontSize: "0.875rem"
+                      }}
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Español</option>
+                      <option value="fr">Français</option>
+                      <option value="sw">Kiswahili</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Summary Stats Row */}
           <div style={{
             display: "grid",
@@ -1078,6 +1445,163 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      {/* Report Details Modal */}
+      {showReportDetails && selectedReport && (
+        <div
+          className="report-details-modal"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="report-details-content"
+            style={{
+              background: "hsl(var(--background))",
+              padding: "2rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+              maxWidth: "600px",
+              width: "100%",
+              margin: "1rem",
+              maxHeight: "80vh",
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
+                Report Details
+              </h3>
+              <button
+                onClick={handleCloseReportDetails}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "1.5rem",
+                  color: "hsl(var(--muted-foreground))",
+                  padding: "0.25rem",
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                <span style={{
+                  fontSize: "0.75rem",
+                  fontWeight: "500",
+                  color: selectedReport.reportType === 'red-flag' ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))',
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em"
+                }}>
+                  {selectedReport.reportType === 'red-flag' ? 'Red Flag' : 'Intervention'}
+                </span>
+                <span style={{
+                  fontSize: "0.75rem",
+                  padding: "0.125rem 0.5rem",
+                  borderRadius: "0.25rem",
+                  backgroundColor: getStatusColor(selectedReport.status),
+                  color: "white",
+                  fontWeight: "500"
+                }}>
+                  {getStatusBadge(selectedReport.status)}
+                </span>
+              </div>
+
+              <div>
+                <h4 style={{ fontSize: "1.125rem", fontWeight: "600", color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
+                  {selectedReport.title || 'Untitled Report'}
+                </h4>
+                <p style={{ color: "hsl(var(--muted-foreground))", lineHeight: "1.5" }}>
+                  {selectedReport.description || 'No description provided'}
+                </p>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.25rem" }}>
+                    Location
+                  </label>
+                  <p style={{ color: "hsl(var(--foreground))" }}>
+                    📍 {selectedReport.location || 'Location not specified'}
+                  </p>
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.25rem" }}>
+                    Created Date
+                  </label>
+                  <p style={{ color: "hsl(var(--foreground))" }}>
+                    📅 {selectedReport.created_at ? new Date(selectedReport.created_at).toLocaleDateString() : 'Date unknown'}
+                  </p>
+                </div>
+              </div>
+
+              {selectedReport.latitude && selectedReport.longitude && (
+                <div>
+                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.25rem" }}>
+                    Coordinates
+                  </label>
+                  <p style={{ color: "hsl(var(--foreground))", fontFamily: "monospace" }}>
+                    {selectedReport.latitude}, {selectedReport.longitude}
+                  </p>
+                </div>
+              )}
+
+              {selectedReport.images && selectedReport.images.length > 0 && (
+                <div>
+                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.5rem" }}>
+                    Evidence Images
+                  </label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: "0.5rem" }}>
+                    {selectedReport.images.map((image: string, index: number) => (
+                      <img
+                        key={index}
+                        src={`${(import.meta.env.VITE_API_URL || "http://localhost:3000").replace('/api', '')}${image}`}
+                        alt={`Evidence ${index + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "80px",
+                          objectFit: "cover",
+                          borderRadius: "0.25rem",
+                          border: "1px solid hsl(var(--border))"
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "2rem" }}>
+              <button
+                onClick={handleCloseReportDetails}
+                style={{
+                  padding: "0.5rem 1rem",
+                  background: "hsl(var(--muted))",
+                  color: "hsl(var(--muted-foreground))",
+                  border: "none",
+                  borderRadius: "0.375rem",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../components/ui/styles/components.css";
@@ -25,11 +25,39 @@ import {
   Apple,
   Play,
   ExternalLink,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 const Homepage: React.FC = () => {
  const navigate = useNavigate();
  const { t } = useTranslation();
+ const [isSpeaking, setIsSpeaking] = useState(false);
+
+ const speakIntro = () => {
+   if ('speechSynthesis' in window) {
+     if (isSpeaking) {
+       speechSynthesis.cancel();
+       setIsSpeaking(false);
+       return;
+     }
+
+     const introText = `Welcome to iReporter, the platform that empowers citizens to report corruption and public issues. With iReporter, you can create red-flag reports for corruption incidents or intervention requests for infrastructure problems like broken roads or collapsed bridges. Track your reports in real-time, add geolocation, and get notified when authorities take action. Join thousands of citizens making a difference in their communities.`;
+
+     const utterance = new SpeechSynthesisUtterance(introText);
+     utterance.lang = 'en-US'; // Set language to English
+     utterance.rate = 0.9; // Slightly slower for clarity
+     utterance.pitch = 1;
+
+     utterance.onstart = () => setIsSpeaking(true);
+     utterance.onend = () => setIsSpeaking(false);
+     utterance.onerror = () => setIsSpeaking(false);
+
+     speechSynthesis.speak(utterance);
+   } else {
+     alert('Sorry, your browser does not support text-to-speech. Please try a modern browser like Chrome or Firefox.');
+   }
+ };
 const handleSignup = () => {
  navigate("/login", { state: { mode: "signup" } });
   };
@@ -108,6 +136,27 @@ const handleSignup = () => {
               }
             >
               Learn More
+            </button>
+            <button
+              className="btn-outline btn-lg"
+              onClick={speakIntro}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: 'transparent',
+                border: '2px solid hsl(var(--primary))',
+                color: 'hsl(var(--primary))',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              {isSpeaking ? 'Stop Audio' : 'Listen to Intro'}
             </button>
           </div>
           <div className="hero-features">
