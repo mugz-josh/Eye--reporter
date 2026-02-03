@@ -1,5 +1,4 @@
 import { Request } from "express";
-import { RowDataPacket } from "mysql2";
 
 export interface User {
   id: number;
@@ -15,7 +14,7 @@ export interface User {
 }
 
 // Database interfaces (matches your actual schema)
-export interface RedFlagDB extends RowDataPacket {
+export interface RedFlagDB {
   id: number;
   user_id: number;
   title: string;
@@ -44,7 +43,7 @@ export interface RedFlag {
   updated_at: Date;
 }
 
-export interface InterventionDB extends RowDataPacket {
+export interface InterventionDB {
   id: number;
   user_id: number;
   title: string;
@@ -73,13 +72,35 @@ export interface Intervention {
 }
 
 // Extended interfaces for joined queries
-export interface RedFlagWithUser extends RedFlagDB {
+export interface RedFlagWithUser {
+  id: number;
+  user_id: number;
+  title: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  status: "draft" | "under-investigation" | "rejected" | "resolved";
+  images: string | null;
+  videos: string | null;
+  created_at: Date;
+  updated_at: Date;
   first_name: string;
   last_name: string;
   email: string;
 }
 
-export interface InterventionWithUser extends InterventionDB {
+export interface InterventionWithUser {
+  id: number;
+  user_id: number;
+  title: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  status: "draft" | "under-investigation" | "rejected" | "resolved";
+  images: string | null;
+  videos: string | null;
+  created_at: Date;
+  updated_at: Date;
   first_name: string;
   last_name: string;
   email: string;

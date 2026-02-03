@@ -1,7 +1,6 @@
 import { Response } from "express";
 import pool from "../config/database";
 import { AuthRequest } from "../types";
-import { ResultSetHeader } from "mysql2";
 import { sendError, sendSuccess } from "../utils/controllerHelpers";
 
 export const commentsController = {
@@ -24,13 +23,13 @@ export const commentsController = {
         SELECT c.*, u.first_name, u.last_name, u.profile_picture
         FROM comments c
         JOIN users u ON c.user_id = u.id
-        WHERE c.report_type = ? AND c.report_id = ?
+        WHERE c.report_type = $1 AND c.report_id = $2
         ORDER BY c.created_at ASC
       `;
 
-      const [results] = await pool.execute(query, [reportType, reportId]);
+      const result = await pool.query(query, [reportType, reportId]);
 
-      sendSuccess(res, 200, results);
+      sendSuccess(res, 200, result.rows);
     } catch (err) {
       sendError(res, 500, "Database error", err);
     }
@@ -76,20 +75,21 @@ export const commentsController = {
 
       // Verify the report exists
       const reportTable = reportType === 'red_flag' ? 'red_flags' : 'interventions';
-      const checkQuery = `SELECT id FROM ${reportTable} WHERE id = ?`;
-      const [checkResults] = await pool.execute(checkQuery, [reportId]);
+      const checkQuery = `SELECT id FROM ${reportTable} WHERE id = $1`;
+      const checkResult = await pool.query(checkQuery, [reportId]);
 
-      if ((checkResults as any[]).length === 0) {
+      if (checkResult.rows.length === 0) {
         sendError(res, 404, "Report not found");
         return;
       }
 
       const insertQuery = `
         INSERT INTO comments (user_id, report_type, report_id, comment_text, comment_type)
-        VALUES (?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
       `;
 
-      const [result] = await pool.execute<ResultSetHeader>(insertQuery, [
+      const insertResult = await pool.query(insertQuery, [
         userId,
         reportType,
         reportId,
@@ -102,12 +102,12 @@ export const commentsController = {
         SELECT c.*, u.first_name, u.last_name, u.profile_picture
         FROM comments c
         JOIN users u ON c.user_id = u.id
-        WHERE c.id = ?
+        WHERE c.id = $1
       `;
 
-      const [commentResults] = await pool.execute(selectQuery, [result.insertId]);
+      const commentResult = await pool.query(selectQuery, [insertResult.rows[0].id]);
 
-      sendSuccess(res, 201, (commentResults as any[])[0]);
+      sendSuccess(res, 201, commentResult.rows[0]);
     } catch (err) {
       sendError(res, 500, "Database error", err);
     }
@@ -131,15 +131,15 @@ export const commentsController = {
       }
 
       // Check if comment exists and get author
-      const checkQuery = "SELECT user_id FROM comments WHERE id = ?";
-      const [checkResults] = await pool.execute(checkQuery, [commentId]);
+      const checkQuery = "SELECT user_id FROM comments WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [commentId]);
 
-      if ((checkResults as any[]).length === 0) {
+      if (checkResult.rows.length === 0) {
         sendError(res, 404, "Comment not found");
         return;
       }
 
-      const comment = (checkResults as any[])[0];
+      const comment = checkResult.rows[0];
 
       // Only allow deletion by comment author or admin
       if (comment.user_id !== userId && !isAdmin) {
@@ -147,8 +147,8 @@ export const commentsController = {
         return;
       }
 
-      const deleteQuery = "DELETE FROM comments WHERE id = ?";
-      await pool.execute(deleteQuery, [commentId]);
+      const deleteQuery = "DELETE FROM comments WHERE id = $1";
+      await pool.query(deleteQuery, [commentId]);
 
       sendSuccess(res, 200, { message: "Comment deleted successfully" });
     } catch (err) {

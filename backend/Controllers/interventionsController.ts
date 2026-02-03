@@ -1,4 +1,4 @@
-  import { Response } from "express";
+import { Response } from "express";
 import pool from "../config/database";
 import {
   AuthRequest,
@@ -8,7 +8,6 @@ import {
   UpdateStatusData,
   InterventionWithUser,
 } from "../types";
-import { ResultSetHeader } from "mysql2";
 import EmailService from "../services/emailService";
 import {
   sendError,
@@ -33,26 +32,25 @@ export const interventionsController = {
     
       const query = isAdmin
         ? `
-          SELECT i.*, u.first_name, u.last_name, u.email 
-          FROM interventions i 
-          JOIN users u ON i.user_id = u.id 
+          SELECT i.*, u.first_name, u.last_name, u.email
+          FROM interventions i
+          JOIN users u ON i.user_id = u.id
           ORDER BY i.created_at DESC
         `
         : `
-          SELECT i.*, u.first_name, u.last_name, u.email 
-          FROM interventions i 
-          JOIN users u ON i.user_id = u.id 
-          WHERE i.user_id = ?
+          SELECT i.*, u.first_name, u.last_name, u.email
+          FROM interventions i
+          JOIN users u ON i.user_id = u.id
+          WHERE i.user_id = $1
           ORDER BY i.created_at DESC
         `;
 
-      const [results] = await pool.execute<InterventionWithUser[]>(
+      const result = await pool.query(
         query,
         isAdmin ? [] : [userId]
       );
 
-      
-      const interventionsWithParsedMedia = parseMedia(results);
+      const interventionsWithParsedMedia = parseMedia(result.rows);
 
       sendSuccess(res, 200, interventionsWithParsedMedia);
     } catch (err) {
@@ -74,15 +72,15 @@ export const interventionsController = {
       }
 
       const query = `
-        SELECT i.*, u.first_name, u.last_name, u.email 
-        FROM interventions i 
-        JOIN users u ON i.user_id = u.id 
-        WHERE i.id = ?
+        SELECT i.*, u.first_name, u.last_name, u.email
+        FROM interventions i
+        JOIN users u ON i.user_id = u.id
+        WHERE i.id = $1
       `;
 
-      const [results] = await pool.execute<InterventionWithUser[]>(query, [id]);
+      const result = await pool.query(query, [id]);
 
-      if (results.length === 0) {
+      if (result.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -90,7 +88,7 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = results[0];
+      const intervention = result.rows[0];
 
       const interventionWithParsedMedia = {
         ...intervention,
@@ -151,10 +149,11 @@ export const interventionsController = {
 
       const query = `
         INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id
       `;
 
-      const [result] = await pool.execute<ResultSetHeader>(query, [
+      const result = await pool.query(query, [
         userId,
         title,
         description,
@@ -167,7 +166,7 @@ export const interventionsController = {
       sendSuccess(
         res,
         201,
-        buildRecordResponse(result.insertId, "Created intervention record")
+        { id: result.rows[0].id, message: "Created intervention record" }
       );
     } catch (error) {
       sendError(res, 500, "Server error during intervention creation", error);
@@ -198,13 +197,13 @@ export const interventionsController = {
 
       
       const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
-      const [checkResults] = await pool.execute<InterventionWithUser[]>(
+        "SELECT user_id, status, images, videos FROM interventions WHERE id = $1";
+      const checkResult = await pool.query(
         checkQuery,
         [id]
       );
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -212,7 +211,7 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = checkResults[0];
+      const intervention = checkResult.rows[0];
 
 
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
@@ -256,8 +255,8 @@ export const interventionsController = {
 
 
       const updateQuery =
-        "UPDATE interventions SET images = ?, videos = ? WHERE id = ?";
-      await pool.execute(updateQuery, [
+        "UPDATE interventions SET images = $1, videos = $2 WHERE id = $3";
+      await pool.query(updateQuery, [
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
         id,
@@ -295,15 +294,12 @@ export const interventionsController = {
         return;
       }
 
-      
-      const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = ?";
-      const [checkResults] = await pool.execute<InterventionWithUser[]>(
-        checkQuery,
-        [id]
-      );
 
-      if (checkResults.length === 0) {
+      const checkQuery =
+        "SELECT user_id, status FROM interventions WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [id]);
+
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -311,9 +307,9 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResults[0];
+      const record = checkResult.rows[0];
 
-      
+
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -332,8 +328,8 @@ export const interventionsController = {
       }
 
       const updateQuery =
-        "UPDATE interventions SET latitude = ?, longitude = ? WHERE id = ?";
-      await pool.execute(updateQuery, [latitude, longitude, id]);
+        "UPDATE interventions SET latitude = $1, longitude = $2 WHERE id = $3";
+      await pool.query(updateQuery, [latitude, longitude, id]);
 
       res.status(200).json({
         status: 200,
@@ -367,15 +363,12 @@ export const interventionsController = {
         return;
       }
 
-      
-      const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = ?";
-      const [checkResults] = await pool.execute<InterventionWithUser[]>(
-        checkQuery,
-        [id]
-      );
 
-      if (checkResults.length === 0) {
+      const checkQuery =
+        "SELECT user_id, status FROM interventions WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [id]);
+
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -383,9 +376,9 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResults[0];
+      const record = checkResult.rows[0];
 
-      
+
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -404,8 +397,8 @@ export const interventionsController = {
       }
 
       const updateQuery =
-        "UPDATE interventions SET description = ? WHERE id = ?";
-      await pool.execute(updateQuery, [description, id]);
+        "UPDATE interventions SET description = $1 WHERE id = $2";
+      await pool.query(updateQuery, [description, id]);
 
       res.status(200).json({
         status: 200,
@@ -441,15 +434,15 @@ export const interventionsController = {
         return;
       }
 
-      
+
       const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = ?";
-      const [checkResults] = await pool.execute<InterventionWithUser[]>(
+        "SELECT user_id, status FROM interventions WHERE id = $1";
+      const checkResult = await pool.query(
         checkQuery,
         [id]
       );
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -457,9 +450,9 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResults[0];
+      const record = checkResult.rows[0];
 
-      
+
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
@@ -477,8 +470,8 @@ export const interventionsController = {
         return;
       }
 
-      const deleteQuery = "DELETE FROM interventions WHERE id = ?";
-      await pool.execute(deleteQuery, [id]);
+      const deleteQuery = "DELETE FROM interventions WHERE id = $1";
+      await pool.query(deleteQuery, [id]);
 
       res.status(200).json({
         status: 200,
@@ -522,24 +515,24 @@ export const interventionsController = {
         return;
       }
 
-      
-      const [rows] = await pool.execute<InterventionWithUser[]>(
-        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = ?",
+
+      const result = await pool.query(
+        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = $1",
         [id]
       );
 
-      if ((rows as any).length === 0) {
+      if (result.rows.length === 0) {
         res
           .status(404)
           .json({ status: 404, error: "Intervention record not found" });
         return;
       }
-      const report = (rows as any)[0];
+      const report = result.rows[0];
 
-      const query = "UPDATE interventions SET status = ? WHERE id = ?";
-      const [result] = await pool.execute<ResultSetHeader>(query, [status, id]);
+      const query = "UPDATE interventions SET status = $1 WHERE id = $2";
+      const updateResult = await pool.query(query, [status, id]);
 
-      if (result.affectedRows === 0) {
+      if (updateResult.rowCount === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -549,9 +542,9 @@ export const interventionsController = {
       try {
         const notificationQuery = `
           INSERT INTO notifications (user_id, title, message, type, related_entity_type, related_entity_id)
-          VALUES (?, ?, ?, ?, ?, ?)
+          VALUES ($1, $2, $3, $4, $5, $6)
         `;
-        await pool.execute(notificationQuery, [
+        await pool.query(notificationQuery, [
           report.user_id,
           "Report status updated",
           `Your intervention "${report.title}" status changed to "${status}"`,
@@ -562,21 +555,21 @@ export const interventionsController = {
       } catch (nErr) {
         console.error(
           "Failed to create notification after status change:",
-          
+
         );
       }
 
    try {
         await EmailService.sendReportStatusNotification(
           report.email,
-          "intervention", 
-          report.title, 
-          report.status, 
-          status 
+          "intervention",
+          report.title,
+          report.status,
+          status
         );
       } catch (emailError) {
         console.error("Failed to send email notification:", emailError);
-        
+
       }
 
       res.status(200).json({
@@ -621,14 +614,14 @@ export const interventionsController = {
       console.log(`⏳ Checking record existence...`);
       const checkStart = Date.now();
       const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
-      const [checkResults] = await pool.execute<InterventionWithUser[]>(
+        "SELECT user_id, status, images, videos FROM interventions WHERE id = $1";
+      const checkResult = await pool.query(
         checkQuery,
         [id]
       );
       console.log(`✅ Record check took ${Date.now() - checkStart}ms`);
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -636,7 +629,7 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = checkResults[0];
+      const intervention = checkResult.rows[0];
 
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -688,11 +681,11 @@ export const interventionsController = {
       const dbStart = Date.now();
       const updateQuery = `
         UPDATE interventions
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
-        WHERE id = ?
+        SET title = $1, description = $2, latitude = $3, longitude = $4, images = $5, videos = $6
+        WHERE id = $7
       `;
 
-      await pool.execute(updateQuery, [
+      await pool.query(updateQuery, [
         title,
         description,
         latitude,

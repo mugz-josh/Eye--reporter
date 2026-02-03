@@ -1,61 +1,63 @@
 require('dotenv').config();
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 
 async function setupDatabase() {
-  let connection;
+  const pool = new Pool({
+    host: process.env.DB_HOST || 'dpg-d606jnffte5s73d97d10-a.oregon-postgres.render.com',
+    user: process.env.DB_USER || 'ireporter_user',
+    password: process.env.DB_PASSWORD || 'oRnHxJE58hx8z2xyZVuxRIILi4HOhN7e',
+    database: process.env.DB_NAME || 'ireporter_joshua',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    ssl: { rejectUnauthorized: false }
+  });
 
   try {
-    // Create connection
-    connection = await mysql.createConnection({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'ireporter'
-    });
-
     console.log('Connected to database');
 
     // Create comments table if it doesn't exist
-    await connection.execute(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS comments (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        report_type ENUM('red_flag', 'intervention') NOT NULL,
-        report_id INT NOT NULL,
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        report_type TEXT CHECK (report_type IN ('red_flag', 'intervention')) NOT NULL,
+        report_id INTEGER NOT NULL,
         comment_text TEXT NOT NULL,
-        comment_type ENUM('user', 'admin', 'official') DEFAULT 'user',
+        comment_type TEXT CHECK (comment_type IN ('user', 'admin', 'official')) DEFAULT 'user',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
     console.log('✅ Comments table created/verified');
 
     // Create upvotes table if it doesn't exist
-    await connection.execute(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS upvotes (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        report_type ENUM('red_flag', 'intervention') NOT NULL,
-        report_id INT NOT NULL,
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        report_type TEXT CHECK (report_type IN ('red_flag', 'intervention')) NOT NULL,
+        report_id INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_upvote (user_id, report_type, report_id)
+        UNIQUE (user_id, report_type, report_id)
       )
     `);
     console.log('✅ Upvotes table created/verified');
 
     // Check if tables exist
-    const [tables] = await connection.execute('SHOW TABLES');
-    console.log('Available tables:', tables.map(row => Object.values(row)[0]));
+    const result = await pool.query(`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+      ORDER BY table_name
+    `);
+    console.log('Available tables:', result.rows.map(row => row.table_name));
 
   } catch (err) {
     console.error('Database setup error:', err);
   } finally {
-    if (connection) {
-      await connection.end();
-      console.log('Database connection closed');
-    }
+    await pool.end();
+    console.log('Database connection closed');
   }
 }
 

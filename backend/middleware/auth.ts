@@ -16,9 +16,9 @@ export const auth = { verifyToken: (req: AuthRequest, res: Response, next: NextF
     if (!userId) {const response: ApiResponse = { status: 401, error: "Authentication required.", };
         res.status(401).json(response);
         return;}
-     const query = "SELECT is_admin FROM users WHERE id = ?";
-     const [results] = (await pool.execute(query, [userId])) as any[];
-    if (results.length === 0 || !results[0].is_admin) { const response: ApiResponse = {status: 403, error: "Access denied. Admin privileges required.",};
+     const query = "SELECT is_admin FROM users WHERE id = $1";
+     const result = await pool.query(query, [userId]);
+    if (result.rows.length === 0 || !result.rows[0].is_admin) { const response: ApiResponse = {status: 403, error: "Access denied. Admin privileges required.",};
         res.status(403).json(response);
         return;}
        next();
@@ -37,12 +37,12 @@ export const auth = { verifyToken: (req: AuthRequest, res: Response, next: NextF
           res.status(401).json(response);
           return;
         }
-     const query = `SELECT user_id FROM ${table} WHERE id = ?`;
-     const [results] = (await pool.execute(query, [recordId])) as any[];
-      if (results.length === 0) {const response: ApiResponse = { status: 404,error: "Record not found", };res.status(404).json(response);
+     const query = `SELECT user_id FROM ${table} WHERE id = $1`;
+     const result = await pool.query(query, [recordId]);
+      if (result.rows.length === 0) {const response: ApiResponse = { status: 404,error: "Record not found", };res.status(404).json(response);
        return;
         }
-      if (results[0].user_id !== userId && !req.user?.isAdmin) {const response: ApiResponse = {status: 403,error: "Access denied. You can only modify your own records.",};
+      if (result.rows[0].user_id !== userId && !req.user?.isAdmin) {const response: ApiResponse = {status: 403,error: "Access denied. You can only modify your own records.",};
           res.status(403).json(response);
           return;}
        next();

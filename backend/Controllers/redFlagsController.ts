@@ -1,3 +1,4 @@
+
 import { Response } from "express";
 import pool from "../config/database";
 import {
@@ -8,7 +9,7 @@ import {
   UpdateStatusData,
   RedFlagWithUser,
 } from "../types";
-import { ResultSetHeader } from "mysql2";
+
 import EmailService from "../services/emailService";
 import {
   sendError,
@@ -34,19 +35,19 @@ export const redFlagsController = {
           ORDER BY rf.created_at DESC
         `
         : `
-          SELECT rf.*, u.first_name, u.last_name, u.email 
-          FROM red_flags rf 
-          JOIN users u ON rf.user_id = u.id 
-          WHERE rf.user_id = ?
+          SELECT rf.*, u.first_name, u.last_name, u.email
+          FROM red_flags rf
+          JOIN users u ON rf.user_id = u.id
+          WHERE rf.user_id = $1
           ORDER BY rf.created_at DESC
         `;
 
-      const [results] = await pool.execute<RedFlagWithUser[]>(
+      const result = await pool.query(
         query,
         isAdmin ? [] : [userId]
       );
 
-      const redFlagsWithParsedMedia = parseMedia(results);
+      const redFlagsWithParsedMedia = parseMedia(result.rows);
 
       sendSuccess(res, 200, redFlagsWithParsedMedia);
     } catch (err) {
@@ -67,15 +68,15 @@ export const redFlagsController = {
       }
 
       const query = `
-        SELECT rf.*, u.first_name, u.last_name, u.email 
-        FROM red_flags rf 
-        JOIN users u ON rf.user_id = u.id 
-        WHERE rf.id = ?
+        SELECT rf.*, u.first_name, u.last_name, u.email
+        FROM red_flags rf
+        JOIN users u ON rf.user_id = u.id
+        WHERE rf.id = $1
       `;
 
-      const [results] = await pool.execute<RedFlagWithUser[]>(query, [id]);
+      const result = await pool.query(query, [id]);
 
-      if (results.length === 0) {
+      if (result.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -83,7 +84,7 @@ export const redFlagsController = {
         return;
       }
 
-      const redFlag = results[0];
+      const redFlag = result.rows[0];
 
       const redFlagWithParsedMedia = {
         ...redFlag,
@@ -140,10 +141,11 @@ export const redFlagsController = {
 
       const query = `
         INSERT INTO red_flags (user_id, title, description, latitude, longitude, images, videos)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id
       `;
 
-      const [result] = await pool.execute<ResultSetHeader>(query, [
+      const result = await pool.query(query, [
         userId,
         title,
         description,
@@ -156,7 +158,7 @@ export const redFlagsController = {
       sendSuccess(
         res,
         201,
-        buildRecordResponse(result.insertId, "Created red-flag record")
+        { id: result.rows[0].id, message: "Created red-flag record" }
       );
     } catch (error) {
       sendError(res, 500, "Server error during red-flag creation", error);
@@ -185,12 +187,12 @@ export const redFlagsController = {
       }
 
       const checkQuery =
-        "SELECT user_id, status, images, videos FROM red_flags WHERE id = ?";
-      const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [
+        "SELECT user_id, status, images, videos FROM red_flags WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [
         id,
       ]);
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -198,7 +200,12 @@ export const redFlagsController = {
         return;
       }
 
-      const redFlag = checkResults[0];
+      const redFlag = checkResult.rows[0] as {
+        user_id: number;
+        status: string;
+        images: string | null;
+        videos: string | null;
+      };
 
       if (redFlag?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -234,11 +241,11 @@ export const redFlagsController = {
       const updatedVideos = [...existingVideos, ...newVideos];
 
       const updateQuery =
-        "UPDATE red_flags SET images = ?, videos = ?, audio = ? WHERE id = ?";
-      await pool.execute(updateQuery, [
+        "UPDATE red_flags SET images = $1, videos = $2, audio = $3 WHERE id = $4";
+      await pool.query(updateQuery, [
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
-        
+        null,
         id,
       ]);
 
@@ -273,12 +280,12 @@ export const redFlagsController = {
         return;
       }
 
-      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = ?";
-      const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [
+      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [
         id,
       ]);
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -286,7 +293,7 @@ export const redFlagsController = {
         return;
       }
 
-      const record = checkResults[0];
+      const record = checkResult.rows[0];
 
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -306,8 +313,8 @@ export const redFlagsController = {
       }
 
       const updateQuery =
-        "UPDATE red_flags SET latitude = ?, longitude = ? WHERE id = ?";
-      await pool.execute(updateQuery, [latitude, longitude, id]);
+        "UPDATE red_flags SET latitude = $1, longitude = $2 WHERE id = $3";
+      await pool.query(updateQuery, [latitude, longitude, id]);
 
       res.status(200).json({
         status: 200,
@@ -340,12 +347,12 @@ export const redFlagsController = {
         return;
       }
 
-      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = ?";
-      const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [
+      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [
         id,
       ]);
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -353,7 +360,7 @@ export const redFlagsController = {
         return;
       }
 
-      const record = checkResults[0];
+      const record = checkResult.rows[0];
 
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -372,8 +379,8 @@ export const redFlagsController = {
         return;
       }
 
-      const updateQuery = "UPDATE red_flags SET description = ? WHERE id = ?";
-      await pool.execute(updateQuery, [description, id]);
+      const updateQuery = "UPDATE red_flags SET description = $1 WHERE id = $2";
+      await pool.query(updateQuery, [description, id]);
 
       res.status(200).json({
         status: 200,
@@ -405,12 +412,12 @@ export const redFlagsController = {
         return;
       }
 
-      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = ?";
-      const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [
+      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [
         id,
       ]);
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -418,7 +425,7 @@ export const redFlagsController = {
         return;
       }
 
-      const record = checkResults[0];
+      const record = checkResult.rows[0];
 
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -437,8 +444,8 @@ export const redFlagsController = {
         return;
       }
 
-      const deleteQuery = "DELETE FROM red_flags WHERE id = ?";
-      await pool.execute(deleteQuery, [id]);
+      const deleteQuery = "DELETE FROM red_flags WHERE id = $1";
+      await pool.query(deleteQuery, [id]);
 
       res.status(200).json({
         status: 200,
@@ -481,23 +488,28 @@ export const redFlagsController = {
         return;
       }
 
-      const [rows] = await pool.execute<RedFlagWithUser[]>(
-        "SELECT rf.*, u.email FROM red_flags rf JOIN users u ON rf.user_id = u.id WHERE rf.id = ?",
+      const result = await pool.query(
+        "SELECT rf.*, u.email FROM red_flags rf JOIN users u ON rf.user_id = u.id WHERE rf.id = $1",
         [id]
       );
 
-      if ((rows as any).length === 0) {
+      if (result.rows.length === 0) {
         res
           .status(404)
           .json({ status: 404, error: "Red-flag record not found" });
         return;
       }
-      const report = (rows as any)[0];
+      const report = result.rows[0] as {
+        user_id: number;
+        title: string;
+        email: string;
+        status: string;
+      };
 
-      const query = "UPDATE red_flags SET status = ? WHERE id = ?";
-      const [result] = await pool.execute<ResultSetHeader>(query, [status, id]);
+      const query = "UPDATE red_flags SET status = $1 WHERE id = $2";
+      const updateResult = await pool.query(query, [status, id]);
 
-      if (result.affectedRows === 0) {
+      if (updateResult.rowCount === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -507,9 +519,9 @@ export const redFlagsController = {
       try {
         const notificationQuery = `
           INSERT INTO notifications (user_id, title, message, type, related_entity_type, related_entity_id)
-          VALUES (?, ?, ?, ?, ?, ?)
+          VALUES ($1, $2, $3, $4, $5, $6)
         `;
-        await pool.execute(notificationQuery, [
+        await pool.query(notificationQuery, [
           report.user_id,
           "Report status updated",
           `Your report "${report.title}" status changed to "${status}"`,
@@ -570,13 +582,13 @@ export const redFlagsController = {
       console.log(`⏳ Checking record existence...`);
       const checkStart = Date.now();
       const checkQuery =
-        "SELECT user_id, status, images, videos FROM red_flags WHERE id = ?";
-      const [checkResults] = await pool.execute<RedFlagWithUser[]>(checkQuery, [
+        "SELECT user_id, status, images, videos, audio FROM red_flags WHERE id = $1";
+      const checkResult = await pool.query(checkQuery, [
         id,
       ]);
       console.log(`✅ Record check took ${Date.now() - checkStart}ms`);
 
-      if (checkResults.length === 0) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -584,7 +596,7 @@ export const redFlagsController = {
         return;
       }
 
-      const redFlag = checkResults[0];
+      const redFlag = checkResult.rows[0];
 
       if (redFlag?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -631,11 +643,11 @@ export const redFlagsController = {
       const dbStart = Date.now();
       const updateQuery = `
         UPDATE red_flags
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
-        WHERE id = ?
+        SET title = $1, description = $2, latitude = $3, longitude = $4, images = $5, videos = $6
+        WHERE id = $7
       `;
 
-      await pool.execute(updateQuery, [
+      await pool.query(updateQuery, [
         title,
         description,
         latitude,
